@@ -12,6 +12,7 @@
 #include "formworksite.h"
 #include "lijuConfForm.h"
 #include "iniFile.h"
+#include "comdata.h"
 #define EDIT_ANGLE   {20,285,160,30,"20.8"}
 #define EDIT_DIST    {20,335,160,30,"12.4"}
 #define EDIT_UP_ANGL {100,370,80,30,"12.4"}
@@ -51,6 +52,7 @@ static COMM_CTRL_DESC commctrls[] = {
     EDIT_UP_ANGL,
     EDIT_SPEED,
     EDIT_HEIGHT,
+
     {710,330,80,30,"风速:"},{710,390,80,30,"吊钩高度:"},{10,375,80,30,"动臂仰角:"}
 };
 static EDevStatus g_status[20];
@@ -91,23 +93,20 @@ CMainMenu::CMainMenu()
 
     if(m_show_up_angle)
     {
-
         new CStatic(&commctrls[13],this);
         edt_up_angle= new CEdit(&commctrls[8],this);
     }
     if(m_show_speed)
     {
         new CStatic(&commctrls[11],this);
-        edt_dg_height  = new CEdit(&commctrls[9],this);
+        edt_fengsu = new CEdit(&commctrls[9],this);
 
     }
     if(m_show_dg_height)
     {
         new CStatic(&commctrls[12],this);
-        edt_fengsu  = new CEdit(&commctrls[10],this);
+        edt_dg_height = new CEdit(&commctrls[10],this);
     }
-
-
     lbl_rights[0] = new CStatic(&commctrls[5],this);
     lbl_rights[1] = new CStatic(&commctrls[6],this);
     lbl_rights[2] = new CStatic(&commctrls[7],this);
@@ -250,6 +249,19 @@ void CMainMenu::OnTimer(int ID)
     int localid = CTajiDbMgr::Get().GetLocalIndex();
     lbl_dist->SetText(Poco::format("%0.2f",g_qtzs[localid].carrier_pos));
     lbl_angle->SetText(Poco::format("%0.2f",g_qtzs[localid].long_arm_angle));
+
+    if(m_show_up_angle)
+    {
+        edt_up_angle->SetFloatText(g_up_angle,3);
+    }
+    if(m_show_speed)
+    {
+        edt_fengsu->SetFloatText(g_speed,2);
+    }
+    if(m_show_dg_height)
+    {
+        edt_dg_height->SetFloatText(434.2,2);
+    }
     m_worksite->update();
 }
 void CMainMenu::OnButtonClick(skin_item_t* item)
