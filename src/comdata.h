@@ -2,6 +2,7 @@
 #define COMDATA_H
 #include "ctx2000.h"
 extern TTjRecord g_TC[21];
+//主机编号， 当前塔机编号, 塔机类型名， 当前塔机的序列号
 extern  std::string MainMachineID,CurID,TCTypeName,CurSerial;
 extern  int     RightNo,AddNo,MaxTCNo;
 extern  int     TCArmLen,TCBeilv;

@@ -31,10 +31,10 @@ private:
         RECT m_dev_serail_rect;
         CDirStatusMgr* m_dir_mgr;
 
-        CEdit* edt_height;
         CEdit* edt_long_arm_len;
         CEdit* edt_short_arm_len;
-
+        CEdit* edt_height;
+        CEdit* edt_up_angle,*edt_weight,*edt_fengsu,*edt_dg_height;
         CStatic* lbl_angle;
         CStatic* lbl_dist;
         CStatic* m_areas[4];
@@ -42,6 +42,8 @@ private:
         CFormWorksite* m_worksite;
         CIcon m_angle;
         CIcon m_dist;
+
+        bool m_show_angle;
 };
 
 #endif // !defined(AFX_MAINMENU_H__D30D85AD_3072_4144_A340_2273333C1696__INCLUDED_)

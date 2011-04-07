@@ -12,11 +12,11 @@
 #include "formworksite.h"
 #include "lijuConfForm.h"
 #define EDIT_ANGLE   {20,285,160,30,"20.8"}
-#define EDIT_DIST    {20,350,160,30,"12.4"}
-#define EDIT_WEIGHT  {20,350,160,30,"12.4"}
-#define EDIT_UP_ANGL {20,350,160,30,"12.4"}
-#define EDIT_UP_ANGL {20,350,160,30,"12.4"}
-#define EDIT_HEIGHT  {20,350,160,30,"12.4"}
+#define EDIT_DIST    {20,335,160,30,"12.4"}
+#define EDIT_UP_ANGL {100,370,80,30,"12.4"}
+//#define EDIT_WEIGHT  {20,350,160,30,"12.4"}
+#define EDIT_SPEED   {710,350,80,30,"12.4"}
+#define EDIT_HEIGHT  {710,410,80,30,"12.4"}
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -44,12 +44,13 @@ static COMM_CTRL_DESC areactrls[] = {
 static COMM_CTRL_DESC commctrls[] = {
     EDIT_ANGLE,
     EDIT_DIST,
-    {710,150,80,30,"0"},{710,230,80,30,"0"},{710,310,80,30,"0"},
-    {710,120,80,30,"H"},{710,200,80,30,"R"},{710,280,80,30,"R-"},
-    EDIT_WEIGHT,
+    {710,150,80,30,"0"},{710,210,80,30,"0"},{710,270,80,30,"0"},
+    {710,120,80,30,"H"},{710,190,80,30,"R"},{710,250,80,30,"R-"},
+    //EDIT_WEIGHT,
     EDIT_UP_ANGL,
-    EDIT_UP_ANGL,
-    EDIT_HEIGHT
+    EDIT_SPEED,
+    EDIT_HEIGHT,
+    {710,330,80,30,"风速:"},{710,390,80,30,"吊钩高度:"},{10,375,80,30,"动臂仰角:"}
 };
 static EDevStatus g_status[20];
 
@@ -78,7 +79,13 @@ CMainMenu::CMainMenu()
     edt_long_arm_len= new CEdit(&commctrls[3],this);
     edt_short_arm_len= new CEdit(&commctrls[4],this);
 
+    edt_up_angle= new CEdit(&commctrls[8],this);
+    edt_dg_height  = new CEdit(&commctrls[9],this);
+    edt_fengsu  = new CEdit(&commctrls[10],this);
 
+    new CStatic(&commctrls[11],this);
+    new CStatic(&commctrls[12],this);
+    new CStatic(&commctrls[13],this);
     lbl_rights[0] = new CStatic(&commctrls[5],this);
     lbl_rights[1] = new CStatic(&commctrls[6],this);
     lbl_rights[2] = new CStatic(&commctrls[7],this);
@@ -193,7 +200,7 @@ void CMainMenu::OnPaint(HWND hWnd)
     m_dir_mgr->Show(hdc,EOK,EOK,EWARNING,EALARM);
 
     m_angle.Show(hdc,80,245,1);
-    m_dist.Show(hdc, 58,320,1);
+    m_dist.Show(hdc, 58,310,1);
     EndPaint(hWnd, hdc);
 }
 void CMainMenu::OnTimer(int ID)
