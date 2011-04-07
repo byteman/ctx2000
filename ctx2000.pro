@@ -55,7 +55,11 @@ SOURCES += \
     AlarmInfoManForm.cpp \
     comdata.cpp \
     tcparam.cpp \
-    divparam.cpp
+    divparam.cpp \
+    lijuConfForm.cpp \
+    MineAddBox.cpp \
+    lijuctrl.cpp \
+    biaoding.cpp
 LIBS+=-lPocoFoundation
 
 DEPENDPATH=../include
@@ -73,7 +77,7 @@ linux-g++ {
 
 LIBS+=-lyate -lminigui -lmgext -lpng -ljpeg \
          -lguicore -lsqlite3 -lserial -lttf -lPocoNet
-
+DEFINES+=
 HEADERS += \
     ime/wt_input.h \
     ime/SoftKeyboardForm.h \
@@ -113,4 +117,12 @@ HEADERS += \
     comdata.h \
     tcparam.h \
     divparam.h \
-    divparamitem.h
+    divparamitem.h \
+    lijuConfForm.h \
+    lijuConfFormItem.h \
+    ModeAddBox.h \
+    ModeAddBoxItem.h \
+    MineAddBox.h \
+    MineAddBoxItem.h \
+    lijuctrl.h \
+    biaoding.h

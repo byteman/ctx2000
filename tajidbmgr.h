@@ -11,14 +11,35 @@ struct THistoy{
     int slewing;
     int trolley;
 };
+struct TLiju{
+    std::string armlen;
+    std::string weight;
+};
+typedef std::vector<TLiju>   TLijuRst;
 typedef std::vector<THistoy> THistoyRst;
 typedef std::map<int, int> TDevIdMap;
+typedef std::vector<std::string> TStringList;
+typedef std::vector<double>    TTjLenRst;
+
 class CTajiDbMgr
 {
 public:
     CTajiDbMgr();
     ~CTajiDbMgr();
     static CTajiDbMgr& Get();
+    //bool addlijuType(std::string type, int armlen, int beilv);
+    bool addlijuItem(std::string  type,  int armlen, int beilv,double len=0,double weight=0);
+    bool addlijuItem(std::string  type,  std::string  armlen, std::string  beilv,std::string  len,std::string  weight);
+    bool getlijuItems(std::string type,  std::string armlen, std::string beilv,TLijuRst& rst);
+    bool getlijuItems(std::string type,TLijuRst& rst);
+    bool isLijuExist(std::string type,  std::string armlen, std::string beilv);
+    bool modifylijuItem(std::string type, TLiju& item);
+    bool modifylijuItem(std::string  type,  std::string  armlen, std::string  beilv,TLiju& olditem,TLiju& newitem);
+    bool getTjTypes(TStringList &types);
+    bool getTjArmLen(std::string type,TStringList& rst);
+    bool getTjBeilv(std::string type, std::string armlen,TStringList& rst);
+    bool deleteTjItem(std::string type,  std::string armlen, std::string beilv,std::string len, std::string weight);
+    std::string getTableName(std::string  type,  std::string  armlen, std::string  beilv);
     bool load(std::string dbpath);
     bool load(std::string dbpath, QtzParam tz[], int num);
     //通过远程广播修改，通过本地设置

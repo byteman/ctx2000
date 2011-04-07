@@ -16,11 +16,12 @@
 #include "LoginForm.h"
 #include "dataacquire.h"
 #include "mainctrl.h"
+#include "MainMenu.h"
 using Poco::Thread;
 using Poco::Event;
 using Poco::SingletonHolder;
 using namespace TelEngine;
-
+static std::string gAppName="";
 class CtxEngine:public Poco::Runnable{
 public:
     static CtxEngine& Get()
@@ -55,7 +56,7 @@ void GUIAPI InitMainUI()
 {
 
     try{
-        CLoginForm login;
+        CMainMenu login;
         login.CreateForm( HWND_DESKTOP );
     }catch(Poco::Exception& e){
         std::cerr << "Sys Exception: " <<e.displayText () << std::endl;
@@ -68,10 +69,6 @@ void GUIAPI InitMainUI()
     std::cerr << "Exit guiApp\n";
 
 }
-
-static std::string gAppName="";
-
-
 
 int MiniGUIMain (int argc, const char* argv[])
 {
@@ -91,11 +88,15 @@ int MiniGUIMain (int argc, const char* argv[])
         fprintf ( stderr, "Can't InitMiniGUIExt!\n" );
         return 2;
     }
+
+
+    //启动主控制模块
     if( ! CMainCtrl::Get().Start())
     {
         fprintf(stderr,"MainCtrl Start Failed\n");
         return 3;
     }
+    //启动主界面模块
     InitMainUI ();
 	
     fprintf ( stderr, "guiApp Exit!\n" );

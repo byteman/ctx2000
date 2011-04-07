@@ -21,7 +21,7 @@ using LibSerial::SerialPort;
 using LibSerial::SerialStream;
 using LibSerial::SerialStreamBuf;
 static Poco::FastMutex _mutex;
-const int DataLength = 39;
+const int DataLength   = 39;
 const int WSDataLength = 154;
 #define     MAX_LEN         8192
 class CDianTaiDataReceiver:public Poco::Runnable{
@@ -35,16 +35,6 @@ public:
     }
     bool start()
     {
-        /*
-        try{
-            if(m_port)
-                fprintf(stderr,"Open %s baud %d\n",m_path.c_str(),19200);
-                m_port->Open(m_path.c_str());
-                //m_port->Open(LibSerial::SerialPort::BAUD_19200);
-        }catch(...){
-            fprintf(stderr,"serial %s open failed\n",m_path.c_str());
-            return false;
-        }*/
         DBG("%s %d\n",__FUNCTION__,__LINE__);
         m_port.Open(m_path.c_str());
 
@@ -104,10 +94,10 @@ public:
                       << std::endl ;
              return false;
         }
-        DBG("%s %d\n",__FUNCTION__,__LINE__);
+
         m_quit = false;
         m_thread.start(*this);
-        DBG("%s %d\n",__FUNCTION__,__LINE__);
+
         return m_rdyEvt.tryWait(1000);
     }
     bool stop()
@@ -254,7 +244,6 @@ public:
     bool    m_signal;
     bool    m_allow_send;
 private:
-    //SerialPort  *m_port;
     SerialStream m_port;
     Poco::Thread m_thread;
     Poco::Event  m_rdyEvt;
@@ -336,7 +325,9 @@ private:
 
 CDianTai::CDianTai()
 {
-
+    m_recv_worker = NULL;
+    m_ps_worker   = NULL;
+    m_send_worker = NULL;
 }
 CDianTai& CDianTai::Get()
 {

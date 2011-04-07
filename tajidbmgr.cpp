@@ -4,6 +4,10 @@
 #include <Poco/SingletonHolder.h>
 #include <Poco/LocalDateTime.h>
 #include <Poco/DateTimeFormatter.h>
+#include <Poco/NumberParser.h>
+#include <Poco/UUID.h>
+#include <Poco/UUIDGenerator.h>
+#include <Poco/String.h>
 #include <iostream>
 #include <yatengine.h>
 #include "iniFile.h"
@@ -11,6 +15,7 @@ using namespace TelEngine;
 using namespace std;
 using Poco::LocalDateTime;
 using Poco::DateTimeFormatter;
+#define DEBUG 1
 CTajiDbMgr& CTajiDbMgr::Get()
 {
     static Poco::SingletonHolder<CTajiDbMgr> sh;
@@ -30,6 +35,239 @@ CTajiDbMgr::~CTajiDbMgr()
         delete pDB;
     }
 
+}
+std::string CTajiDbMgr::getTableName(std::string  type,  std::string  armlen, std::string  beilv)
+{
+    std::string tblname= Poco::format("tbl%s_%s_%s",type,armlen,beilv);
+    //Poco::UUID uuid = Poco::UUIDGenerator::defaultGenerator().create();
+    //std::string tblname= Poco::format("tbl_%s",uuid.toString());
+    tblname = Poco::replace(tblname,"-","_");
+    fprintf(stderr,"table name %s\n",tblname.c_str());
+    return tblname;
+}
+bool CTajiDbMgr::addlijuItem(std::string  type,  std::string  armlen, std::string  beilv,std::string  len,std::string  weight)
+{
+    CppSQLite3Buffer strSql;
+    const char* tmp = NULL;
+    bool bExist = false;
+    try{
+        tmp = strSql.format("select * from tbltjtype where tjtype='%s' and tjarmlen=%s",type.c_str(),armlen.c_str());
+        fprintf(stderr,"tbltjtype %s \r\n", tmp);
+        CppSQLite3Query qry =  pDB->execQuery(tmp);
+        if(!qry.eof())
+        {
+            bExist = true;
+        }
+        qry.finalize();
+
+    }catch (CppSQLite3Exception& e) {
+        cerr << "getTjTypes :" << e.errorCode() << ":" << e.errorMessage() << endl;
+        bExist = false;
+
+    }
+    bool insert_flag=false;
+    if(!bExist)
+    {
+        try{
+            tmp = strSql.format("Insert into tbltjtype values('%s','%s')",type.c_str(),armlen.c_str());
+            fprintf(stderr,"%s\n",tmp);
+            int rows = pDB->execDML(tmp);
+            if (rows) {
+                    insert_flag =true;
+            }
+        }catch (CppSQLite3Exception& e) {
+            cerr << "getTjTypes :" << e.errorCode() << ":" << e.errorMessage() << endl;
+            insert_flag = false;
+        }
+    }
+
+    std::string tblname = getTableName(type,armlen,beilv);
+    if(!pDB->tableExists(tblname.c_str()))
+    {
+        try{
+
+            tmp = strSql.format("CREATE TABLE '%s' (len TEXT,weight TEXT)",tblname.c_str());
+            pDB->execDML(tmp);
+        }catch (CppSQLite3Exception& e) {
+            cerr << "getTjTypes :" << e.errorCode() << ":" << e.errorMessage() << endl;
+            return false;
+        }
+    }
+    try{
+        tmp = strSql.format("insert into '%s' values('%s','%s')",tblname.c_str(),len.c_str(),weight.c_str());
+        fprintf(stderr,"%s\n",tmp);
+        pDB->execDML(tmp);
+    }catch (CppSQLite3Exception& e) {
+        cerr << "getTjTypes :" << e.errorCode() << ":" << e.errorMessage() << endl;
+        return false;
+    }
+    return true;
+}
+bool CTajiDbMgr::addlijuItem(std::string type,  int armlen, int beilv,double len,double weight)
+{
+
+}
+bool CTajiDbMgr::isLijuExist(std::string type,  std::string armlen, std::string beilv)
+{
+    return pDB->tableExists(getTableName(type,armlen,beilv).c_str());
+}
+bool CTajiDbMgr::getlijuItems(std::string type, std::string armlen, std::string beilv,TLijuRst& rst)
+{
+    bool bExist = false;
+    if(isLijuExist(type,armlen,beilv)){
+        CppSQLite3Buffer strSql;
+        const char* tmp = NULL;
+        try{
+            tmp = strSql.format("select * from %s",getTableName(type,armlen,beilv).c_str());
+            fprintf(stderr,"getlijuItems %s \r\n", tmp);
+            CppSQLite3Query qry =  pDB->execQuery(tmp);
+            while(!qry.eof())
+            {
+                TLiju item;
+                item.armlen = qry.getStringField("len");
+                item.weight = qry.getStringField("weight");
+                rst.push_back(item);
+                bExist = true;
+                qry.nextRow();
+            }
+            qry.finalize();
+
+        }catch (CppSQLite3Exception& e) {
+            cerr << "getTjTypes :" << e.errorCode() << ":" << e.errorMessage() << endl;
+            bExist = false;
+
+        }
+    }else{
+        return false;
+    }
+    return bExist;
+}
+bool CTajiDbMgr::getlijuItems(std::string type,TLijuRst& rst)
+{
+
+}
+bool CTajiDbMgr::modifylijuItem(std::string type, TLiju& item)
+{
+
+}
+bool CTajiDbMgr::modifylijuItem(std::string  type,  std::string  armlen, std::string  beilv,TLiju& olditem,TLiju& newitem)
+{
+    std::string tblname = getTableName(type,armlen,beilv);
+    if(isLijuExist(type,armlen,beilv))
+    {
+        try{
+            CppSQLite3Buffer  strInst;
+            const char* tmp = strInst.format("update  %s set len='%s', weight='%s' where len='%s' and weight='%s';", \
+                            tblname.c_str(), newitem.armlen.c_str(),newitem.weight.c_str(),olditem.armlen.c_str(),olditem.weight.c_str());
+            fprintf(stderr,"-=-=WetObjs.cpp=-=- %s \n", tmp);
+            int rows = pDB->execDML(tmp);
+            if (rows) {
+                    return true;
+            }
+        }
+        catch (CppSQLite3Exception& e) {
+            cerr << e.errorCode() << ":" << e.errorMessage() << endl;
+        }
+        return false;
+    }else{
+        return true;
+    }
+}
+bool CTajiDbMgr::deleteTjItem(std::string type,  std::string armlen, std::string beilv,std::string len, std::string weight)
+{
+    std::string tblname = getTableName(type,armlen,beilv);
+    if(isLijuExist(type,armlen,beilv))
+    {
+        try{
+            CppSQLite3Buffer  strInst;
+            const char* tmp = strInst.format("delete from  %s where len='%s' and weight='%s';", \
+                            tblname.c_str(), len.c_str(),weight.c_str());
+            fprintf(stderr,"-=-=WetObjs.cpp=-=- %s \n", tmp);
+            int rows = pDB->execDML(tmp);
+            if (rows) {
+                    return true;
+            }
+        }
+        catch (CppSQLite3Exception& e) {
+            cerr << e.errorCode() << ":" << e.errorMessage() << endl;
+        }
+        return false;
+    }else{
+        return true;
+    }
+}
+
+bool CTajiDbMgr::getTjBeilv(std::string type, std::string armlen,TStringList& rst)
+{
+    bool bExist = false;
+    int  index  = 0;
+    try{
+        CppSQLite3Buffer strSql;
+        const char* tmp = strSql.format("select * from tbltjtype where tjtype='%s' and tjarmlen='%s'",type.c_str(),armlen.c_str());
+        fprintf(stderr,"getTjBeilv %s \r\n", tmp);
+        CppSQLite3Query qry =  pDB->execQuery(tmp);
+        while(!qry.eof())
+        {
+            rst.push_back(qry.getStringField("tjbeilv"));
+            index++;
+            qry.nextRow();
+            bExist  = true;
+        }
+        qry.finalize();
+    }
+    catch (CppSQLite3Exception& e) {
+        cerr << "getTjTypes :" << e.errorCode() << ":" << e.errorMessage() << endl;
+        bExist = false;
+    }
+    return bExist;
+}
+bool CTajiDbMgr::getTjArmLen(std::string type,TStringList& rst)
+{
+    bool bExist = false;
+    int  index  = 0;
+    try{
+        CppSQLite3Buffer strSql;
+        const char* tmp = strSql.format("select * from tbltjtype where tjtype='%s'",type.c_str());
+        fprintf(stderr,"tbltjtype %s \r\n", tmp);
+        CppSQLite3Query qry =  pDB->execQuery(tmp);
+        while(!qry.eof())
+        {
+            rst.push_back(qry.getStringField("tjarmlen"));
+            index++;
+            qry.nextRow();
+            bExist  = true;
+        }
+        qry.finalize();
+    }
+    catch (CppSQLite3Exception& e) {
+        cerr << "getTjTypes :" << e.errorCode() << ":" << e.errorMessage() << endl;
+        bExist = false;
+    }
+    return bExist;
+}
+bool CTajiDbMgr::getTjTypes(TStringList &types)
+{
+    bool bExist = false;
+    int  index  = 0;
+    try{
+        CppSQLite3Buffer strSql;
+        const char* tmp = strSql.format("select distinct(tjtype) from tbltjtype");
+        DBG("tbltjtype %s \r\n", tmp);
+        CppSQLite3Query qry =  pDB->execQuery(tmp);
+        while(!qry.eof())
+        {
+            types.push_back(qry.getStringField("tjtype"));
+            index++;
+            qry.nextRow();
+            bExist  = true;
+        }
+        qry.finalize();
+    }
+    catch (CppSQLite3Exception& e) {
+        cerr << "getTjTypes :" << e.errorCode() << ":" << e.errorMessage() << endl;
+        bExist = false;
+    }
+    return bExist;
 }
 bool CTajiDbMgr::load(std::string dbpath, QtzParam tz[], int num)
 {

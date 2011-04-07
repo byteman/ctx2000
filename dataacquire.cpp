@@ -85,7 +85,7 @@ public:
         {
             try{
                 m_buf.clear();
-                m_port->Read(m_buf, 13, 50);
+                m_port->Read(m_buf, 15, 50);
             }catch(LibSerial::SerialPort::ReadTimeout& e)
             {
                 //std::cerr << "Serial TimeOut\n";
@@ -98,7 +98,7 @@ public:
             }
             fprintf(stderr , "\n");
     #endif
-            if( (m_buf.at(0) == 0xaa) && (m_buf.at(12) == 0x55) )
+            if( (m_buf.at(0) == 0xaa) && (m_buf.at(14) == 0x55) )
             {
                 m_queue.enqueueNotification(new TADNotification(1,m_buf));
             }
@@ -193,22 +193,23 @@ public:
     {
         if(type == 1)
         {
-            if( (data.size() != 13) || ( (data.at(0) != 0xaa) && (data.at(12) != 0x55) ) )
+            if( (data.size() != 15) || ( (data.at(0) != 0xaa) && (data.at(14) != 0x55) ) )
                 return;
 
-            short ad[5] = {0,};
+            short ad[6] = {0,};
             ad[0] = (data.at(1)<<8)+data.at(2);
             ad[1] = (data.at(3)<<8)+data.at(4);
             ad[2] = (data.at(5)<<8)+data.at(6);
             ad[3] = (data.at(7)<<8)+data.at(8);
             ad[4] = (data.at(9)<<8)+data.at(10);
+            ad[5] = (data.at(11)<<8)+data.at(12);
             //while(m_ad_queue.size())
             //{
             //    m_ad_queue.pop();
            // }
-            for(size_t i = 0 ; i < 5; i++)
+            for(size_t i = 0 ; i < 6; i++)
             {
-                TAD a(i, ad[i]);
+                TAD a(i+1, ad[i]);
                 m_ad_queue.push(a);
             }
         }else if(type == 2)
@@ -223,7 +224,7 @@ public:
             int angle_ad = 0;
             if(! Poco::NumberParser::tryParse(buf,angle_ad))
                 return;
-            TAD a(6, angle_ad); //6 === angle ad
+            TAD a(7, angle_ad); //7 === angle ad
             m_ad_queue.push(a);
         }else{
             return;

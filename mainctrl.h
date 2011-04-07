@@ -59,6 +59,7 @@ private:
     void ReadSetting();
     void SaveDivideInfo();
     void SaveWorksiteInfomation();
+    void ad_handle(ADNotification* pNf);
 
 
     //=====================

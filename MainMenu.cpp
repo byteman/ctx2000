@@ -10,7 +10,7 @@
 #include "collalgo.h"
 #include "tajidbmgr.h"
 #include "formworksite.h"
-
+#include "lijuConfForm.h"
 #define EDIT_ANGLE   {20,285,160,30,"20.8"}
 #define EDIT_DIST    {20,350,160,30,"12.4"}
 
@@ -183,7 +183,6 @@ void CMainMenu::OnPaint(HWND hWnd)
         statusIcon[i]->SetStatus(hdc,g_status[i]);
 
     m_dir_mgr->Show(hdc,EOK,EOK,EWARNING,EALARM);
-
     m_dir_mgr->Show(hdc,EOK,EOK,EWARNING,EALARM);
 
     m_angle.Show(hdc,80,245,1);
@@ -208,30 +207,7 @@ void CMainMenu::OnTimer(int ID)
         cnt++;
         g_status[i] = EDevStatus(cnt%3);
     }
-    /*
-    RECT rt;
-    SetRect(&rt,530,0,800,60);
-    InvalidateRect(m_hWnd,&rt,TRUE);
-    SetRect(&rt,290,190,710,410);
-    InvalidateRect(m_hWnd,&rt,TRUE);
 
-    for(int i = 0; i < CTajiDbMgr::Get().get_tj_num(); i++)
-    {
-        g_qtzs[i].carrier_pos = dist;
-        dist+=1;
-        if(dist==g_qtzs[i].long_arm_len)
-            dist = 0;
-        lbl_dist->SetText(Poco::format("%d",dist));
-
-
-        g_qtzs[i].long_arm_angle= angle*3.1415926/180;
-        angle+=1;
-        if(angle==360)
-            angle = 0;
-        lbl_angle->SetText(Poco::format("%0.2f",angle));
-        //tajis[i]->Update(m_hWnd);
-    }
-    */
     int localid = CTajiDbMgr::Get().GetLocalIndex();
     lbl_dist->SetText(Poco::format("%0.2f",g_qtzs[localid].carrier_pos));
     lbl_angle->SetText(Poco::format("%0.2f",g_qtzs[localid].long_arm_angle));
@@ -243,7 +219,9 @@ void CMainMenu::OnButtonClick(skin_item_t* item)
         CSysSet ss;
         ss.CreateForm(m_hWnd);
     }else if(item->id == _skinBtns[1]->GetId()){
-        CTajiDbMgr::Get().AddAlarmInfo(1,1);
+        CLiJuManForm lj;
+        lj.CreateForm(m_hWnd);
+
     }else if(item->id == _skinBtns[2]->GetId()){
 
     }else if(item->id == _skinBtns[3]->GetId()){

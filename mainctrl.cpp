@@ -10,15 +10,19 @@
 #include <yateclass.h>
 #include <assert.h>
 #include <math.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <fstream>
 #include "centerrecver.h"
 #include "iniFile.h"
 #include "comdata.h"
+#include "lijuctrl.h"
 using namespace TelEngine;
 using Poco::SingletonHolder;
 using Poco::StringTokenizer;
 QtzParam  g_qtzs[NUMBER_OF_QTZ];
-TTjRecord g_TC[21];
+
 Poco::Timespan g_SubWaitSubTime(15,0);
 TIniFile cfg;
 class CDataHandler{
@@ -192,9 +196,9 @@ CMainCtrl::~CMainCtrl()
 void CMainCtrl::init_tj_data()
 {
 
-    m_local_id = 2;//CTajiDbMgr::Get().GetLocalId();
-    CurID = "02";
-    TCTotalNum = 20;
+    m_local_id  = 2;//CTajiDbMgr::Get().GetLocalId();
+    CurID       = "02";
+    TCTotalNum  = 20;
     ReadSetting();
 
 }
@@ -655,7 +659,18 @@ void CMainCtrl::ReadSetting()
     TCTypeName = Poco::trim(cfg.ReadString("device","TC_type",""));
     CurID      = Poco::trim(cfg.ReadString("device","CurID","0"));
     CurSerial  = Poco::trim(cfg.ReadString("device","Serial",""));
+    StrTCArmLen = Poco::trim(cfg.ReadString("device","armlen",""));
+    StrTCBeilv  = Poco::trim(cfg.ReadString("device","beilv",""));
 
+    if( !CLijuCtrl::Get().Load(TCTypeName,StrTCArmLen,StrTCBeilv))
+    {
+        std::cerr << "load Liju Data Failed\n";
+    }
+    //int b = CLijuCtrl::Get().ChangeBeilv();
+    //std::cerr <<  "new beilv:" <<  b <<std::endl;
+
+    //CLijuCtrl::Get().Service(32.2,23);
+    //fprintf(stderr,"percent=%0.3f\n",CLijuCtrl::Get().m_percent);
     std::cerr << "type:" << TCTypeName <<  std::endl;
     std::cerr << "CurID:" << CurID <<  std::endl;
     std::cerr << "CurSerial:" << CurSerial <<  std::endl;
@@ -1072,6 +1087,53 @@ CMainCtrl& CMainCtrl::Get()
     static SingletonHolder<CMainCtrl> sh;
     return *sh.get();
 }
+int getRtSignal(sigset_t *mask)
+{
+    sigemptyset(mask);
+    sigaddset(mask,SIGIO);
+    return SIGIO;
+}
+void blockRtSignal()
+{
+    sigset_t mask;
+    int sigNo = getRtSignal(&mask);
+    if(sigNo > 0)
+        pthread_sigmask(SIG_BLOCK,&mask,NULL);
+
+}
+void CMainCtrl::ad_handle(ADNotification* pNf)
+{
+    poco_check_ptr (pNf);
+    AutoPtr<ADNotification> nf = pNf;
+    TAdQueue *que = nf->Message();
+
+    while(que->size() > 0)
+    {
+        TAD ad = que->front();
+        que->pop();
+        fprintf(stderr,"GetAd type = %d value = %d\n",ad.m_type,ad.m_value);
+        if(ad.m_type == 7)
+        {
+            ad_angle = ad.m_value;
+        }else  if(ad.m_type == 1)
+        {
+            ad_up_angle = ad.m_value;
+        }else if(ad.m_type == 2)
+        {
+            ad_weight = ad.m_value;
+        }else if(ad.m_type == 3)
+        {
+            ad_car_dist = ad.m_value;
+        }else if(ad.m_type == 4)
+        {
+            ad_height = ad.m_value;
+        }else if(ad.m_type == 5)
+        {
+            ad_fengsu = ad.m_value;
+        }
+    }
+
+}
 bool CMainCtrl::Start()
 {
     if( !CTajiDbMgr::Get().load("ctx2000.sqlite3",g_qtzs, NUMBER_OF_QTZ))
@@ -1080,27 +1142,24 @@ bool CMainCtrl::Start()
         return false;
     }
     fprintf(stderr,"tj num = %d\n",CTajiDbMgr::Get().get_tj_num());
-/*
+
     if( ! CDataAcquire::Get().Start("/dev/ttyUSB0"))
     {
         fprintf(stderr,"DataAcquire Start Failed\n");
-        //return false;
-    }
-*/
-    DBG("%s %d\n",__FUNCTION__,__LINE__);
-    if( ! CDianTai::Get().Start("/dev/ttyUSB0"))
-    {
-        fprintf(stderr,"DianTai Start Failed\n");
         return false;
     }
-    DBG("%s %d\n",__FUNCTION__,__LINE__);
+    if( ! CDianTai::Get().Start("/dev/ttyUSB1"))
+    {
+        fprintf(stderr,"DianTai Start Failed\n");
+        //return false;
+    }
+    blockRtSignal();
     //CDataAcquire::Get().addObserver(Notifyer(CMainCtrl,ADNotification,handle_ad));
-    //CenterRecver::Get().Start("192.168.0.104",8888);
     TelEngine::Engine::install(new MainCtrlHandler(this));
-    DBG("%s %d\n",__FUNCTION__,__LINE__);
-    //TelEngine::Engine::install(new CenterDataHandler);
+
+    CDataAcquire::Get().addObserver(Notifyer(CMainCtrl,ADNotification,ad_handle));
     m_thread.start(*this);
-    DBG("%s %d\n",__FUNCTION__,__LINE__);
+
     return m_rdyEvt.tryWait(1000);
 
 }
