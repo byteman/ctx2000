@@ -43,7 +43,7 @@ private:
         CIcon m_angle;
         CIcon m_dist;
 
-        bool m_show_angle;
+        bool m_show_up_angle,m_show_speed,m_show_dg_height;
 };
 
 #endif // !defined(AFX_MAINMENU_H__D30D85AD_3072_4144_A340_2273333C1696__INCLUDED_)

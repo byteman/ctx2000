@@ -17,4 +17,6 @@ extern  unsigned char tcorder[21];
 extern  double Trolly_dist_min,Trolly_dist_max,V0;
 //实时的ad值
 extern  int ad_angle, ad_up_angle, ad_car_dist, ad_weight,ad_fengsu, ad_height;
+//分别是 小车幅度 吊钩高度 吊钩物体的重量 角度 风速 动臂仰角
+extern  double g_car_dist,g_dg_height,g_dg_weight,g_angle,g_speed,g_up_angle;
 #endif // COMDATA_H

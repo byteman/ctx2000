@@ -11,6 +11,7 @@
 #include "tajidbmgr.h"
 #include "formworksite.h"
 #include "lijuConfForm.h"
+#include "iniFile.h"
 #define EDIT_ANGLE   {20,285,160,30,"20.8"}
 #define EDIT_DIST    {20,335,160,30,"12.4"}
 #define EDIT_UP_ANGL {100,370,80,30,"12.4"}
@@ -64,6 +65,12 @@ CMainMenu::CMainMenu()
         printf("Can't loadres\n");
         exit(0);
     }
+    TIniFile cfg("ctx2000.ini");
+    m_show_up_angle  =  cfg.ReadBool("display","up_angle",false);
+    m_show_speed     =  cfg.ReadBool("display","speed",   false);
+    m_show_dg_height =  cfg.ReadBool("display","height",  false);
+
+
 
     for (int i = 0; i < 2; i++)
     {
@@ -79,13 +86,28 @@ CMainMenu::CMainMenu()
     edt_long_arm_len= new CEdit(&commctrls[3],this);
     edt_short_arm_len= new CEdit(&commctrls[4],this);
 
-    edt_up_angle= new CEdit(&commctrls[8],this);
-    edt_dg_height  = new CEdit(&commctrls[9],this);
-    edt_fengsu  = new CEdit(&commctrls[10],this);
 
-    new CStatic(&commctrls[11],this);
-    new CStatic(&commctrls[12],this);
-    new CStatic(&commctrls[13],this);
+
+
+    if(m_show_up_angle)
+    {
+
+        new CStatic(&commctrls[13],this);
+        edt_up_angle= new CEdit(&commctrls[8],this);
+    }
+    if(m_show_speed)
+    {
+        new CStatic(&commctrls[11],this);
+        edt_dg_height  = new CEdit(&commctrls[9],this);
+
+    }
+    if(m_show_dg_height)
+    {
+        new CStatic(&commctrls[12],this);
+        edt_fengsu  = new CEdit(&commctrls[10],this);
+    }
+
+
     lbl_rights[0] = new CStatic(&commctrls[5],this);
     lbl_rights[1] = new CStatic(&commctrls[6],this);
     lbl_rights[2] = new CStatic(&commctrls[7],this);
@@ -100,6 +122,7 @@ CMainMenu::CMainMenu()
     SetRect(&m_status_rect,200,0,800,Client_Height);
     SetRect(&m_dev_serail_rect,0,0,200,Client_Height);
 
+
     for(int i = 0; i < 1; i++)
     {
         m_areas[i] = new CStatic(&areactrls[i],this);
@@ -111,6 +134,8 @@ CMainMenu::CMainMenu()
     m_angle.LoadFile("ctx2000/angle.jpg");
     m_dist.LoadFile("ctx2000/dist.jpg");
     InitSkinHeader("MainMenu");
+
+
 
 }
 

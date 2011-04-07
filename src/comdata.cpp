@@ -14,3 +14,4 @@ unsigned char tcorder[21];
 double Trolly_dist_min,Trolly_dist_max,V0;
 int ad_angle, ad_up_angle, ad_car_dist, ad_weight,ad_fengsu, ad_height;
 TTjRecord g_TC[21];
+double g_car_dist,g_dg_height,g_dg_weight,g_angle,g_speed,g_up_angle;
