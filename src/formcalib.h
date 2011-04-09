@@ -18,7 +18,7 @@ public:
     virtual void OnUserMsg(HWND hWnd, int message, WPARAM wParam, LPARAM lParam);
     virtual void OnButtonClick(skin_item_t* item);
 private:
-    void calc_angle(int type);
+    void calibrate_angle(int type);
     void calc_up_angle(int type);
     CSkinButton* _btns[20];
     CEdit*       _edits[10];

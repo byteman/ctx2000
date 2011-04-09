@@ -43,6 +43,8 @@ static COMM_CTRL_DESC lablectrls[] = {
     {550,  120, 200,30,"Danger Distance:"},
     {550,  190, 200,30,"Warn Distance:"},
     {550,  260, 200,30,"Add Safe Angle:"},
+    {550,  330, 80,30,"FD time(s):"},
+    {650,  330, 80,30,"Brake time(s):"},
 };
 static COMM_CTRL_DESC editctrls[] = {
     {80,  80,  80,30,"0"},
@@ -72,6 +74,8 @@ static COMM_CTRL_DESC editctrls[] = {
     {550,  150, 100,30,"1"},
     {550,  220, 100,30,"2"},
     {550,  290, 100,30,"3"},
+    {550,  360, 80,30,"10"},
+    {650,  360, 80,30,"10"},
 };
 static const char* mmenu_bmps[] = {
         PCOMM_BACKGROUND,
@@ -141,6 +145,8 @@ void    CWorkSite::OnShow()
     edits[16]->SetText(Poco::format("%0.2f",DangerDis));
     edits[17]->SetText(Poco::format("%0.2f",WarnDis));
     edits[18]->SetText(Poco::format("%0.2f",AddAngle));
+    edits[19]->SetText(Poco::format("%d",fd_time));
+    edits[20]->SetText(Poco::format("%d",brake_time));
     /*
     CTajiDbMgr::Get().load("ctx2000.sqlite3");
 

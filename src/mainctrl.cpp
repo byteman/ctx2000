@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <fstream>
+#include <math.h>
 #include "centerrecver.h"
 #include "iniFile.h"
 #include "comdata.h"
@@ -653,6 +654,45 @@ void CMainCtrl::ReadSiteInfo()
     VStopDis= cfg.ReadFloat("device","VStopDis",0);
     AddAngle= cfg.ReadFloat("device","AddAngle",0);
 }
+bool CMainCtrl::is_circle_interset(double x1, double y1, double x2, double y2, double r1, double r2)
+{
+   double len = sqrt( (x1-x2) * (x1-x2) + (y1-y2) * (y1-y2) );
+
+   return ( len < (r1+r2) );
+}
+int  CMainCtrl::GetValidTjList(std::vector<int> &devlist)
+{
+    int cnt = 0;
+    for(int i = 0; i < 21; i++)
+    {
+        std::string serial = g_TC[i].Serial;
+        if(Poco::trim(serial).length() != 0)
+        {
+            devlist.push_back(i);
+            cnt++;
+        }
+    }
+    return cnt;
+}
+int  CMainCtrl::GetConflictTjList(std::vector<int> &devlist)
+{
+    int cnt = 0;
+    for(int i = 0; i < 21; i++)
+    {
+        if(i == g_local_id)
+            continue;
+        std::string serial = g_TC[i].Serial;
+        if(Poco::trim(serial).length() == 0)
+            continue;
+        if( is_circle_interset(g_TC[i].x,g_TC[i].y,g_TC[g_local_id].x,g_TC[g_local_id].y,g_TC[i].LongArmLength,g_TC[g_local_id].LongArmLength))
+        {
+            devlist.push_back(i);
+            cnt++;
+        }
+    }
+    return cnt;
+}
+
 void CMainCtrl::ReadSetting()
 {
     cfg.Open("ctx2000.ini");
@@ -702,6 +742,7 @@ void CMainCtrl::ReadSetting()
 
     std::string tmp = CurID;
     m_local_id = Poco::NumberParser::parse(tmp);
+    g_local_id = m_local_id;
     Trolly_dist_max = cfg.ReadFloat("dist_bd","V_dist_max",2.0);   //小车最近距离
     Trolly_dist_min = cfg.ReadFloat("dist_bd","V_dist_max",60.0);  //小车最远距离
     V0 = cfg.ReadFloat("dist_bd","V_dist_max",5);
@@ -728,8 +769,8 @@ void CMainCtrl::ReadSetting()
          g_TC[i].DHeight=0;
          g_TC[i].Valide=false;
     }
-    fd_time = cfg.ReadInteger("device","FD_time",0);
-    DBG("fd_time=%d\n",fd_time);
+    fd_time = cfg.ReadInteger("device","FD_time",5);
+    brake_time= cfg.ReadInteger("device","brake_time",5);
     tcfile.open("DivideLine.tc",std::ios::in);
     if(tcfile.good())
     {
@@ -744,6 +785,42 @@ void CMainCtrl::ReadSetting()
         tcfile.close();
     }else
         DBG("DivideLine.tc open failed\n");
+
+    //获取有效塔机信息
+    int ret = GetValidTjList(g_valid_tj_list);
+    fprintf(stderr,"valid dev count = %d\n",ret);
+    for(int i = 0 ; i < ret; i++)
+    {
+        fprintf(stderr,"valid id[%d] = %d\n",i,g_valid_tj_list.at(i));
+    }
+    fprintf(stderr,"come1\n");
+    //在塔机参数已经读取成功后，再获取与本机id冲突的设备id列表
+    ret = GetConflictTjList(g_conflict_tj_list);
+    fprintf(stderr,"conflict dev count = %d\n",ret);
+    for(int i = 0 ; i < ret; i++)
+    {
+        fprintf(stderr,"conflict localid[%d] : id[%d] = %d\n",g_local_id,i,g_conflict_tj_list.at(i));
+    }
+    //计算ABC角度
+    calc_angle(czwzb,g_TC[g_local_id].x,g_TC[g_local_id].y,g_angle_A,g_angle_B,g_angle_C);
+    InitAlgoData();
+}
+void CMainCtrl::InitAlgoData()
+{
+    for(int i = 0; i < NUMBER_OF_QTZ; i++)
+    {
+        g_qtzs[i].number     =  i+1;
+        g_qtzs[i].carrier_pos = 0;
+        g_qtzs[i].height      = g_TC[i+1].Height;
+        g_qtzs[i].long_arm_len     = g_TC[i+1].LongArmLength;
+        g_qtzs[i].short_arm_len    = g_TC[i+1].ShortArmLenght;
+        g_qtzs[i].long_arm_angle   = 0;
+        g_qtzs[i].pos.x      = g_TC[i+1].x;
+        g_qtzs[i].pos.y      = g_TC[i+1].y;
+        fprintf(stderr,"g_qtzs[%d] car_pos=%0.2f height=%0.2f longarm=%0.2f shortarm=%0.2f,x=%0.2f y=%0.2f\n",\
+                i,g_qtzs[i].carrier_pos,g_qtzs[i].height,g_qtzs[i].long_arm_len,g_qtzs[i].short_arm_len,\
+                g_qtzs[i].pos.x,g_qtzs[i].pos.y);
+    }
 
 }
 void CMainCtrl::SaveSiteInfo()
@@ -1115,27 +1192,33 @@ void CMainCtrl::ad_handle(ADNotification* pNf)
         if(ad.m_type == 7)
         {
             ad_angle = ad.m_value;
+            g_angle = (ad_angle-g_bd[BD_ANGLE].zero_ad)*g_bd[BD_ANGLE].bd_k;
         }else  if(ad.m_type == 1)
         {
             ad_up_angle = ad.m_value;
+            g_up_angle = (ad_up_angle-g_bd[BD_UP_ANGLE].zero_ad)*g_bd[BD_UP_ANGLE].bd_k;
         }else if(ad.m_type == 2)
         {
             ad_weight = ad.m_value;
         }else if(ad.m_type == 3)
         {
             ad_car_dist = ad.m_value;
+            g_car_dist = (ad_car_dist-g_bd[BD_CAR_DIST].zero_ad)*g_bd[BD_CAR_DIST].bd_k;
         }else if(ad.m_type == 4)
         {
             ad_height = ad.m_value;
+            g_dg_height = (ad_height-g_bd[BD_HEIGHT].zero_ad)*g_bd[BD_HEIGHT].bd_k;
         }else if(ad.m_type == 5)
         {
             ad_fengsu = ad.m_value;
+            g_speed =  (ad_fengsu-g_bd[BD_SPEED].zero_ad)*g_bd[BD_SPEED].bd_k;
         }
     }
 
 }
 bool CMainCtrl::Start()
 {
+
     if( !CTajiDbMgr::Get().load("ctx2000.sqlite3",g_qtzs, NUMBER_OF_QTZ))
     {
         fprintf(stderr,"TajiDbMgr load failed\n");

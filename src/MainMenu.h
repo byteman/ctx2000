@@ -34,7 +34,7 @@ private:
         CEdit* edt_long_arm_len;
         CEdit* edt_short_arm_len;
         CEdit* edt_height;
-        CEdit* edt_up_angle,*edt_weight,*edt_fengsu,*edt_dg_height;
+        CEdit* edt_up_angle,*edt_max_weight,*edt_fengsu,*edt_dg_height;
         CStatic* lbl_angle;
         CStatic* lbl_dist;
         CStatic* m_areas[4];
@@ -43,7 +43,7 @@ private:
         CIcon m_angle;
         CIcon m_dist;
 
-        bool m_show_up_angle,m_show_speed,m_show_dg_height;
+        bool m_show_up_angle,m_show_speed,m_show_dg_height,m_show_max_weight;
 };
 
 #endif // !defined(AFX_MAINMENU_H__D30D85AD_3072_4144_A340_2273333C1696__INCLUDED_)

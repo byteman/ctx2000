@@ -2,6 +2,8 @@
 #include "formcalibitem.h"
 #include "BmpRes.h"
 #include "comdata.h"
+#include "iniFile.h"
+#include <math.h>
 static const char* mmenu_bmps[] = {
      PCOMM_BACKGROUND,
      PSETZERO_BTN,
@@ -132,34 +134,70 @@ void CFormCalib::OnShow()
 {
 
 }
-void CFormCalib::calc_angle(int type)
+//a === bd[0][0..1]
+//b === bd[1][0..1]
+
+void CFormCalib::calibrate_angle(int type)
 {
+    static int start_ad = 0;
+    static int end_ad   = 0;
+    static bool start=false;
     if(type == 0){
+        start_ad = ad_up_angle;
+        start = true;
+    }else if((type == 1) && (start)){
+        start = false;
+        end_ad = ad_up_angle;
+        double k = (end_ad - start_ad) / g_angle_C;
+        g_bd[BD_ANGLE].bd_k        = k;
+        g_bd[BD_ANGLE].zero_ad     = start_ad;
+        g_bd[BD_ANGLE].start_value = g_angle_A;
 
-    }else if(type == 1){
-
+        TIniFile cfg("ctx2000.ini");
+        cfg.WriteFloat("angle_bd","a_angle",g_bd[BD_ANGLE].start_value);
+        cfg.WriteFloat("angle_bd","angle_k",g_bd[BD_ANGLE].bd_k);
+        cfg.WriteInteger("angle_bd","zero_ad", g_bd[BD_ANGLE].zero_ad);
     }
 }
 void CFormCalib::calc_up_angle(int type)
 {
     static int start_ad = 0;
+    static int end_ad   = 0;
+    static bool start=false;
     if(type == 0){
         start_ad = ad_up_angle;
-    }else if(type == 1){
+        start = true;
+    }else if(type == 1 && start){
+        start = false;
+        end_ad = ad_up_angle;
+        double min_up_angle = g_TC[g_local_id].L2;
+        double max_up_angle = g_TC[g_local_id].L1;
+        double k = (end_ad-start_ad)/(max_up_angle-min_up_angle);
 
+        g_bd[BD_UP_ANGLE].bd_k        = k;
+        g_bd[BD_UP_ANGLE].zero_ad     = start_ad;
+        g_bd[BD_UP_ANGLE].start_value = min_up_angle;
+
+        TIniFile cfg("ctx2000.ini");
+        cfg.WriteFloat("up_angle_bd","min_up_angle",min_up_angle);
+        cfg.WriteFloat("up_angle_bd","up_angle_k",k);
+        cfg.WriteInteger("angle_bd","zero_ad", start_ad);
     }
 }
 void CFormCalib::OnButtonClick(skin_item_t* item)
 {
     if(item->id       == _btns[0]->GetId()){
         //回转标定开始
-        calc_angle(0);
+        calibrate_angle(0);
     }else if(item->id == _btns[1]->GetId()){
         //回转标定结束
+        calibrate_angle(1);
     }else if(item->id == _btns[2]->GetId()){
         //动臂仰角标定开始
+        calc_up_angle(0);
     }else if(item->id == _btns[3]->GetId()){
         //动臂仰角标定结束
+        calc_up_angle(1);
     }else if(item->id == _btns[4]->GetId()){
         //幅度标定开始
     }else if(item->id == _btns[5]->GetId()){

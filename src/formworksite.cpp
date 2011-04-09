@@ -1,17 +1,52 @@
 #include "formworksite.h"
 #include "tajidbmgr.h"
+#include "comdata.h"
 static WNDPROC old_static_proc;
 static HWND    old_hwnd;
 static CFormWorksite  *myptr = NULL;
+
+void   CFormWorksite::calc_map_point(double x1, double y1,double r1,double s1,double &x2, double &y2,double &r2,double &s2)
+{
+    x2 =  (x1-m_local_x)*m_zoom + m_center_x;
+    y2 =  (m_local_y-y1)*m_zoom + m_center_y;
+    r2 = r1*m_zoom;
+    s2 = s1*m_zoom;
+}
+void   CFormWorksite::init_map_point(int local_x, int local_y,int org_x, int org_y, int long_arm_len)
+{
+    m_width_factor  = (double)((0.7*m_width) /(2*long_arm_len));
+    m_height_factor = (double)((0.7*m_height)/(2*long_arm_len));
+    if( m_width_factor > m_height_factor )
+    {
+        m_zoom =    m_width_factor;
+    }else{
+        m_zoom =    m_height_factor;
+    }
+    m_local_x = local_x;
+    m_local_y = local_y;
+}
 CFormWorksite::CFormWorksite(CStatic* area,int w,int h):
     m_area(area),
     m_width(w),m_height(h)
 {
-    for(int i = 0; i < CTajiDbMgr::Get().get_tj_num(); i++)
+    size_t i = 0;
+    double x,y,r,s;
+    m_center_x = w/2;
+    m_center_y = h/2;
+
+    init_map_point(g_TC[g_local_id].x,g_TC[g_local_id].y,m_center_x,m_center_y,g_TC[g_local_id].LongArmLength);
+
+    for(i = 0; i < g_conflict_tj_list.size(); i++)
     {
-        m_tajis[i] = new CTaji(&g_qtzs[i]);
+        int idx=g_conflict_tj_list.at(i);
+
+        calc_map_point(g_TC[idx].x,g_TC[idx].y,g_TC[idx].LongArmLength,g_TC[idx].ShortArmLenght,x,y,r,s);
+
+        m_tajis[i] = new CTaji(x,y,r,s,idx);
     }
-    m_tj_num = CTajiDbMgr::Get().get_tj_num();
+    calc_map_point(g_TC[g_local_id].x,g_TC[g_local_id].y,g_TC[g_local_id].LongArmLength,g_TC[g_local_id].ShortArmLenght,x,y,r,s);
+    m_tajis[i] = new CTaji(x,y,r,s,g_local_id);
+    m_tj_num   = g_conflict_tj_list.size()+1;
     myptr    = this;
 }
 CFormWorksite::~CFormWorksite()

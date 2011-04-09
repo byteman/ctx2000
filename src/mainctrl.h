@@ -60,8 +60,10 @@ private:
     void SaveDivideInfo();
     void SaveWorksiteInfomation();
     void ad_handle(ADNotification* pNf);
-
-
+    int  GetValidTjList(std::vector<int> &devlist);
+    int  GetConflictTjList(std::vector<int> &devlist);
+    void InitAlgoData();
+    bool is_circle_interset(double x1, double y1, double x2, double y2, double r1, double r2);
     //=====================
     Poco::Thread m_thread;
     Poco::Event  m_rdyEvt;

@@ -4,7 +4,7 @@
 #include <Poco/SingletonHolder.h>
 #include <Poco/Format.h>
 #include "tajidbmgr.h"
-
+#include "comdata.h"
 #define w    10
 #define h    8
 
@@ -21,10 +21,20 @@ CTaji::CTaji(QtzParam* tzPar,int zoom):
     fprintf(stderr,"taji rect x=%d y=%d r=%d b=%d\n",m_rt.left,m_rt.top,m_rt.right,m_rt.bottom);
     m_tj_num = Poco::format("%u",tzPar->number);
 }
-CTaji::CTaji(int x, int y, int r):
+CTaji::CTaji(int x, int y, int r,int s, int id):
     x_pt(x),y_pt(y),m_r(r)
 {
+    m_tj_num = Poco::format("%d",id);
+    m_short_arm = s;
     SetRect(&m_rt,x_pt-m_r,y_pt-m_r,x_pt+m_r,y_pt+m_r);
+    if(id==g_local_id)
+    {
+        m_is_local = true;
+    }else{
+        m_is_local = false;
+    }
+    fprintf(stderr,"taji rect x=%d y=%d r=%d b=%d\n",m_rt.left,m_rt.top,m_rt.right,m_rt.bottom);
+
 }
 bool CTaji::Update(HWND hwnd)
 {
@@ -32,28 +42,39 @@ bool CTaji::Update(HWND hwnd)
 }
 bool CTaji::Draw(HDC hdc)
 {
-    return Draw(hdc,m_tj_num,m_tzPar->long_arm_angle,m_tzPar->carrier_pos);
+    return Draw(hdc,m_tj_num,g_angle,g_car_dist);
 }
+/*
+在画布上绘制塔机的实时状态
+hdc:画布句柄
+tjnum:塔机的编号
+angle:塔机的回转角度 角度*2*pi/360;
+car_dist:小车的幅度
+*/
 bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
 {
-     SetPenWidth(hdc, 5);
+     double x ,y;
+     SetPenWidth(hdc, 2);
      SetPenColor(hdc,PIXEL_green);
      int w2 = 2*m_r;
      ArcEx(hdc,x_pt-m_r,y_pt-m_r,w2,w2,0 ,360*64);
 
  //长臂
 
-     double x = m_r * sin(angle);
-     double y = m_r * cos(angle);
-     SetPenColor(hdc,PIXEL_blue);
-     LineEx(hdc,x_pt,y_pt,x_pt + x,y_pt-y);
-     //fprintf(stderr,"angle=%0.2f,x=%0.2f,y=%0.2f\n",angle,sin(angle),cos(angle));
- //短臂
-     SetPenColor(hdc,PIXEL_darkyellow);
-     x = m_short_arm * sin(angle);
-     y = m_short_arm * cos(angle);
+     if(m_is_local)
+     {
+         x = m_r * sin(angle);
+         y = m_r * cos(angle);
+         SetPenColor(hdc,PIXEL_blue);
+         LineEx(hdc,x_pt,y_pt,x_pt + x,y_pt-y);
+         //fprintf(stderr,"angle=%0.2f,x=%0.2f,y=%0.2f\n",angle,sin(angle),cos(angle));
+     //短臂
+         SetPenColor(hdc,PIXEL_darkyellow);
+         x = m_short_arm * sin(angle);
+         y = m_short_arm * cos(angle);
 
-     LineEx(hdc,x_pt,y_pt,x_pt - x,y_pt+y);
+         LineEx(hdc,x_pt,y_pt,x_pt - x,y_pt+y);
+     }
 //原点的编号
      RECT rect;
      SetBrushColor(hdc,PIXEL_lightwhite);
@@ -66,11 +87,14 @@ bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
      DrawText(hdc,m_tj_num.c_str(),m_tj_num.length (),&rect,DT_CENTER|DT_VCENTER|DT_SINGLELINE);
     //Circle(hdc,m_tzPar->pos.x,m_tzPar->pos.y);
 //小车
-     SetBrushColor(hdc,PIXEL_red);
-     x = x_pt + car_dist * sin(angle);
-     y = y_pt - car_dist * cos(angle);
+     if(m_is_local)
+     {
+         SetBrushColor(hdc,PIXEL_red);
+         x = x_pt + car_dist * sin(angle);
+         y = y_pt - car_dist * cos(angle);
 
-     FillBox(hdc,x,y,10,10);
+         FillBox(hdc,x,y,10,10);
+     }
 }
 
 CTaijiMgr& CTaijiMgr::Get()

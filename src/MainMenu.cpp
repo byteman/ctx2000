@@ -15,10 +15,10 @@
 #include "comdata.h"
 #define EDIT_ANGLE   {20,285,160,30,"20.8"}
 #define EDIT_DIST    {20,335,160,30,"12.4"}
-#define EDIT_UP_ANGL {100,370,80,30,"12.4"}
-//#define EDIT_WEIGHT  {20,350,160,30,"12.4"}
-#define EDIT_SPEED   {710,350,80,30,"12.4"}
-#define EDIT_HEIGHT  {710,410,80,30,"12.4"}
+#define EDIT_UP_ANGL {710,250,80,30,"12.4"}
+#define EDIT_WEIGHT  {710,310,80,30,"12.4"}
+#define EDIT_SPEED   {710,370,80,30,"12.4"}
+#define EDIT_HEIGHT  {710,430,80,30,"12.4"}
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -46,14 +46,16 @@ static COMM_CTRL_DESC areactrls[] = {
 static COMM_CTRL_DESC commctrls[] = {
     EDIT_ANGLE,
     EDIT_DIST,
-    {710,150,80,30,"0"},{710,210,80,30,"0"},{710,270,80,30,"0"},
-    {710,120,80,30,"H"},{710,190,80,30,"R"},{710,250,80,30,"R-"},
-    //EDIT_WEIGHT,
-    EDIT_UP_ANGL,
-    EDIT_SPEED,
-    EDIT_HEIGHT,
-
-    {710,330,80,30,"风速:"},{710,390,80,30,"吊钩高度:"},{10,375,80,30,"动臂仰角:"}
+    {710,100,80,30,"0"},{710,150,80,30,"0"},{710,200,80,30,"0"},
+    {710,80,80,30,"H"},{710,130,80,30,"R"},{710,180,80,30,"R-"},
+    EDIT_UP_ANGL, //8
+    EDIT_WEIGHT, //9
+    EDIT_SPEED,//10
+    EDIT_HEIGHT,//11
+    {710,230,80,30,"Up Angle:"},//12
+    {710,285,80,30,"Max Weight:"},//13
+    {710,350,80,30,"Speed:"},//14
+    {710,410,80,30,"Car Height:"}//15
 };
 static EDevStatus g_status[20];
 
@@ -71,7 +73,7 @@ CMainMenu::CMainMenu()
     m_show_up_angle  =  cfg.ReadBool("display","up_angle",false);
     m_show_speed     =  cfg.ReadBool("display","speed",   false);
     m_show_dg_height =  cfg.ReadBool("display","height",  false);
-
+    m_show_max_weight = cfg.ReadBool("display","max_weight",  false);
 
 
     for (int i = 0; i < 2; i++)
@@ -93,20 +95,26 @@ CMainMenu::CMainMenu()
 
     if(m_show_up_angle)
     {
-        new CStatic(&commctrls[13],this);
+        new CStatic(&commctrls[12],this);
         edt_up_angle= new CEdit(&commctrls[8],this);
+    }
+    if(m_show_max_weight)
+    {
+        new CStatic(&commctrls[13],this);
+        edt_max_weight = new CEdit(&commctrls[9],this);
     }
     if(m_show_speed)
     {
-        new CStatic(&commctrls[11],this);
-        edt_fengsu = new CEdit(&commctrls[9],this);
+        new CStatic(&commctrls[14],this);
+        edt_fengsu = new CEdit(&commctrls[10],this);
 
     }
     if(m_show_dg_height)
     {
-        new CStatic(&commctrls[12],this);
-        edt_dg_height = new CEdit(&commctrls[10],this);
+        new CStatic(&commctrls[15],this);
+        edt_dg_height = new CEdit(&commctrls[11],this);
     }
+
     lbl_rights[0] = new CStatic(&commctrls[5],this);
     lbl_rights[1] = new CStatic(&commctrls[6],this);
     lbl_rights[2] = new CStatic(&commctrls[7],this);
@@ -129,7 +137,7 @@ CMainMenu::CMainMenu()
 
     m_worksite = new CFormWorksite(m_areas[0],areactrls[0].w,areactrls[0].h);
 
-    m_dir_mgr = new CDirStatusMgr(30,Client_Height+25);
+    m_dir_mgr = new CDirStatusMgr(10,Client_Height+25);
     m_angle.LoadFile("ctx2000/angle.jpg");
     m_dist.LoadFile("ctx2000/dist.jpg");
     InitSkinHeader("MainMenu");
@@ -246,9 +254,11 @@ void CMainMenu::OnTimer(int ID)
         g_status[i] = EDevStatus(cnt%3);
     }
 
+    g_angle += (3.1415926/180);
+
     int localid = CTajiDbMgr::Get().GetLocalIndex();
-    lbl_dist->SetText(Poco::format("%0.2f",g_qtzs[localid].carrier_pos));
-    lbl_angle->SetText(Poco::format("%0.2f",g_qtzs[localid].long_arm_angle));
+    lbl_dist->SetText(Poco::format("%0.2f",g_car_dist));
+    lbl_angle->SetText(Poco::format("%0.2f",((180*g_angle)/3.14159)));
 
     if(m_show_up_angle)
     {
@@ -260,7 +270,11 @@ void CMainMenu::OnTimer(int ID)
     }
     if(m_show_dg_height)
     {
-        edt_dg_height->SetFloatText(434.2,2);
+        edt_dg_height->SetFloatText(g_dg_height,2);
+    }
+    if(m_show_max_weight)
+    {
+        edt_max_weight->SetFloatText(g_dg_weight,2);
     }
     m_worksite->update();
 }

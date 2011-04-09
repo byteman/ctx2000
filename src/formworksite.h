@@ -18,6 +18,10 @@ private:
     int m_width,m_height;
     CTaji* m_tajis[20];
     int    m_tj_num;
+    int    m_center_x,m_center_y,m_local_x,m_local_y;
+    double    m_map_x,m_map_y,m_width_factor, m_height_factor,m_zoom;
+    void   init_map_point(int local_x, int local_y,int org_x, int org_y ,int long_arm_len);
+    void   calc_map_point(double x, double y,double r1,double s1,double &x2, double &y2,double &r2,double &s2);
 };
 
 #endif // FORMWORKSITE_H
