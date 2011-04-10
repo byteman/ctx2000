@@ -59,13 +59,13 @@ public:
     CDataAcquire();
     static CDataAcquire& Get();
 
-    bool Start(std::string path);
+    bool Start(std::string path1,std::string path2);
     bool Stop();
     bool Pause(bool yes);
     void addObserver(const AbstractObserver& observer);
     void removeObserver(const AbstractObserver& observer);
 private:
-    bool Init(std::string path);
+    bool Init(std::string path1,std::string path2);
     NotificationCenter m_nc;
     NotificationQueue  m_nq;
     CDataAcquireWorker1* m_aq_work1;

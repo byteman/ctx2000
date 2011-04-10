@@ -801,9 +801,21 @@ void CMainCtrl::ReadSetting()
     {
         fprintf(stderr,"conflict localid[%d] : id[%d] = %d\n",g_local_id,i,g_conflict_tj_list.at(i));
     }
+    //初始化标定系数
+    InitBDParam();
     //计算ABC角度
     calc_angle(czwzb,g_TC[g_local_id].x,g_TC[g_local_id].y,g_angle_A,g_angle_B,g_angle_C);
+    fprintf(stderr,"angleA=%0.2f,angleB=%0.2f,angleC=%0.2f\n",g_angle_A,g_angle_B,g_angle_C);
     InitAlgoData();
+}
+void CMainCtrl::InitBDParam()
+{
+    TIniFile cfg("ctx2000.ini");
+    g_bd[BD_ANGLE].bd_k =cfg.ReadFloat("angle_bd","angle_k",0);
+    g_bd[BD_ANGLE].start_value =cfg.ReadFloat("angle_bd","a_angle",0);
+    g_bd[BD_ANGLE].zero_ad =cfg.ReadInteger("angle_bd","zero_ad",0);
+    g_bd[BD_ANGLE].bd_ad   = cfg.ReadInteger("angle_bd","bd_ad",0);
+
 }
 void CMainCtrl::InitAlgoData()
 {
@@ -1226,7 +1238,7 @@ bool CMainCtrl::Start()
     }
     fprintf(stderr,"tj num = %d\n",CTajiDbMgr::Get().get_tj_num());
 
-    if( ! CDataAcquire::Get().Start("/dev/ttyUSB0"))
+    if( ! CDataAcquire::Get().Start("/dev/ttyUSB0","/dev/ttyUSB0"))
     {
         fprintf(stderr,"DataAcquire Start Failed\n");
         return false;

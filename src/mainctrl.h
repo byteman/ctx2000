@@ -48,6 +48,7 @@ private:
     std::string GetNextID();
     std::string GetAddID();
     int       ValideTCNum();
+    void      InitBDParam();
     void      WatchNetWork(std::string &MainDevID, bool &AddState);
     void      DripMainNoAndAddNo(std::string &MainNo, std::string &RightNo, std::string &AddNo);
     void      UpdateTCStatus();

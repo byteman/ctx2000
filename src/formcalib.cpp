@@ -143,20 +143,28 @@ void CFormCalib::calibrate_angle(int type)
     static int end_ad   = 0;
     static bool start=false;
     if(type == 0){
-        start_ad = ad_up_angle;
+        start_ad = ad_angle;
         start = true;
     }else if((type == 1) && (start)){
         start = false;
-        end_ad = ad_up_angle;
+        end_ad = ad_angle;
         double k = (end_ad - start_ad) / g_angle_C;
+
+        if(k < 2)
+        {
+            MessageBox(m_hWnd,"Calibration ERROR! Please Calibrate again.","Error",MB_OK);
+            return;
+        }
         g_bd[BD_ANGLE].bd_k        = k;
         g_bd[BD_ANGLE].zero_ad     = start_ad;
+        g_bd[BD_ANGLE].bd_ad     = end_ad;
         g_bd[BD_ANGLE].start_value = g_angle_A;
 
         TIniFile cfg("ctx2000.ini");
         cfg.WriteFloat("angle_bd","a_angle",g_bd[BD_ANGLE].start_value);
         cfg.WriteFloat("angle_bd","angle_k",g_bd[BD_ANGLE].bd_k);
         cfg.WriteInteger("angle_bd","zero_ad", g_bd[BD_ANGLE].zero_ad);
+        cfg.WriteInteger("angle_bd","bd_ad", g_bd[BD_ANGLE].bd_ad);
     }
 }
 void CFormCalib::calc_up_angle(int type)

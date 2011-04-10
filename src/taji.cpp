@@ -58,20 +58,23 @@ bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
      SetPenColor(hdc,PIXEL_green);
      int w2 = 2*m_r;
      ArcEx(hdc,x_pt-m_r,y_pt-m_r,w2,w2,0 ,360*64);
+     fprintf(stderr,"angle=%0.2f\n",angle);
+     angle=angle*3.14/180;
 
  //³¤±Û
 
      if(m_is_local)
      {
-         x = m_r * sin(angle);
-         y = m_r * cos(angle);
+         y = m_r * sin(angle);
+         x = m_r * cos(angle);
+         fprintf(stderr,"x=%0.2f,y=%0.2f\n",x,y);
          SetPenColor(hdc,PIXEL_blue);
          LineEx(hdc,x_pt,y_pt,x_pt + x,y_pt-y);
          //fprintf(stderr,"angle=%0.2f,x=%0.2f,y=%0.2f\n",angle,sin(angle),cos(angle));
      //¶Ì±Û
          SetPenColor(hdc,PIXEL_darkyellow);
-         x = m_short_arm * sin(angle);
-         y = m_short_arm * cos(angle);
+         y = m_short_arm * sin(angle);
+         x = m_short_arm * cos(angle);
 
          LineEx(hdc,x_pt,y_pt,x_pt - x,y_pt+y);
      }

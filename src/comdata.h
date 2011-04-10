@@ -4,6 +4,7 @@
 typedef std::vector<int> TID;
 typedef struct tag_TBD{
     int     zero_ad;
+    int     bd_ad;
     double  bd_k;
     double  start_value;
 }TBD;

@@ -254,11 +254,8 @@ void CMainMenu::OnTimer(int ID)
         g_status[i] = EDevStatus(cnt%3);
     }
 
-    g_angle += (3.1415926/180);
-
-    int localid = CTajiDbMgr::Get().GetLocalIndex();
     lbl_dist->SetText(Poco::format("%0.2f",g_car_dist));
-    lbl_angle->SetText(Poco::format("%0.2f",((180*g_angle)/3.14159)));
+    lbl_angle->SetText(Poco::format("%0.2f",g_angle));
 
     if(m_show_up_angle)
     {

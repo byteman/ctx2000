@@ -1,4 +1,6 @@
 #include "comdata.h"
+#include <math.h>
+#include <stdlib.h>
 TBD g_bd[6];
 TID g_valid_tj_list;
 TID g_conflict_tj_list;
@@ -29,7 +31,7 @@ void calc_angle(double bd[2][2],double x,double y,double &AngleA,double &AngleB,
 
     double x2 = bd[1][0] - x;
     double y2 = bd[1][1] - y;
-
+fprintf(stderr,"x1=%0.2f,x2=%0.2f,y1=%0.2f,y2=%0.2f\n",x1,x2,y1,y2);
     if(y1==0)
     {
          if(x1>0)AngleA=0;
@@ -55,7 +57,9 @@ void calc_angle(double bd[2][2],double x,double y,double &AngleA,double &AngleB,
         AngleA = atan(y1/x1)*180/3.14;
     }
     if( (x1 < 0) && (y1 > 0) ){
-        AngleA = 180 - atan(y1/abs(x1))*180/3.14;
+        double z= atan(1);
+        fprintf(stderr,"z=%0.2f\n",z);
+        AngleA = 180 - z*180/3.14;
     }
     if( (x1 < 0) && (y1 < 0) ){
         AngleA = 180 + atan(abs(y1)/abs(x1))*180/3.14;
@@ -63,6 +67,21 @@ void calc_angle(double bd[2][2],double x,double y,double &AngleA,double &AngleB,
     if( (x1 > 0) && (y1 < 0) ){
         AngleA = 360-atan(abs(y1)/x1)*180/3.14;
     }
+/*
+    if( (x2 > 0) && (y2 > 0) ){
+        //a1
+        AngleB = atan(y2/x2)*180/3.14;
+    }
+    if( (x2 < 0) && (y2 > 0) ){
+        AngleB = 180 - atan(y2/abs(x2))*180/3.14;
+    }
+    if( (x2 < 0) && (y2 < 0) ){
+        AngleB = 180 + atan(abs(y2)/abs(x2))*180/3.14;
+    }
+    if( (x2 > 0) && (y2 < 0) ){
+        AngleB = 360-atan(abs(y2)/x2)*180/3.14;
+    }
+    */
 
     if( (x2 > 0) && (y2 > 0) ){
         //a1
@@ -70,16 +89,16 @@ void calc_angle(double bd[2][2],double x,double y,double &AngleA,double &AngleB,
         tempp=90-AngleB;
     }
     if( (x2 < 0) && (y2 > 0) ){
-        AngelB = 180 - atan(y2/abs(x2))*180/3.14;
-        tempp=180-AngelB;
+        AngleB = 180 - atan(y2/abs(x2))*180/3.14;
+        tempp=180-AngleB;
     }
     if( (x2 < 0) && (y2 < 0) ){
         AngleB = 270 - atan(abs(x2)/abs(y2))*180/3.14;
-        tempp=270-AngelB;
+        tempp=270-AngleB;
     }
     if( (x2 > 0) && (y2 < 0) ){
-        AngleA = 360-atan(abs(y2)/x2)*180/3.14;
-        tempp=360-AngelB;
+        AngleB = 360-atan(abs(y2)/x2)*180/3.14;
+        tempp=360-AngleB;
     }
 
     if(AngleB > AngleA){

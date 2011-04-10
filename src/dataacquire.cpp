@@ -2,7 +2,8 @@
 #include <cstdio>
 #include <vector>
 //#include <iostream>
-
+#include <SerialStream.h>
+#include <SerialStreamBuf.h>
 #include <Poco/Runnable.h>
 #include <Poco/ThreadPool.h>
 //#include <Poco/NotificationQueue.h>
@@ -13,14 +14,15 @@
 #include <Poco/SingletonHolder.h>
 #include <Poco/NumberParser.h>
 #include "tajidbmgr.h"
-
+#include "comdata.h"
 
 using Poco::Runnable;
 using Poco::SingletonHolder;
 using Poco::Notification;
 using Poco::Exception;
 using LibSerial::SerialPort;
-
+using LibSerial::SerialStream;
+using LibSerial::SerialStreamBuf;
 class TADNotification: public Notification
 {
 public:
@@ -55,7 +57,7 @@ public:
             delete m_port;
         }
     }
-    bool start(SerialPort::BaudRate baud)
+    virtual bool start(SerialPort::BaudRate baud)
     {
         try{
             if(m_port)
@@ -133,32 +135,90 @@ public:
     {
 
     }
+    void calc_angle()
+    {
+        crane_angle= (ad_angle-g_bd[BD_ANGLE].zero_ad)/g_bd[BD_ANGLE].bd_k+g_bd[BD_ANGLE].start_value;
+        if (abs(crane_angle_save-crane_angle)>crane_angle_thresh)
+            crane_angle_save=crane_angle;
+        else
+            crane_angle=crane_angle_save;
+
+        int kk = (int)crane_angle;
+        crane_angle=crane_angle-kk+(kk % 360);
+        if (crane_angle<0)
+            crane_angle=crane_angle+360;
+        g_angle = crane_angle;
+
+    }
     virtual void run()
     {
         m_rdyEvt.set();
         m_quitEvt.reset();
         m_quit = false;
+        std::string data="";
+        bool start_flag = false;
         while(!m_quit)
         {
+
             try{
-                  m_buf.clear();
-                  m_port->Write(m_cmd,4);
-                  m_port->Read(m_buf, 13, 50); //µÈ´ý50ms
+                char ch = m_port->ReadByte(50);
+                if(ch == '=')
+                {
+                    data.clear();
+                    start_flag=true;
+                }else if(start_flag){
+                    if(ch == '\r')
+                    {
+                        if(data.length()  == 11)
+                        {
+
+                            if(Poco::NumberParser::tryParse(data,ad_angle))
+                            {
+                                //fprintf(stderr,"ad = %d\n",ad_angle);
+                                calc_angle();
+                            }
+                            //fprintf(stderr,"value=%s\n",data.c_str());
+                        }
+                        data.clear();
+                    }else{
+                        if(data.length() < 11)
+                            data.push_back(ch);
+                    }
+
+                }
             }catch(LibSerial::SerialPort::ReadTimeout& e)
             {
-                //std::cerr << "Serial TimeOut\n";
+                std::cerr << "Serial timeout\n";
                 continue;
             }
-    #if 1
+        continue;
+
+    #if 0
+
             for(size_t i = 0; i < m_buf.size(); i++)
             {
                 fprintf(stderr , "0x%x ",m_buf.at(i));
             }
             fprintf(stderr , "\n");
+
+            fprintf(stderr,"angle recv %s\n",data.c_str());
     #endif
+            fprintf(stderr,"angle recv %s\n",data.c_str());
+            /*
             if( (m_buf.at(0) == 0x3D) && (m_buf.at(12) == 0x0D) )
             {
                 m_queue.enqueueNotification(new TADNotification(2,m_buf));
+            }
+            */
+            if(data[0] == '=' && data.length() == 13)
+            {
+
+                int ad = 0;
+                if(Poco::NumberParser::tryParse(data.substr(1,11),ad))
+                {
+                    fprintf(stderr,"ad = %d\n",ad);
+                }
+                //m_queue.enqueueNotification(new TADNotification(2,m_buf));
             }
         }
         m_port->Close();
@@ -166,6 +226,7 @@ public:
     }
 
 private:
+    double crane_angle_save,crane_angle_thresh,crane_angle;
     unsigned char m_cmd[4];
 
 };
@@ -284,12 +345,12 @@ CDataAcquire::CDataAcquire():
 
 }
 
-bool CDataAcquire::Init(std::string path)
+bool CDataAcquire::Init(std::string path1,std::string path2)
 {
-    if(!m_aq_work1)
-        m_aq_work1 = new CDataAcquireWorker1(path,m_nq);
+    //if(!m_aq_work1)
+    //    m_aq_work1 = new CDataAcquireWorker1(path1,m_nq);
     if(!m_aq_work2)
-        m_aq_work2 = new CDataAcquireWorker2(path,m_nq);
+        m_aq_work2 = new CDataAcquireWorker2(path2,m_nq);
     if(!m_ps_work)
         m_ps_work  = new CDataParseWorker(m_nq,m_nc);
     return true;
@@ -297,11 +358,11 @@ bool CDataAcquire::Init(std::string path)
 /*
 
 */
-bool CDataAcquire::Start(std::string path)
+bool CDataAcquire::Start(std::string path1,std::string path2)
 {
-    if( !Init(path) ) return false;
-    if( !m_aq_work1->start(LibSerial::SerialPort::BAUD_115200) ) return false;
-    if( !m_aq_work2->start(LibSerial::SerialPort::BAUD_9600)   ) return false;
+    if( !Init(path1,path2) ) return false;
+    //if( !m_aq_work1->start(LibSerial::SerialPort::BAUD_115200) ) return false;
+    if( !m_aq_work2->start(LibSerial::SerialPort::BAUD_115200)   ) return false;
 
     return  m_ps_work->start();
 }

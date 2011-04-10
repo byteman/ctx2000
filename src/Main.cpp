@@ -77,7 +77,7 @@ int MiniGUIMain (int argc, const char* argv[])
     argc    = argc;
 
     fprintf(stderr,"%s build @ %s %s",argv[0],__DATE__,__TIME__);
-#if 1
+#if 0
     if( !CtxEngine::Get().start( 1000, argc, argv ) )
     {
         std::cerr << "CtxEngine start failed\n";
