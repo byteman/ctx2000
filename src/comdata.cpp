@@ -20,7 +20,7 @@ int ad_angle, ad_up_angle, ad_car_dist, ad_weight,ad_fengsu, ad_height;
 TTjRecord g_TC[21];
 double g_car_dist,g_dg_height,g_dg_weight,g_angle,g_speed,g_up_angle;
 double g_angle_A,g_angle_B,g_angle_C;
-
+std::string g_diantai_com,g_ad_com1,g_ad_com2,g_gprs_com;
 
 
 void calc_angle(double bd[2][2],double x,double y,double &AngleA,double &AngleB,double &AngleC)
@@ -31,7 +31,7 @@ void calc_angle(double bd[2][2],double x,double y,double &AngleA,double &AngleB,
 
     double x2 = bd[1][0] - x;
     double y2 = bd[1][1] - y;
-fprintf(stderr,"x1=%0.2f,x2=%0.2f,y1=%0.2f,y2=%0.2f\n",x1,x2,y1,y2);
+    //fprintf(stderr,"x1=%0.2f,x2=%0.2f,y1=%0.2f,y2=%0.2f\n",x1,x2,y1,y2);
     if(y1==0)
     {
          if(x1>0)AngleA=0;

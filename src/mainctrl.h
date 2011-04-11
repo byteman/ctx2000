@@ -42,12 +42,14 @@ private:
     int      m_wait_id;
     double    m_angle;
     double    m_dist;
+    void    LjService();
     std::string      build_qurey_msg();
     int       MaxNo();
     bool      is_conflcit(int callto_id);
     std::string GetNextID();
     std::string GetAddID();
     int       ValideTCNum();
+    void      CreateDefaultTjParam();
     void      InitBDParam();
     void      WatchNetWork(std::string &MainDevID, bool &AddState);
     void      DripMainNoAndAddNo(std::string &MainNo, std::string &RightNo, std::string &AddNo);

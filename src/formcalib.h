@@ -19,6 +19,9 @@ public:
     virtual void OnButtonClick(skin_item_t* item);
 private:
     void calibrate_angle(int type);
+    void calibrate_height(int type);
+    void calibrate_car_dist(int type);
+    void calibrate_weight(int type);
     void calc_up_angle(int type);
     CSkinButton* _btns[20];
     CEdit*       _edits[10];

@@ -43,7 +43,7 @@ extern  int ad_angle, ad_up_angle, ad_car_dist, ad_weight,ad_fengsu, ad_height;
 extern  double g_car_dist,g_dg_height,g_dg_weight,g_angle,g_speed,g_up_angle;
 
 extern double g_angle_A,g_angle_B,g_angle_C;
-
+extern std::string g_diantai_com,g_ad_com1,g_ad_com2,g_gprs_com;
 
 //common functions
 

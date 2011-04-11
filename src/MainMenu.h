@@ -6,6 +6,7 @@
 #include "dt_core.h"
 #include "dirstatus.h"
 #include "taji.h"
+#include "percent.h"
 #define MM_SKIN_BTN_NUM  3
 class CStatusIcon;
 class CFormWorksite;
@@ -39,10 +40,11 @@ private:
         CStatic* lbl_dist;
         CStatic* m_areas[4];
         CStatic* lbl_rights[3];
+        CStatic* m_liju;
         CFormWorksite* m_worksite;
         CIcon m_angle;
         CIcon m_dist;
-
+        CPercent m_per;
         bool m_show_up_angle,m_show_speed,m_show_dg_height,m_show_max_weight;
 };
 

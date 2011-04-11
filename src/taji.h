@@ -6,7 +6,7 @@
 class CTaji
 {
 public:
-    CTaji(int x, int y, int r, int s,int id);
+    CTaji(int x, int y, int r, int s,int id,double zoom);
     //param: 全局的塔机参数字
     CTaji(QtzParam* tzPar,int zoom=1);
     bool Draw(HDC hdc);
@@ -19,6 +19,7 @@ private:
     std::string m_tj_num;
     RECT m_rt;
     bool m_is_local;
+    double m_zoom;
 
 };
 class CTaijiMgr{

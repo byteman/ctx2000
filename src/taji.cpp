@@ -21,8 +21,8 @@ CTaji::CTaji(QtzParam* tzPar,int zoom):
     fprintf(stderr,"taji rect x=%d y=%d r=%d b=%d\n",m_rt.left,m_rt.top,m_rt.right,m_rt.bottom);
     m_tj_num = Poco::format("%u",tzPar->number);
 }
-CTaji::CTaji(int x, int y, int r,int s, int id):
-    x_pt(x),y_pt(y),m_r(r)
+CTaji::CTaji(int x, int y, int r,int s, int id,double zoom):
+    x_pt(x),y_pt(y),m_r(r),m_zoom(zoom)
 {
     m_tj_num = Poco::format("%d",id);
     m_short_arm = s;
@@ -58,7 +58,7 @@ bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
      SetPenColor(hdc,PIXEL_green);
      int w2 = 2*m_r;
      ArcEx(hdc,x_pt-m_r,y_pt-m_r,w2,w2,0 ,360*64);
-     fprintf(stderr,"angle=%0.2f\n",angle);
+     //fprintf(stderr,"angle=%0.2f\n",angle);
      angle=angle*3.14/180;
 
  //³¤±Û
@@ -67,7 +67,7 @@ bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
      {
          y = m_r * sin(angle);
          x = m_r * cos(angle);
-         fprintf(stderr,"x=%0.2f,y=%0.2f\n",x,y);
+         //fprintf(stderr,"x=%0.2f,y=%0.2f\n",x,y);
          SetPenColor(hdc,PIXEL_blue);
          LineEx(hdc,x_pt,y_pt,x_pt + x,y_pt-y);
          //fprintf(stderr,"angle=%0.2f,x=%0.2f,y=%0.2f\n",angle,sin(angle),cos(angle));
@@ -88,13 +88,13 @@ bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
      //SetTextColor (hdc,PIXEL_red);
      SelectFont(hdc,GetSystemFont(SYSLOGFONT_FIXED));
      DrawText(hdc,m_tj_num.c_str(),m_tj_num.length (),&rect,DT_CENTER|DT_VCENTER|DT_SINGLELINE);
-    //Circle(hdc,m_tzPar->pos.x,m_tzPar->pos.y);
+
 //Ð¡³µ
      if(m_is_local)
      {
          SetBrushColor(hdc,PIXEL_red);
-         x = x_pt + car_dist * sin(angle);
-         y = y_pt - car_dist * cos(angle);
+         x = x_pt + car_dist * cos(angle)*m_zoom;
+         y = y_pt - car_dist * sin(angle)*m_zoom;
 
          FillBox(hdc,x,y,10,10);
      }

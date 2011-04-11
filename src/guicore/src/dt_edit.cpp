@@ -139,6 +139,7 @@ double CEdit::GetFloatValue(bool ok)
     char *endptr = NULL;
     char buf[32] = {0,};
     std::string tmp = GetText();
+
     tmp.copy(buf,32);
     double value = strtod(buf,&endptr);
     if(endptr!=NULL)

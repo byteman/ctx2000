@@ -13,6 +13,7 @@
 #include "lijuConfForm.h"
 #include "iniFile.h"
 #include "comdata.h"
+#include "lijuctrl.h"
 #define EDIT_ANGLE   {20,285,160,30,"20.8"}
 #define EDIT_DIST    {20,335,160,30,"12.4"}
 #define EDIT_UP_ANGL {710,250,80,30,"12.4"}
@@ -55,7 +56,8 @@ static COMM_CTRL_DESC commctrls[] = {
     {710,230,80,30,"Up Angle:"},//12
     {710,285,80,30,"Max Weight:"},//13
     {710,350,80,30,"Speed:"},//14
-    {710,410,80,30,"Car Height:"}//15
+    {710,410,80,30,"Car Height:"},//15
+    {155,85,40,150,"0"}
 };
 static EDevStatus g_status[20];
 
@@ -114,7 +116,7 @@ CMainMenu::CMainMenu()
         new CStatic(&commctrls[15],this);
         edt_dg_height = new CEdit(&commctrls[11],this);
     }
-
+    m_liju        = new CStatic(&commctrls[16],this);
     lbl_rights[0] = new CStatic(&commctrls[5],this);
     lbl_rights[1] = new CStatic(&commctrls[6],this);
     lbl_rights[2] = new CStatic(&commctrls[7],this);
@@ -148,7 +150,10 @@ CMainMenu::CMainMenu()
 
 CMainMenu::~CMainMenu()
 {
-
+    if(m_worksite)
+    {
+        delete m_worksite;
+    }
 }
 void CMainMenu::DrawDevSerial(HDC hdc, RECT rt,std::string devserail)
 {
@@ -204,7 +209,7 @@ void CMainMenu::OnCreate()
 int paintcircle(int x,int r)
 {
     int y = (int)sqrt(r*r -x*x);
-    fprintf(stderr,"x=%d y=%d r=%d\n",x,y,r);
+    //fprintf(stderr,"x=%d y=%d r=%d\n",x,y,r);
     return y;
 
 }
@@ -214,6 +219,7 @@ int paintcircle(int x,int r)
 void CMainMenu::OnShow()
 {
     m_worksite->init(m_hWnd);
+    m_per.Init(this,m_liju,commctrls[16].w,commctrls[16].h);
 }
 void CMainMenu::OnPaint(HWND hWnd)
 {
@@ -273,6 +279,7 @@ void CMainMenu::OnTimer(int ID)
     {
         edt_max_weight->SetFloatText(g_dg_weight,2);
     }
+    m_per.Show(CLijuCtrl::Get().m_percent);
     m_worksite->update();
 }
 void CMainMenu::OnButtonClick(skin_item_t* item)

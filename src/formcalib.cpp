@@ -4,6 +4,7 @@
 #include "comdata.h"
 #include "iniFile.h"
 #include <math.h>
+#include <Poco/NumberParser.h>
 static const char* mmenu_bmps[] = {
      PCOMM_BACKGROUND,
      PSETZERO_BTN,
@@ -136,7 +137,118 @@ void CFormCalib::OnShow()
 }
 //a === bd[0][0..1]
 //b === bd[1][0..1]
+void CFormCalib::calibrate_height(int type)
+{
+    static int start_ad = 0;
+    static int end_ad   = 0;
+    static bool start   = false;
+    double zero_height = 0;
+    if(type == 0){
+        start_ad = ad_height;
 
+        if(!Poco::NumberParser::tryParseFloat(_edits[1]->GetText(),zero_height))
+        {
+            MessageBox(m_hWnd,"Please input correct height\n","Error",MB_OK);
+            return;
+        }
+        start = true;
+    }else if((type == 1) && (start)){
+        start = false;
+        end_ad = ad_height;
+        double bd_height=0;
+        if(!Poco::NumberParser::tryParseFloat(_edits[1]->GetText(),bd_height))
+        {
+            MessageBox(m_hWnd,"Please input correct height\n","Error",MB_OK);
+            return;
+        }
+        double k = (end_ad - start_ad) / (bd_height-zero_height);
+
+        g_bd[BD_HEIGHT].bd_k        = k;
+        g_bd[BD_HEIGHT].zero_ad     = start_ad;
+        g_bd[BD_HEIGHT].bd_ad       = end_ad;
+        g_bd[BD_HEIGHT].start_value = zero_height;
+
+        TIniFile cfg("ctx2000.ini");
+        cfg.WriteFloat("height_bd","min_height",g_bd[BD_HEIGHT].start_value);
+        cfg.WriteFloat("height_bd","height_k",  g_bd[BD_HEIGHT].bd_k);
+        cfg.WriteInteger("height_bd","zero_ad", g_bd[BD_HEIGHT].zero_ad);
+        cfg.WriteInteger("height_bd","bd_ad",   g_bd[BD_HEIGHT].bd_ad);
+      }else{
+          MessageBox(m_hWnd,"Please Press start first\n","Error",MB_OK);
+      }
+}
+void CFormCalib::calibrate_car_dist(int type)
+{
+    static int start_ad = 0;
+    static int end_ad   = 0;
+    static bool start=false;
+    if(type == 0){
+        start_ad = ad_car_dist;
+        start = true;
+    }else if((type == 1) && (start)){
+        start = false;
+        end_ad = ad_car_dist;
+        double min_dist = g_TC[g_local_id].Rs;
+        double max_dist = g_TC[g_local_id].LongArmLength;
+        double k = (end_ad - start_ad) / (max_dist-min_dist);
+
+        if(k < 2)
+        {
+            MessageBox(m_hWnd,"Calibration ERROR! Please Calibrate again.","Dist Error",MB_OK);
+            return;
+        }
+        g_bd[BD_CAR_DIST].bd_k        = k;
+        g_bd[BD_CAR_DIST].zero_ad     = start_ad;
+        g_bd[BD_CAR_DIST].bd_ad       = end_ad;
+        g_bd[BD_CAR_DIST].start_value = g_TC[g_local_id].Rs;
+
+        TIniFile cfg("ctx2000.ini");
+        cfg.WriteFloat("dist_bd","min_dist",  g_bd[BD_CAR_DIST].start_value);
+        cfg.WriteFloat("dist_bd","dist_k",    g_bd[BD_CAR_DIST].bd_k);
+        cfg.WriteInteger("dist_bd","zero_ad", g_bd[BD_CAR_DIST].zero_ad);
+        cfg.WriteInteger("dist_bd","bd_ad",   g_bd[BD_CAR_DIST].bd_ad);
+    }else{
+        MessageBox(m_hWnd,"Please Press start first\n","Error",MB_OK);
+    }
+}
+void CFormCalib::calibrate_weight(int type)
+{
+    static int start_ad = 0;
+    static int end_ad   = 0;
+    static bool start=false;
+    if(type == 0){
+        start_ad = ad_weight;
+        start = true;
+    }else if((type == 1) && (start)){
+        start = false;
+        end_ad = ad_weight;
+        double bd_weight=0;
+        if(!Poco::NumberParser::tryParseFloat(_edits[0]->GetText(),bd_weight))
+        {
+            MessageBox(m_hWnd,"Please input correct weight\n","Error",MB_OK);
+            return;
+        }
+        /*
+        double bd_weight = _edits[0]->GetFloatValue(ok);
+        if(!ok){
+            MessageBox(m_hWnd,"Please input correct weight\n","Error",MB_OK);
+            return;
+        }
+        */
+        double k = (end_ad - start_ad) / bd_weight;
+
+        g_bd[BD_WEIGHT].bd_k        = k;
+        g_bd[BD_WEIGHT].zero_ad     = start_ad;
+        g_bd[BD_WEIGHT].bd_ad       = end_ad;
+        g_bd[BD_WEIGHT].start_value = 0;
+
+        TIniFile cfg("ctx2000.ini");
+        cfg.WriteFloat("weight_bd","min_weight",g_bd[BD_WEIGHT].start_value);
+        cfg.WriteFloat("weight_bd","weight_k",g_bd[BD_WEIGHT].bd_k);
+        cfg.WriteInteger("weight_bd","zero_ad", g_bd[BD_WEIGHT].zero_ad);
+        cfg.WriteInteger("weight_bd","bd_ad", g_bd[BD_WEIGHT].bd_ad);
+      }
+}
 void CFormCalib::calibrate_angle(int type)
 {
     static int start_ad = 0;
@@ -189,7 +301,8 @@ void CFormCalib::calc_up_angle(int type)
         TIniFile cfg("ctx2000.ini");
         cfg.WriteFloat("up_angle_bd","min_up_angle",min_up_angle);
         cfg.WriteFloat("up_angle_bd","up_angle_k",k);
-        cfg.WriteInteger("angle_bd","zero_ad", start_ad);
+        cfg.WriteInteger("up_angle_bd","zero_ad", start_ad);
+        cfg.WriteInteger("up_angle_bd","bd_ad", end_ad);
     }
 }
 void CFormCalib::OnButtonClick(skin_item_t* item)
@@ -208,15 +321,21 @@ void CFormCalib::OnButtonClick(skin_item_t* item)
         calc_up_angle(1);
     }else if(item->id == _btns[4]->GetId()){
         //幅度标定开始
+        calibrate_car_dist(0);
     }else if(item->id == _btns[5]->GetId()){
         //幅度标定接收
+        calibrate_car_dist(1);
     }else if(item->id == _btns[6]->GetId()){
         //称重标定开始
+        calibrate_weight(0);
     }else if(item->id == _btns[7]->GetId()){
         //称重标定结束
+         calibrate_weight(1);
     }else if(item->id == _btns[8]->GetId()){
         //吊钩高度标定开始
+        calibrate_height(0);
     }else if(item->id == _btns[9]->GetId()){
         //吊钩高度标定结束
+        calibrate_height(1);
     }
 }

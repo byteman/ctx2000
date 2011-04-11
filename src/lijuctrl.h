@@ -19,7 +19,7 @@ class CLijuCtrl
 public:
     static CLijuCtrl& Get();
     CLijuCtrl(std::string type="", int armlen=0, int beilv=0);
-    void Service(double car_pos, double weight);
+    int Service(double car_pos, double weight);
     bool Load(std::string type="", std::string armlen="", std::string beilv=0);
     //设置新的倍率，
     int ChangeBeilv(int newBeilv=0);

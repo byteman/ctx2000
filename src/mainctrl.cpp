@@ -692,7 +692,31 @@ int  CMainCtrl::GetConflictTjList(std::vector<int> &devlist)
     }
     return cnt;
 }
+void      CMainCtrl::CreateDefaultTjParam()
+{
 
+    strcpy(g_TC[1].Serial,"C8002");
+    g_TC[1].x=1;
+    g_TC[1].y=300;
+    g_TC[1].LongArmLength=100;
+    g_TC[1].ShortArmLenght=20;
+
+    strcpy(g_TC[2].Serial,"C8003");
+    g_TC[2].x=100;
+    g_TC[2].y=200;
+    g_TC[2].LongArmLength=100;
+    g_TC[2].ShortArmLenght=20;
+
+    strcpy(g_TC[3].Serial,"C8004");
+    g_TC[3].x=300;
+    g_TC[3].y=1;
+    g_TC[3].LongArmLength=105;
+    g_TC[3].ShortArmLenght=20;
+
+    SaveTowerCraneInfo();
+
+
+}
 void CMainCtrl::ReadSetting()
 {
     cfg.Open("ctx2000.ini");
@@ -701,6 +725,11 @@ void CMainCtrl::ReadSetting()
     CurSerial  = Poco::trim(cfg.ReadString("device","Serial",""));
     StrTCArmLen = Poco::trim(cfg.ReadString("device","armlen",""));
     StrTCBeilv  = Poco::trim(cfg.ReadString("device","beilv",""));
+
+    g_diantai_com=Poco::trim(cfg.ReadString("serial","diantai_com","/dev/ttymxc0"));
+    g_ad_com1    =Poco::trim(cfg.ReadString("serial","ad_com1","/dev/ttymxc1"));
+    g_ad_com2    =Poco::trim(cfg.ReadString("serial","ad_com2","/dev/ttymxc2"));
+    g_gprs_com   =Poco::trim(cfg.ReadString("serial","gprs_com","/dev/ttymxc3"));
 
     if( !CLijuCtrl::Get().Load(TCTypeName,StrTCArmLen,StrTCBeilv))
     {
@@ -736,6 +765,7 @@ void CMainCtrl::ReadSetting()
         }
         tcfile.close();
     }else{
+        CreateDefaultTjParam();
         std::cerr << "Can not open tc.red" << std::endl;
     }
     DBG("CurID:%s\n",CurID.c_str());
@@ -811,10 +841,32 @@ void CMainCtrl::ReadSetting()
 void CMainCtrl::InitBDParam()
 {
     TIniFile cfg("ctx2000.ini");
-    g_bd[BD_ANGLE].bd_k =cfg.ReadFloat("angle_bd","angle_k",0);
+    g_bd[BD_ANGLE].bd_k =cfg.ReadFloat("angle_bd","angle_k",1);
     g_bd[BD_ANGLE].start_value =cfg.ReadFloat("angle_bd","a_angle",0);
     g_bd[BD_ANGLE].zero_ad =cfg.ReadInteger("angle_bd","zero_ad",0);
     g_bd[BD_ANGLE].bd_ad   = cfg.ReadInteger("angle_bd","bd_ad",0);
+
+    g_bd[BD_UP_ANGLE].bd_k =cfg.ReadFloat("up_angle_bd","up_angle_k",1);
+    g_bd[BD_UP_ANGLE].start_value =cfg.ReadFloat("up_angle_bd","min_up_angle",0);
+    g_bd[BD_UP_ANGLE].zero_ad =cfg.ReadInteger("up_angle_bd","zero_ad",0);
+    g_bd[BD_UP_ANGLE].bd_ad   = cfg.ReadInteger("up_angle_bd","bd_ad",0);
+
+
+    g_bd[BD_WEIGHT].bd_k =cfg.ReadFloat("weight_bd","weight_k",1);
+    g_bd[BD_WEIGHT].start_value =cfg.ReadFloat("weight_bd","min_weight",0);
+    g_bd[BD_WEIGHT].zero_ad =cfg.ReadInteger("weight_bd","zero_ad",0);
+    g_bd[BD_WEIGHT].bd_ad   = cfg.ReadInteger("weight_bd","bd_ad",0);
+
+
+    g_bd[BD_CAR_DIST].bd_k =cfg.ReadFloat("dist_bd","dist_k",1);
+    g_bd[BD_CAR_DIST].start_value =cfg.ReadFloat("dist_bd","min_dist",0);
+    g_bd[BD_CAR_DIST].zero_ad =cfg.ReadInteger("dist_bd","zero_ad",0);
+    g_bd[BD_CAR_DIST].bd_ad   = cfg.ReadInteger("dist_bd","bd_ad",0);
+
+    g_bd[BD_HEIGHT].bd_k = cfg.ReadFloat("height_bd","height_k",1);
+    g_bd[BD_HEIGHT].start_value = cfg.ReadFloat("height_bd","min_height",0);
+    g_bd[BD_HEIGHT].zero_ad = cfg.ReadInteger("height_bd","zero_ad",0);
+    g_bd[BD_HEIGHT].bd_ad   = cfg.ReadInteger("height_bd","bd_ad",0);
 
 }
 void CMainCtrl::InitAlgoData()
@@ -1102,6 +1154,9 @@ bool CMainCtrl::DealWorkSiteInfo()
     }
     return false;
 }
+/*
+在这个地方填充算法模块的实时参数
+*/
 void Gather_AD()
 {
     static int i = 0;
@@ -1111,6 +1166,15 @@ void Gather_AD()
     i+=5;
 
 }
+/*
+力矩服务程序
+*/
+void    CMainCtrl::LjService()
+{
+    int out_state = CLijuCtrl::Get().Service(g_car_dist,g_dg_weight);
+    //根据力矩输出的状态来控制继电器的动作
+
+}
 void CMainCtrl::run()
 {
     bool AddState=false;
@@ -1118,7 +1182,7 @@ void CMainCtrl::run()
     m_rdyEvt.set();
     m_quitEvt.reset();
     m_quit = false;
-    init_tj_data();
+
 
     while (false == AddState) {
         WatchNetWork(MainMachineID,AddState);
@@ -1129,8 +1193,8 @@ void CMainCtrl::run()
         Gather_AD();
         DealWorkSiteInfo();
         DealHeightInfo();
-
         UpdateTCStatus();
+        LjService();
         //DBG("%s %d\n",__FUNCTION__,__LINE__);
         if(m_mode == mode_master)
         {
@@ -1236,14 +1300,17 @@ bool CMainCtrl::Start()
         fprintf(stderr,"TajiDbMgr load failed\n");
         return false;
     }
-    fprintf(stderr,"tj num = %d\n",CTajiDbMgr::Get().get_tj_num());
 
-    if( ! CDataAcquire::Get().Start("/dev/ttyUSB0","/dev/ttyUSB0"))
+    fprintf(stderr,"tj num = %d\n",CTajiDbMgr::Get().get_tj_num());
+    init_tj_data();
+
+    if( ! CDataAcquire::Get().Start(g_ad_com1,g_ad_com2))
     {
         fprintf(stderr,"DataAcquire Start Failed\n");
         return false;
     }
-    if( ! CDianTai::Get().Start("/dev/ttyUSB1"))
+
+    if( ! CDianTai::Get().Start(g_diantai_com))
     {
         fprintf(stderr,"DianTai Start Failed\n");
         //return false;

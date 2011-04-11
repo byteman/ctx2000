@@ -42,10 +42,10 @@ CFormWorksite::CFormWorksite(CStatic* area,int w,int h):
 
         calc_map_point(g_TC[idx].x,g_TC[idx].y,g_TC[idx].LongArmLength,g_TC[idx].ShortArmLenght,x,y,r,s);
 
-        m_tajis[i] = new CTaji(x,y,r,s,idx);
+        m_tajis[i] = new CTaji(x,y,r,s,idx,m_zoom);
     }
     calc_map_point(g_TC[g_local_id].x,g_TC[g_local_id].y,g_TC[g_local_id].LongArmLength,g_TC[g_local_id].ShortArmLenght,x,y,r,s);
-    m_tajis[i] = new CTaji(x,y,r,s,g_local_id);
+    m_tajis[i] = new CTaji(x,y,r,s,g_local_id,m_zoom);
     m_tj_num   = g_conflict_tj_list.size()+1;
     myptr    = this;
 }

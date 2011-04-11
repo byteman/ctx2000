@@ -59,7 +59,8 @@ SOURCES += \
     lijuConfForm.cpp \
     MineAddBox.cpp \
     lijuctrl.cpp \
-    biaoding.cpp
+    biaoding.cpp \
+    percent.cpp
 LIBS+=-lPocoFoundation
 
 DEPENDPATH=../include
@@ -125,4 +126,5 @@ HEADERS += \
     MineAddBox.h \
     MineAddBoxItem.h \
     lijuctrl.h \
-    biaoding.h
+    biaoding.h \
+    percent.h

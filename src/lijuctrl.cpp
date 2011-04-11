@@ -3,7 +3,9 @@
 #include <Poco/NumberParser.h>
 #include <Poco/SingletonHolder.h>
 #include <Poco/String.h>
+#include <Poco/Mutex.h>
 #include <iostream>
+static Poco::FastMutex _mutex;
 CLijuCtrl&  CLijuCtrl::Get()
 {
     static Poco::SingletonHolder<CLijuCtrl> sh;
@@ -15,6 +17,7 @@ CLijuCtrl::CLijuCtrl(std::string type, int armlen, int beilv)
 }
 bool CLijuCtrl::Load(std::string type, std::string armlen, std::string beilv)
 {
+    Poco::FastMutex::ScopedLock lock(_mutex);
     TLijuRst rst;
     m_lijuGrp.clear();
     m_BeilvList.clear();
@@ -70,27 +73,27 @@ bool CLijuCtrl::Load(std::string type, std::string armlen, std::string beilv)
     m_load_ok = true;
     return true;
 }
-void CLijuCtrl::Service(double car_pos, double weight)
+int CLijuCtrl::Service(double car_pos, double weight)
 {
-    double max_weight=0;
-    bool   find = false;
+    double max_weight = 0;
+    bool   find       = false;
     for(size_t i = 0; i < m_lijuGrp.size(); i++)
     {
         if(car_pos <= m_lijuGrp.at(i).car_pos)
         {
-            max_weight=m_lijuGrp.at(i).max_weight;
-            find = true;
+            max_weight = m_lijuGrp.at(i).max_weight;
+            find       = true;
             break;
         }
     }
     if( !find )
     {
         int cnt = m_lijuGrp.size();
-        if(cnt>0)
+        if( cnt > 0 )
             max_weight = m_lijuGrp.at(cnt-1).max_weight;
     }
-    if(max_weight < 0.1)//得到了异常的重量
-        return;
+    if( max_weight < 0.1 )//得到了异常的重量
+        return 0;
     m_percent = weight / max_weight;
     if(m_percent >= 1.05)
     {
@@ -102,17 +105,18 @@ void CLijuCtrl::Service(double car_pos, double weight)
     else
         m_cur_state = 0;
 
-    fprintf(stderr,"percent=%0.3f\n",m_percent);
+    //fprintf(stderr,"weight=%0.2f, max_weight=%0.2f,percent=%0.3f\n",weight,max_weight,m_percent);
+    return m_cur_state;
 }
 int CLijuCtrl::ChangeBeilv(int newBeilv)
 {
-    if( (m_curBeilvIndex==-1) || (m_curBeilv.size() == 0))
+    if( ( m_curBeilvIndex == -1) || ( m_curBeilv.size() == 0 ) )
         return -1;
-    if(!m_load_ok)
+    if( !m_load_ok )
         return -2;
 
     int max = m_BeilvList.size();
-    if((++m_curBeilvIndex) >= max)
+    if( (++m_curBeilvIndex) >= max )
         m_curBeilvIndex = 0;
     std::string tmp = m_BeilvList.at(m_curBeilvIndex);
 
