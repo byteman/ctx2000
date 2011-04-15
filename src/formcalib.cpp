@@ -108,12 +108,12 @@ CFormCalib::~CFormCalib()
 
 void CFormCalib::OnCreate()
 {
-    msgHandler = new ADMessageHandler(m_hWnd);
-    TelEngine::Engine::install(msgHandler);
+    //msgHandler = new ADMessageHandler(m_hWnd);
+    //TelEngine::Engine::install(msgHandler);
 }
 void CFormCalib::OnClose()
 {
-    TelEngine::Engine::uninstall(msgHandler);
+    //TelEngine::Engine::uninstall(msgHandler);
 }
 void CFormCalib::OnTimer(int ID)
 {

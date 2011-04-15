@@ -225,13 +225,7 @@ void    CDivParam::OnButtonClick(skin_item_t* item)
     {
 
         SaveTC(m_tc_id);
-        Message m("mainctrl.cmd");
 
-        m.setParam("type",  "save_wb");
-
-        if (!Engine::dispatch(m)) {
-             Debug("mainctrl",DebugWarn,"save_wb failed");
-        }
     }
     else if(item->id == btn_exit->GetId())
     {

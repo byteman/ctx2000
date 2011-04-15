@@ -787,30 +787,6 @@ void CMainCtrl::InitAlgoData()
 }
 void CMainCtrl::SaveSiteInfo()
 {
-    /*
-    FILE* fp = fopen("ws.red","wb+");
-    for(int i = 0; i <4; i++){
-        fwrite((const void*)&wksp[i][0],sizeof(double),fp);
-        fwrite((const void*)&wksp[i][1],sizeof(double),fp);
-    }
-
-    for(int i = 0; i <2; i++){
-        fwrite((const void*)&czwzb[i][0],sizeof(double),fp);
-        fwrite((const void*)&czwzb[i][1],sizeof(double),fp);
-    }
-
-    fwrite((const void*)&YNAngle,sizeof(double),fp);
-    fwrite((const void*)&BrakeDis,sizeof(double),fp);
-    fwrite((const void*)&DangerDis,sizeof(double),fp);
-    fwrite((const void*)&WarnDis,sizeof(double),fp);
-    fwrite((const void*)&VStopDis,sizeof(double),fp);
-    fwrite((const void*)&VWarnDis,sizeof(double),fp);
-    fwrite((const void*)&Addangle,sizeof(double),fp);
-
-    fclose(fp);
-*/
-
-    //TIniFile cfg("ctx2000.ini");
     cfg.WriteFloat("device","leftup_x",wksp[0][0]);
     cfg.WriteFloat("device","leftup_y",wksp[0][1]);
     cfg.WriteFloat("device","leftdown_x",wksp[1][0]);
@@ -828,7 +804,6 @@ void CMainCtrl::SaveSiteInfo()
 
     cfg.WriteFloat("device","YNAngle",YNAngle);
     cfg.WriteFloat("device","BrakeDis",BrakeDis);
-    DBG("***********BrakeDis=%6.2f\n",BrakeDis);
     cfg.WriteFloat("device","DangerDis",DangerDis);
     cfg.WriteFloat("device","WarnDis",WarnDis);
     cfg.WriteFloat("device","VStopDis",VStopDis);

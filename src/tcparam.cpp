@@ -7,6 +7,7 @@
 #include "comdata.h"
 #include <yatengine.h>
 #include <Poco/String.h>
+#include "mainctrl.h"
 using namespace TelEngine;
 extern TTjRecord g_TC[21];
 static COMM_CTRL_DESC lablectrls[] = {
@@ -210,13 +211,7 @@ void    CTCParam::OnButtonClick(skin_item_t* item)
     {
 
         SaveTC(m_tc_id);
-        Message m("mainctrl.cmd");
-
-        m.setParam("type",  "save_tc");
-
-        if (!Engine::dispatch(m)) {
-             Debug("mainctrl",DebugWarn,"save_tc failed");
-        }
+        CMainCtrl::Get().SaveTowerCraneInfo();
     }
     else if(item->id == btn_exit->GetId())
     {

@@ -6,7 +6,7 @@
 #include <Poco/Format.h>
 #include "comdata.h"
 #include <yatengine.h>
-
+#include "mainctrl.h"
 using namespace TelEngine;
 extern TTjRecord g_TC[21];
 static COMM_CTRL_DESC lablectrls[] = {
@@ -147,38 +147,6 @@ void    CWorkSite::OnShow()
     edits[18]->SetText(Poco::format("%0.2f",AddAngle));
     edits[19]->SetText(Poco::format("%d",fd_time));
     edits[20]->SetText(Poco::format("%d",brake_time));
-    /*
-    CTajiDbMgr::Get().load("ctx2000.sqlite3");
-
-    int id = CTajiDbMgr::Get().GetLocalIndex();
-
-    for(int i = 0; i < 8;)
-    {
-        double x_pos = CTajiDbMgr::Get().m_tj[id].ws.worksite_coord.at(i/2).x;
-        double y_pos = CTajiDbMgr::Get().m_tj[id].ws.worksite_coord.at(i/2).y;
-        fprintf(stderr,"x=%0.2f,y=%0.2f\n",x_pos,y_pos);
-        edits[i++]->SetText(Poco::format("%0.2f",x_pos));
-        edits[i++]->SetText(Poco::format("%0.2f",y_pos));
-    }
-
-    edits[8]->SetText(Poco::format("%0.2f",CTajiDbMgr::Get().m_tj[id].ws.y_angle));
-
-    edits[9]->SetText(Poco::format("%0.2f",CTajiDbMgr::Get().m_tj[id].ws.anchor_coord.at(0).x));
-    edits[10]->SetText(Poco::format("%0.2f",CTajiDbMgr::Get().m_tj[id].ws.anchor_coord.at(0).y));
-    edits[11]->SetText(Poco::format("%0.2f",CTajiDbMgr::Get().m_tj[id].ws.anchor_coord.at(1).x));
-    edits[12]->SetText(Poco::format("%0.2f",CTajiDbMgr::Get().m_tj[id].ws.anchor_coord.at(1).y));
-
-    edits[13]->SetText(Poco::format("%0.2f",CTajiDbMgr::Get().m_tj[id].ws.car_high_spd_dist));
-    edits[14]->SetText(Poco::format("%0.2f",CTajiDbMgr::Get().m_tj[id].ws.car_low_spd_dist));
-
-    edits[15]->SetText(Poco::format("%0.2f",CTajiDbMgr::Get().m_tj[id].ws.brake_dist));
-    edits[16]->SetText(Poco::format("%0.2f",CTajiDbMgr::Get().m_tj[id].ws.slowdown_dist));
-    edits[17]->SetText(Poco::format("%0.2f",CTajiDbMgr::Get().m_tj[id].ws.alert_dist));
-    edits[18]->SetText(Poco::format("%0.2f",CTajiDbMgr::Get().m_tj[id].ws.inertia_angle));
-
-    //edits[0]->SetText(Poco::format("%0.2f",CTajiDbMgr::Get().m_tj.ws.alert_dist));
-    //edits[1]->SetText(Poco::format("%0.2f",CTajiDbMgr::Get().m_tj.ws.alert_dist));
-    */
 }
 void    CWorkSite::OnButtonClick(skin_item_t* item)
 {
@@ -189,16 +157,6 @@ void    CWorkSite::OnButtonClick(skin_item_t* item)
     }
     else if(item->id == btn_save->GetId())
     {
-        /*
-        int id = CTajiDbMgr::Get().GetLocalIndex();
-        CTajiDbMgr::Get().m_tj[id].ws.car_high_spd_dist = edits[13]->GetFloatValue();
-        CTajiDbMgr::Get().m_tj[id].ws.car_low_spd_dist  = edits[14]->GetFloatValue();
-        CTajiDbMgr::Get().m_tj[id].ws.brake_dist        = edits[15]->GetFloatValue();
-        CTajiDbMgr::Get().m_tj[id].ws.slowdown_dist     = edits[16]->GetFloatValue();
-        CTajiDbMgr::Get().m_tj[id].ws.alert_dist        = edits[17]->GetFloatValue();
-        CTajiDbMgr::Get().m_tj[id].ws.inertia_angle     = edits[18]->GetFloatValue();
-        CTajiDbMgr::Get().UpdateWorksite(&CTajiDbMgr::Get().m_tj[id].ws);
-        */
         bool ok;
         for(int i = 0 ;i < 4;i++)
         {
@@ -226,13 +184,7 @@ void    CWorkSite::OnButtonClick(skin_item_t* item)
         edits[17]->SetText(Poco::format("%0.2f",WarnDis));
         edits[18]->SetText(Poco::format("%0.2f",AddAngle));
 
-        Message m("mainctrl.cmd");
-
-        m.setParam("type",  "save_worksite");
-
-        if (!Engine::dispatch(m)) {
-             Debug("mainctrl",DebugWarn,"ext.ctrl failed");
-        }
+        CMainCtrl::Get().SaveSiteInfo();
     }
     else if(item->id == btn_exit->GetId())
     {
