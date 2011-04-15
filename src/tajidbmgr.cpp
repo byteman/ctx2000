@@ -51,7 +51,7 @@ bool CTajiDbMgr::addlijuItem(std::string  type,  std::string  armlen, std::strin
     const char* tmp = NULL;
     bool bExist = false;
     try{
-        tmp = strSql.format("select * from tbltjtype where tjtype='%s' and tjarmlen=%s",type.c_str(),armlen.c_str());
+        tmp = strSql.format("select * from tbltjtype where tjtype='%s' and tjarmlen='%s' and tjbeilv='%s'",type.c_str(),armlen.c_str(),beilv.c_str());
         fprintf(stderr,"tbltjtype %s \r\n", tmp);
         CppSQLite3Query qry =  pDB->execQuery(tmp);
         if(!qry.eof())
@@ -69,7 +69,7 @@ bool CTajiDbMgr::addlijuItem(std::string  type,  std::string  armlen, std::strin
     if(!bExist)
     {
         try{
-            tmp = strSql.format("Insert into tbltjtype values('%s','%s')",type.c_str(),armlen.c_str());
+            tmp = strSql.format("Insert into tbltjtype values('%s','%s','%s')",type.c_str(),armlen.c_str(),beilv.c_str());
             fprintf(stderr,"%s\n",tmp);
             int rows = pDB->execDML(tmp);
             if (rows) {
@@ -227,7 +227,7 @@ bool CTajiDbMgr::getTjArmLen(std::string type,TStringList& rst)
     int  index  = 0;
     try{
         CppSQLite3Buffer strSql;
-        const char* tmp = strSql.format("select * from tbltjtype where tjtype='%s'",type.c_str());
+        const char* tmp = strSql.format("select distinct(tjarmlen) from tbltjtype where tjtype='%s'",type.c_str());
         fprintf(stderr,"tbltjtype %s \r\n", tmp);
         CppSQLite3Query qry =  pDB->execQuery(tmp);
         while(!qry.eof())
@@ -277,16 +277,10 @@ bool CTajiDbMgr::load(std::string dbpath, QtzParam tz[], int num)
             pDB->close();
             m_opened = false;
         }
+
         pDB->open(dbpath.c_str());
         m_dbpath = dbpath;
-
         m_opened = true;
-        if(loadtjparam(tz,num)) //在没有塔吊数据的时候会返回false
-        {
-
-        }else{
-            std::cerr << "no tjparam in db\n";
-        }
         return true;
     }
     catch(CppSQLite3Exception& e)
@@ -296,6 +290,7 @@ bool CTajiDbMgr::load(std::string dbpath, QtzParam tz[], int num)
     }
 
 }
+/*
 bool CTajiDbMgr::load(std::string dbpath)
 {
     try{
@@ -325,6 +320,7 @@ bool CTajiDbMgr::load(std::string dbpath)
 
 
 }
+
 bool CTajiDbMgr::loadworksite()
 {
     bool bExist = false;
@@ -563,7 +559,7 @@ bool CTajiDbMgr::loaddivparam()
     }
     return bExist;
 }
-
+*/
 bool CTajiDbMgr::checkExistData(std::string tblname)
 {
     bool bExist = false;
@@ -598,6 +594,7 @@ bool CTajiDbMgr::checkExistData(std::string tblname,int id)
     }
     return bExist;
 }
+/*
 bool CTajiDbMgr::AlertWorksite(TWorkSiteParam* par)
 {
     try{
@@ -767,6 +764,7 @@ bool CTajiDbMgr::AddDividingParam(int index,PolyDef par)
 {
 
 }
+*/
 
 void CTajiDbMgr::GetWorkSiteParam(TWorkSiteParam &ws)
 {

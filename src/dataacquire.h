@@ -9,6 +9,7 @@
 #include <queue>
 #include <iostream>
 #include "ctx2000.h"
+#include "filter.h"
 using Poco::NotificationCenter;
 using Poco::Observer;
 using Poco::NObserver;
@@ -71,6 +72,7 @@ private:
     CDataAcquireWorker1* m_aq_work1;
     CDataAcquireWorker2* m_aq_work2;
     CDataParseWorker*    m_ps_work;
+
 };
 
 #endif // DATAACQUIRE_H

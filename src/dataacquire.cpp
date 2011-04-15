@@ -23,6 +23,7 @@ using Poco::Exception;
 using LibSerial::SerialPort;
 using LibSerial::SerialStream;
 using LibSerial::SerialStreamBuf;
+static CFilter m_filter[6];
 class TADNotification: public Notification
 {
 public:
@@ -86,82 +87,63 @@ public:
 #endif
         if( (data.at(0) == 0xaa) && (data.at(14) == 0x55) )
         {
-            ad_car_dist = (data.at(1)<<8)+data.at(2);
-            g_car_dist=(ad_car_dist-g_bd[BD_CAR_DIST].zero_ad)/g_bd[BD_CAR_DIST].bd_k+g_bd[BD_CAR_DIST].start_value;
-            ad_height = (data.at(3)<<8)+data.at(4);
-            g_dg_height=(ad_height-g_bd[BD_HEIGHT].zero_ad)/g_bd[BD_HEIGHT].bd_k+g_bd[BD_HEIGHT].start_value;
-            ad_weight = (data.at(5)<<8)+data.at(6);
-            g_dg_weight=(ad_weight-g_bd[BD_WEIGHT].zero_ad)/g_bd[BD_WEIGHT].bd_k+g_bd[BD_WEIGHT].start_value;
-            ad_up_angle = (data.at(7)<<8)+data.at(8);
+            ad_up_angle =  m_filter[3].Filter((data.at(7)<<8)+data.at(8));
             g_up_angle=(ad_up_angle-g_bd[BD_UP_ANGLE].zero_ad)/g_bd[BD_UP_ANGLE].bd_k+g_bd[BD_UP_ANGLE].start_value;
-            ad_fengsu = (data.at(9)<<8)+data.at(10);
+
+            ad_car_dist = m_filter[0].Filter((data.at(1)<<8)+data.at(2));
+            //fprintf(stderr,"ad_car=%d up_angle=%0.2f\n",ad_car_dist,g_up_angle);
+            if(g_TC[g_local_id].Dyna){ //动臂式的幅度计算
+                g_car_dist =g_TC[g_local_id].LongArmLength*cos(g_up_angle*3.14/180)+g_TC[g_local_id].a0;
+
+                //fprintf(stderr,"dist=%0.2f %0.2f %0.2f %0.2f\n",g_car_dist,g_TC[g_local_id].LongArmLength,cos(g_up_angle*3.14/180),g_TC[g_local_id].a0);
+            }else{ //平臂式的幅度计算
+                g_car_dist=(ad_car_dist-g_bd[BD_CAR_DIST].zero_ad)/g_bd[BD_CAR_DIST].bd_k+g_bd[BD_CAR_DIST].start_value;
+                //fprintf(stderr,"dist=%0.2f\n",g_car_dist);
+            }
+
+            ad_height =  m_filter[1].Filter((data.at(3)<<8)+data.at(4));
+            g_dg_height=(ad_height-g_bd[BD_HEIGHT].zero_ad)/g_bd[BD_HEIGHT].bd_k+g_bd[BD_HEIGHT].start_value;
+            ad_weight =  m_filter[2].Filter((data.at(5)<<8)+data.at(6));
+            g_dg_weight=(ad_weight-g_bd[BD_WEIGHT].zero_ad)/g_bd[BD_WEIGHT].bd_k+g_bd[BD_WEIGHT].start_value;
+
+            ad_fengsu =  m_filter[4].Filter((data.at(9)<<8)+data.at(10));
+            g_speed = ad_fengsu;
         }
 
         //g_speed=(ad_car_dist-g_bd[BD_CAR_DIST].zero_ad)/g_bd[BD_CAR_DIST].bd_k+g_bd[BD_CAR_DIST].start_value;
     }
     virtual void run()
     {
+        set_thread_title("ctx2000.ad1");
         m_rdyEvt.set();
         m_quitEvt.reset();
         m_quit = false;
         m_buf.clear();
-        //m_port->SetBaudRate(LibSerial::SerialPort::BAUD_9600);
         while(!m_quit)
         {
 
             try{
-                Poco::Thread::sleep(100);
+
+                Poco::Thread::sleep(50);
                 m_buf.clear();
-                //fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
                 m_port->WriteByte(0x2);
-                //unsigned char ch = m_port->ReadByte(15);
-                m_port->Read(m_buf,15,100);
+                //m_port->ReadLine(100,'U');
+                m_port->Read(m_buf,15,1000);
 
+#if 0
+    for(size_t i = 0; i <m_buf.size();i++)
+    {
+        fprintf(stderr,"0x%x ",m_buf.at(i));
+    }
+    fprintf(stderr,"\n");
+#endif
                 calc_rt_value(m_buf);
-                //fprintf(stderr,"recv ad=0x%x\n",ch);
-                //fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
-                //收到起始标记并且是第一个
-                /*
-                if( ( ch == 0xAA ) && ( m_buf.size() == 0 ) )
-                {
-
-                    m_buf.clear();
-                    start_flag=true;
-                }else if(start_flag){
-                    if(ch == 0x55)
-                    {
-                        if(m_buf.size()  == 13)
-                        {
-                            unsigned char sum = 0;
-                            for(size_t i = 0 ; i < m_buf.size()-1; i++)
-                            {
-                                 sum ^= m_buf.at(i);
-                            }
-                            if(sum == m_buf.at(12))
-                            {
-                                fprintf(stderr,"recv ad\n");
-                                    calc_rt_value(m_buf);
-
-                            }
-
-                            m_buf.clear();
-                            start_flag = false;
-                        }
-                    }else{
-                        if(m_buf.size() < 13)
-                            m_buf.push_back(ch);
-
-                    }
-
-                }
-                */
             }catch(LibSerial::SerialPort::ReadTimeout& e)
             {
-                std::cerr << "Serial1 timeout\n";
+                fprintf(stderr,"%s timeout len=%d\n",m_path.c_str(),m_buf.size());
                 continue;
             }
         }
-        fprintf(stderr,"quit ad2\n");
         m_port->Close();
         m_quitEvt.set();
     }
@@ -182,10 +164,12 @@ public:
         CDataAcquireWorker1(devpath,queue)
     {
         // [ #01 enter ]
-        m_cmd[0] = 0x23;
-        m_cmd[1] = 0x30;
-        m_cmd[2] = 0x31;
-        m_cmd[3] = 0x0D;
+        sprintf(m_cmd,"#%02d\r",encoder_addr);
+        fprintf(stderr,"cmd=%s",m_cmd);
+        //m_cmd[0] = 0x23;
+        //m_cmd[1] = 0x30;
+        //m_cmd[2] = 0x31;
+        //m_cmd[3] = 0x0D;
     }
     virtual ~CDataAcquireWorker2()
     {
@@ -208,43 +192,38 @@ public:
     }
     virtual void run()
     {
+        set_thread_title("ctx2000.ad2");
         m_rdyEvt.set();
         m_quitEvt.reset();
         m_quit = false;
         std::string data="";
-        bool start_flag = false;
+        char buf[15] = {0,};
+        int tmp=0;
         while(!m_quit)
         {
 
             try{
-                char ch = m_port->ReadByte(50);
-                //fprintf(stderr,"ch=%c\n",ch);
-                if(ch == '=')
+                Poco::Thread::sleep(50);
+                m_buf.clear();
+                m_port->Write((unsigned char*)m_cmd,4);
+                m_port->Read(m_buf,13);
+                memcpy(buf,m_buf.data()+1,11);
+                buf[11]=0;
+                //data=buf;
+                //fprintf(stderr,"data=%s\n",buf);
+                //data = m_port->ReadLine(100,'\r');
+                //if( (data.length() == 13) && (data.at(0)=='='))
                 {
-                    data.clear();
-                    start_flag=true;
-                }else if(start_flag){
-                    if(ch == '\r')
+
+                    if(Poco::NumberParser::tryParse(buf,tmp))
                     {
-                        if(data.length()  == 11)
-                        {
-
-                            if(Poco::NumberParser::tryParse(data,ad_angle))
-                            {
-                                calc_angle();
-                            }
-                        }
-                        data.clear();
-                        start_flag = false;
-                    }else{
-                        if(data.length() < 11)
-                            data.push_back(ch);
+                        ad_angle = m_filter[5].Filter(tmp);
+                        calc_angle();
                     }
-
                 }
             }catch(LibSerial::SerialPort::ReadTimeout& e)
             {
-                std::cerr << "Serial2 timeout\n";
+                fprintf(stderr,"%s timeout len=%d\n",m_path.c_str(),m_buf.size());
                 continue;
             }
         }
@@ -254,7 +233,7 @@ public:
 
 private:
     double crane_angle_save,crane_angle_thresh,crane_angle;
-    unsigned char m_cmd[4];
+    char m_cmd[4];
 
 };
 
@@ -367,6 +346,7 @@ CDataAcquire& CDataAcquire::Get()
 
 CDataAcquire::CDataAcquire():
     m_aq_work1(NULL),
+    m_aq_work2(NULL),
     m_ps_work(NULL)
 {
 
@@ -387,9 +367,14 @@ bool CDataAcquire::Init(std::string path1,std::string path2)
 */
 bool CDataAcquire::Start(std::string path1,std::string path2)
 {
+
     if( !Init(path1,path2) ) return false;
-    if( !m_aq_work1->start(LibSerial::SerialPort::BAUD_57600) ) return false;
-    if( !m_aq_work2->start(LibSerial::SerialPort::BAUD_115200)   ) return false;
+    if(!m_aq_work1)return false;
+    if(!m_aq_work2)return false;
+
+        if( !m_aq_work1->start(LibSerial::SerialPort::BAUD_57600) ) return false;
+    if(m_aq_work2)
+        if( !m_aq_work2->start(LibSerial::SerialPort::BAUD_115200)   ) return false;
 
     return  true;
 }

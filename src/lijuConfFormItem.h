@@ -125,5 +125,7 @@ typedef struct skin_bmp_s		//Add by Achille 2009/11/27 11:15:55
 #define SKIN_BUTTON_EDIT        {3,BUTTON_EDIT_X,BUTTON_EDIT_Y}
 #define SKIN_BUTTON_QUIT       {4,BUTTON_QUIT_X,BUTTON_QUIT_Y}
 #define SKIN_BUTTON_EXIT       {5,BUTTON_EXIT_X,BUTTON_EXIT_Y}
+#define SKIN_BUTTON_SAVE       {6,BUTTON_ADD_X-100,BUTTON_ADD_Y}
+
 
 #endif

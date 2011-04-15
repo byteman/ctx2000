@@ -4,6 +4,8 @@
 #include "tajidbmgr.h"
 #include "MineAddBox.h"
 #include "comdata.h"
+#include "lijuctrl.h"
+#include "iniFile.h"
 #include <Poco/Format.h>
 static char* userlist_caption[] =
 {
@@ -30,7 +32,8 @@ static const char *mmenu_bmps[] =
     PCOMM_DEL_BTN,
     PCOMM_EDIT_BTN,
     PCOMM_RET_BTN,
-    PCOMM_CLOSE_BTN
+    PCOMM_CLOSE_BTN,
+    PCOMM_SAVE_BTN,
 };
 
 static SKIN_BUTTON_DESC SkinBtnsDesc[] =
@@ -39,7 +42,8 @@ static SKIN_BUTTON_DESC SkinBtnsDesc[] =
     SKIN_BUTTON_DEL,
     SKIN_BUTTON_EDIT,
     SKIN_BUTTON_QUIT,
-    SKIN_BUTTON_EXIT
+    SKIN_BUTTON_EXIT,
+    SKIN_BUTTON_SAVE
 };
 static COMM_CTRL_DESC CommCtrlsDesc[] =
 {
@@ -134,9 +138,27 @@ CLiJuManForm::OnButtonClick(skin_item_t * item)
             if( (type.length() > 0 ) && (len.length() > 0) && (beilv.length() > 0)&&(liju.m_arm_len.length() > 0) && (liju.m_weight.length() > 0) )
             {
                 CTajiDbMgr::Get().addlijuItem(type,len,beilv,liju.m_arm_len,liju.m_weight);
+            }else{
+                return;
             }
+/*
+            if(cbx_type->FindItemByText(type)==-1)
+            {
+                cbx_type->AddItem(type);
+                cbx_type->SetText(type);
+            }
+            if(cbx_arm_len->FindItemByText(len)==-1)
+            {
+                cbx_arm_len->AddItem(len);
+                cbx_arm_len->SetText(len);
+            }
+            if(cbx_beilv->FindItemByText(beilv)==-1)
+            {
+                cbx_beilv->AddItem(beilv);
+                cbx_beilv->SetText(beilv);
+            }
+ */
             RefreshList(type,len,beilv);
-
         }
     }
     else if(item->id == _skinBtns[1]->GetId())
@@ -172,6 +194,7 @@ CLiJuManForm::OnButtonClick(skin_item_t * item)
                 olditem.weight = weight;
                 CTajiDbMgr::Get().modifylijuItem(type,len,beilv,olditem,newitem);
             }
+            CLijuCtrl::Get().Load();
             RefreshList(type,len,beilv);
 
         }
@@ -183,6 +206,20 @@ CLiJuManForm::OnButtonClick(skin_item_t * item)
     else if(item->id == _skinBtns[4]->GetId())
     {
         Close();
+    }
+    else if(item->id == _skinBtns[5]->GetId())
+    {
+        std::string type    = cbx_type->GetSelItemText();
+        std::string armlen  = cbx_arm_len->GetSelItemText();
+        std::string beilv   = cbx_beilv->GetSelItemText();
+        if( (type.length() > 0 ) && (beilv.length() > 0)&&(armlen.length() > 0) )
+        {
+            TIniFile cfg("ctx2000.ini");
+            cfg.WriteString("device","TC_type",type);
+            cfg.WriteString("device","armlen",armlen);
+            cfg.WriteString("device","beilv",beilv);
+        }
+
     }
 }
 
@@ -196,6 +233,9 @@ CLiJuManForm::InitListCol()
         _lvLiJu->AddColumn(i,userlist_caption[i],width[i]);
     }
     _lvLiJu->Clear();
+    cbx_arm_len->Clear();
+    cbx_type->Clear();
+    cbx_beilv->Clear();
     TStringList item;
     if(CTajiDbMgr::Get().getTjTypes(item))
     {
@@ -210,12 +250,6 @@ CLiJuManForm::InitListCol()
         cbx_type->SetCurSel(index);
     }
     cbx_arm_len->SetText(StrTCArmLen);
-    cbx_beilv->Clear();
-    cbx_beilv->AddItem("1");
-    cbx_beilv->AddItem("2");
-    cbx_beilv->AddItem("4");
-    cbx_beilv->AddItem("6");
-    cbx_beilv->AddItem("8");
     cbx_beilv->SetText(StrTCBeilv);
 
 }
@@ -243,16 +277,41 @@ void CLiJuManForm::OnCommCtrlNotify(HWND hwnd, int id, int nc)
     fprintf(stderr,"nc=%d\n",nc);
     if( (id == cbx_type->GetId()) &&  (nc == CBN_CLOSEUP)){
         TStringList rst;
+        cbx_arm_len->Clear();
         if(CTajiDbMgr::Get().getTjArmLen(cbx_type->GetSelItemText(),rst))
-        {
-            cbx_arm_len->Clear();
+        { 
             for(size_t i = 0 ; i < rst.size(); i++)
             {
                 cbx_arm_len->AddItem(rst.at(i));
             }
             cbx_arm_len->SetCurSel(-1);
         }
+        rst.clear();
+        cbx_beilv->Clear();
+        if(CTajiDbMgr::Get().getTjBeilv(cbx_type->GetSelItemText(),cbx_arm_len->GetSelItemText(),rst))
+        {
+
+            for(size_t i = 0 ; i < rst.size(); i++)
+            {
+                cbx_beilv->AddItem(rst.at(i));
+            }
+            cbx_beilv->SetCurSel(-1);
+        }
+        ReloadLijuItems();
     }else if(id == cbx_beilv->GetId() && nc == CBN_CLOSEUP){
+        ReloadLijuItems();
+    }else if(id == cbx_arm_len->GetId() && nc == CBN_CLOSEUP){
+        TStringList rst;
+        cbx_beilv->Clear();
+        if(CTajiDbMgr::Get().getTjBeilv(cbx_type->GetSelItemText(),cbx_arm_len->GetSelItemText(),rst))
+        {
+
+            for(size_t i = 0 ; i < rst.size(); i++)
+            {
+                cbx_beilv->AddItem(rst.at(i));
+            }
+            cbx_beilv->SetCurSel(-1);
+        }
         ReloadLijuItems();
     }
 }

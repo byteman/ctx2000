@@ -42,8 +42,8 @@ CGpio::CGpio()
 }
 
 /*
-è®¾ç½®å¯åŠ¨åIOè®¾å¤‡çš„é»˜è®¤å‚æ•°ï¼Œé…ç½®å‚æ•°
-åªä¼šåœ¨å¯åŠ¨æ—¶è°ƒç”¨ä¸€æ¬¡ï¼Œæ‰€ä»¥ä¸ç”¨åŠ é”
+ÉèÖÃÆô¶¯ºóIOÉè±¸µÄÄ¬ÈÏ²ÎÊı£¬ÅäÖÃ²ÎÊı
+Ö»»áÔÚÆô¶¯Ê±µ÷ÓÃÒ»´Î£¬ËùÒÔ²»ÓÃ¼ÓËø
 */
 bool    CGpio::Init(int num_input, int num_output,bool reset)
 {
@@ -160,7 +160,7 @@ bool    CGpio::CreateVirtualFiles()
     for( int i = 0; i < 6; i++)
     {
             Poco::File file(gRegFiles[i]);
-            //åˆ›å»ºæˆåŠŸè¿”å›trueï¼Œå·²ç»å­˜åœ¨è¿”å›false
+            //´´½¨³É¹¦·µ»Øtrue£¬ÒÑ¾­´æÔÚ·µ»Øfalse
             if( file.createFile ())
             {
                 Poco::FileStream fos(gRegFiles[i]);

@@ -1,6 +1,9 @@
 #include "comdata.h"
 #include <math.h>
 #include <stdlib.h>
+#include <sys/prctl.h>
+#include <stdarg.h>
+
 TBD g_bd[6];
 TID g_valid_tj_list;
 TID g_conflict_tj_list;
@@ -21,8 +24,19 @@ TTjRecord g_TC[21];
 double g_car_dist,g_dg_height,g_dg_weight,g_angle,g_speed,g_up_angle;
 double g_angle_A,g_angle_B,g_angle_C;
 std::string g_diantai_com,g_ad_com1,g_ad_com2,g_gprs_com;
+int encoder_addr;
 
+int set_thread_title(const char* fmt,... )
+{
+    char title [16] ={0};
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf (title, sizeof (title) , fmt, ap);
+    va_end (ap);
 
+   return prctl(PR_SET_NAME,title) ;
+
+}
 void calc_angle(double bd[2][2],double x,double y,double &AngleA,double &AngleB,double &AngleC)
 {
     double tempp;

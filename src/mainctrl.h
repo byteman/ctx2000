@@ -6,6 +6,7 @@
 #include "tajidbmgr.h"
 #include "dataacquire.h"
 #include "diantai.h"
+#include "extdev/gpio.h"
 using Poco::Event;
 using Poco::Runnable;
 using Poco::Thread;
@@ -48,6 +49,7 @@ private:
     bool      is_conflcit(int callto_id);
     std::string GetNextID();
     std::string GetAddID();
+    void Gather_AD();
     int       ValideTCNum();
     void      CreateDefaultTjParam();
     void      InitBDParam();
@@ -72,8 +74,9 @@ private:
     Poco::Event  m_rdyEvt;
     Poco::Event  m_quitEvt;
     volatile bool m_quit;
-
+    ControledStatus m_control_state,m_old_ctrl_state;
     Poco::Timestamp lastDateTime,sendInfoTime;
+    CGpio m_gpio;
 };
 
 #endif // MAINCTRL_H

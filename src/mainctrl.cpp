@@ -15,15 +15,15 @@
 #include <unistd.h>
 #include <fstream>
 #include <math.h>
-#include "centerrecver.h"
 #include "iniFile.h"
 #include "comdata.h"
 #include "lijuctrl.h"
 using namespace TelEngine;
 using Poco::SingletonHolder;
 using Poco::StringTokenizer;
-QtzParam  g_qtzs[NUMBER_OF_QTZ];
-
+//QtzParam  g_qtzs[NUMBER_OF_QTZ];
+#define JDQ_OPEN  IO_HIGH_LEVEL
+#define JDQ_CLOSE IO_LOW_LEVEL
 Poco::Timespan g_SubWaitSubTime(15,0);
 TIniFile cfg;
 class CDataHandler{
@@ -31,129 +31,7 @@ public:
 
 
 };
-//
-class CenterDataHandler : public MessageHandler
-{
-public:
-    CenterDataHandler() : MessageHandler("center.cmd") { }
-    //parse and  update system param
-    void parseUploadParam(Message &msg)
-    {
 
-        unsigned char id = msg.getIntValue("id",0);
-        if(id == 0)//没有id为0的塔机编号
-        {
-            msg.setParam("ret","fail");
-            msg.setParam("error","id==0");
-            return;
-        }
-
-        unsigned char index = CTajiDbMgr::Get().GetDevIndex(id);
-        assert( index!=-1 );
-        std::string var_name = msg.getValue("name","no");
-        fprintf(stderr,"parseUploadParam name=%s id: %d\n",var_name.c_str(),id);
-        if( (var_name == "taji") && (index < NUMBER_OF_QTZ))
-        {
-
-            TTjParam &t = CTajiDbMgr::Get().m_tj[index];
-
-
-            t.a0        = msg.getDoubleValue("jiegou",0);
-            t.devserail = msg.getValue("serial","noset");
-            t.height    = msg.getDoubleValue("height",0);
-            t.isown     = msg.getIntValue("isown",0);
-            t.long_arm_length  = msg.getDoubleValue("long_arm_len",0);
-            t.short_arm_length = msg.getDoubleValue("short_arm_len",0);
-            t.max_up_angle     = msg.getDoubleValue("max_up_angle",0);
-            t.min_up_angle     = msg.getDoubleValue("min_up_angle",0);
-            t.min_car_dist     = msg.getDoubleValue("min_car_dist",0);
-            t.taji_id          = id;
-            t.pos.x            = msg.getDoubleValue("x_pos",0);
-            t.pos.y            = msg.getDoubleValue("y_pos",0);
-            t.taji_type        = msg.getIntValue("type",0);
-
-            CTajiDbMgr::Get().UpdateTjParam(id,&t);
-
-            msg.setParam("ret","ok");
-        }else if(var_name == "worksite"){
-            TWorkSiteParam ws;// = CTajiDbMgr::Get().m_tj[id].ws;
-
-            ws.alert_dist = msg.getDoubleValue("alert_dist",0);
-
-            ws.anchor_coord.at(0).x = msg.getDoubleValue("ax1",0);
-            ws.anchor_coord.at(0).y = msg.getDoubleValue("ay1",0);
-            ws.anchor_coord.at(1).x = msg.getDoubleValue("ax2",0);
-            ws.anchor_coord.at(1).y = msg.getDoubleValue("ay2",0);
-
-            ws.brake_dist = msg.getDoubleValue("brake_dist",0);
-            ws.car_high_spd_dist = msg.getDoubleValue("car_high_spd_dist",0);
-            ws.car_low_spd_dist  = msg.getDoubleValue("car_low_spd_dist",0);
-            ws.inertia_angle     = msg.getDoubleValue("inertia_angle",0);
-            ws.slowdown_dist     = msg.getDoubleValue("slowdown_dist",0);
-            ws.y_angle           = msg.getDoubleValue("y_angle",0);
-
-            for(int i = 0; i < 4; i++)
-            {
-                std::string x_field = Poco::format("wx%d",i);
-                std::string y_field = Poco::format("wy%d",i);
-                ws.worksite_coord.at(i).x = msg.getDoubleValue(x_field.c_str(),0);
-                ws.worksite_coord.at(i).y = msg.getDoubleValue(y_field.c_str(),0);
-            }
-            CTajiDbMgr::Get().UpdateWorksite(&ws);
-            //std::vector<PolyDef> &zone = CTajiDbMgr::Get().m_tj[id].zone;
-            msg.setParam("ret","ok");
-        }
-
-
-    }
-    void parseRtParam(Message &msg)
-    {
-        unsigned char id = msg.getIntValue("id",0);
-        if(id == 0)//没有id为0的塔机编号
-        {
-            msg.setParam("ret","fail");
-            msg.setParam("error","id==0");
-            return;
-        }
-        double angle = msg.getDoubleValue("angle",0);
-        double dist  = msg.getDoubleValue("dist",0);
-        unsigned char index = CTajiDbMgr::Get().GetDevIndex(id);
-        assert( index != -1);
-        if(index < NUMBER_OF_QTZ)
-        {
-            fprintf(stderr,"update %d tj \n");
-            //CTajiDbMgr::Get().m_tj[id].rt.carrier_pos    = dist-CTajiDbMgr::Get().m_tj[id].calc.;
-            //CTajiDbMgr::Get().m_tj[id].rt.long_arm_angle = angle*3.1415926/180;;
-            g_qtzs[index].carrier_pos    = dist;
-            g_qtzs[index].long_arm_angle = angle*3.1415926/180;
-            //calcRtParam(id,dist,angle);
-        }
-    }
-    void calcRtParam(int id,int dist_ad, int angle_ad)
-    {
-        //dist_zero = CTajiDbMgr::Get().m_tj[id].calc.anchor_zero_ad;
-        //CTajiDbMgr::Get().m_tj[id].calc
-    }
-    virtual bool received(Message &msg)
-    {
-        String type(msg.getValue("cmd"));
-
-        type.trimBlanks();
-        type.trimSpaces();
-        std::cerr << "mainctrl received msg type:" << type.c_str() <<"\n";
-        if(type == "upload")
-        {
-            std::cerr << "type upload\n";
-            parseUploadParam(msg);
-            return true;
-
-        }else if(type == "runtime"){
-            parseRtParam(msg);
-            return true;
-        }
-        return false;
-    }
-};
 class MainCtrlHandler : public MessageHandler
 {
 public:
@@ -196,12 +74,8 @@ CMainCtrl::~CMainCtrl()
 }
 void CMainCtrl::init_tj_data()
 {
-
-    m_local_id  = 2;//CTajiDbMgr::Get().GetLocalId();
-    CurID       = "02";
     TCTotalNum  = 20;
     ReadSetting();
-
 }
 int       CMainCtrl::ValideTCNum()
 {
@@ -405,6 +279,7 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
     AddNo   = "0";
     CDianTai::Get().ClearMessage();
     //listen 5s to recv rtmsg;
+
     while( (CurTime-StartTime) < 5000000)
     {
         DBG("%s Wait RtMsg\n",__FUNCTION__);
@@ -416,8 +291,8 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
         }
         Poco::Thread::sleep(50);
         CurTime.update();
-
     }
+    fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
     if(FoundM){
         //等待100ms，再接收一个消息
         Poco::Thread::sleep(100);
@@ -425,6 +300,7 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
         {
                 DripMainNoAndAddNo(MainDevID,RightNo,AddNo);
         }
+        fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
         while( (RightNo=="0") || (AddNo != CurID) || (MainDevID == CurID) ){
             Poco::Thread::sleep(10);
             if(CDianTai::Get().CheckMessage(msg))
@@ -562,7 +438,7 @@ void CMainCtrl::master_loop()
         //DBG("Master Wait Recv RtMsg\n");
         while (CDianTai::Get().GetMessage(msg)) {
                 msg_count++;
-                fprintf(stderr,"Master recv RtMsg context=%s\n",msg.wType,msg.context.c_str());
+                fprintf(stderr,"Master recv RtMsg %d,context=%s\n",msg.wType,msg.context.c_str());
                 DistillData(msg.context,ID);
                 RecieveValidData=true;
         }
@@ -725,27 +601,26 @@ void CMainCtrl::ReadSetting()
     CurSerial  = Poco::trim(cfg.ReadString("device","Serial",""));
     StrTCArmLen = Poco::trim(cfg.ReadString("device","armlen",""));
     StrTCBeilv  = Poco::trim(cfg.ReadString("device","beilv",""));
-
+    encoder_addr = cfg.ReadInteger("device","encoder_addr",0);
     g_diantai_com=Poco::trim(cfg.ReadString("serial","diantai_com","/dev/ttymxc0"));
     g_ad_com1    =Poco::trim(cfg.ReadString("serial","ad_com1","/dev/ttymxc1"));
     g_ad_com2    =Poco::trim(cfg.ReadString("serial","ad_com2","/dev/ttymxc2"));
     g_gprs_com   =Poco::trim(cfg.ReadString("serial","gprs_com","/dev/ttymxc3"));
 
+//根据设定的当前塔机类型和倍率还有长度加载载荷曲线表
     if( !CLijuCtrl::Get().Load(TCTypeName,StrTCArmLen,StrTCBeilv))
     {
         std::cerr << "load Liju Data Failed\n";
     }
-    //int b = CLijuCtrl::Get().ChangeBeilv();
-    //std::cerr <<  "new beilv:" <<  b <<std::endl;
 
-    //CLijuCtrl::Get().Service(32.2,23);
-    //fprintf(stderr,"percent=%0.3f\n",CLijuCtrl::Get().m_percent);
-    std::cerr << "type:" << TCTypeName <<  std::endl;
-    std::cerr << "CurID:" << CurID <<  std::endl;
-    std::cerr << "CurSerial:" << CurSerial <<  std::endl;
+    std::cerr << "type: " << TCTypeName <<  std::endl;
+    std::cerr << "ArmLen: " << StrTCArmLen <<  std::endl;
+    std::cerr << "BeiLv: " << StrTCBeilv <<  std::endl;
+    std::cerr << "CurID: " << CurID <<  std::endl;
+    std::cerr << "CurSerial: " << CurSerial <<  std::endl;
 
     ifstream tcfile;
-
+//加载塔机配置
     tcfile.open("tc.red",std::ios::binary|std::ios::in);
 
     if(tcfile.good())
@@ -761,6 +636,7 @@ void CMainCtrl::ReadSetting()
                     g_TC[TcNum].Height);
             if(g_TC[TcNum].Serial == CurSerial){
                 CurID = Poco::format("%d",TcNum);
+                DBG("Find CurID:%s\n",CurID.c_str());
             }
         }
         tcfile.close();
@@ -768,14 +644,11 @@ void CMainCtrl::ReadSetting()
         CreateDefaultTjParam();
         std::cerr << "Can not open tc.red" << std::endl;
     }
-    DBG("CurID:%s\n",CurID.c_str());
+
 
     std::string tmp = CurID;
     m_local_id = Poco::NumberParser::parse(tmp);
     g_local_id = m_local_id;
-    Trolly_dist_max = cfg.ReadFloat("dist_bd","V_dist_max",2.0);   //小车最近距离
-    Trolly_dist_min = cfg.ReadFloat("dist_bd","V_dist_max",60.0);  //小车最远距离
-    V0 = cfg.ReadFloat("dist_bd","V_dist_max",5);
 
     ReadSiteInfo();
     tcfile.open("bd.red",std::ios::binary);
@@ -823,7 +696,6 @@ void CMainCtrl::ReadSetting()
     {
         fprintf(stderr,"valid id[%d] = %d\n",i,g_valid_tj_list.at(i));
     }
-    fprintf(stderr,"come1\n");
     //在塔机参数已经读取成功后，再获取与本机id冲突的设备id列表
     ret = GetConflictTjList(g_conflict_tj_list);
     fprintf(stderr,"conflict dev count = %d\n",ret);
@@ -873,18 +745,44 @@ void CMainCtrl::InitAlgoData()
 {
     for(int i = 0; i < NUMBER_OF_QTZ; i++)
     {
-        g_qtzs[i].number     =  i+1;
-        g_qtzs[i].carrier_pos = 0;
-        g_qtzs[i].height      = g_TC[i+1].Height;
-        g_qtzs[i].long_arm_len     = g_TC[i+1].LongArmLength;
-        g_qtzs[i].short_arm_len    = g_TC[i+1].ShortArmLenght;
-        g_qtzs[i].long_arm_angle   = 0;
-        g_qtzs[i].pos.x      = g_TC[i+1].x;
-        g_qtzs[i].pos.y      = g_TC[i+1].y;
-        fprintf(stderr,"g_qtzs[%d] car_pos=%0.2f height=%0.2f longarm=%0.2f shortarm=%0.2f,x=%0.2f y=%0.2f\n",\
-                i,g_qtzs[i].carrier_pos,g_qtzs[i].height,g_qtzs[i].long_arm_len,g_qtzs[i].short_arm_len,\
-                g_qtzs[i].pos.x,g_qtzs[i].pos.y);
+        g_qtzs[i].m_number           = i+1;
+        g_qtzs[i].m_height           = g_TC[i+1].Height;
+        g_qtzs[i].m_long_arm_len     = g_TC[i+1].LongArmLength;
+        g_qtzs[i].m_short_arm_len    = g_TC[i+1].ShortArmLenght;
+        g_qtzs[i].m_coord.x          = g_TC[i+1].x;
+        g_qtzs[i].m_coord.y          = g_TC[i+1].y;
+        //YNAngle,VStopDis,VWarnDis,BrakeDis,DangerDis,WarnDis,AddAngle;
+        g_qtzs[i].m_brake_dist       = BrakeDis;
+        g_qtzs[i].m_stop_dist        = DangerDis;
+        g_qtzs[i].m_slowdown_dist    = WarnDis;
+        g_qtzs[i].m_carrier_slowdown_dist= VWarnDis;
+        g_qtzs[i].m_carrier_brake_dist   = VStopDis;
+        g_qtzs[i].m_sarm_cc_len          = g_TC[g_local_id].a0;
+
+//三个实时参数
+        g_qtzs[i].m_sarm_angle = 0; //动臂仰角,实时参数
+        g_qtzs[i].m_carrier_pos      = 0;
+        g_qtzs[i].m_long_arm_angle   = 0;
+
+        fprintf(stderr,"g_qtzs[%d] car_pos=%0.2f height=%0.2f longarm=%0.2f shortarm=%0.2f,x=%0.2f y=%0.2f brake_dist=%0.2f stop_dist=%0.2f slowdown_dist=%0.2f v_slow_dist=%0.2f v_brake_dist=%0.2f\n",\
+                i,g_qtzs[i].m_carrier_pos,g_qtzs[i].m_height,g_qtzs[i].m_long_arm_len,g_qtzs[i].m_short_arm_len,\
+                g_qtzs[i].m_coord.x,g_qtzs[i].m_coord.y,BrakeDis,DangerDis,WarnDis,VWarnDis,VStopDis);
     }
+    int index =  g_local_id - 1;
+    if(index >= 0)
+    {
+        for(size_t i = 0; i < g_conflict_tj_list.size();i++)
+        {
+            int id = g_conflict_tj_list.at(i);
+            if(id < NUMBER_OF_QTZ)
+            {
+                fprintf(stderr,"QtzAddDetect %d\n ",id);
+                g_qtzs[index].QtzAddDetect(&g_qtzs[id]);
+
+            }
+        }
+    }
+
 
 }
 void CMainCtrl::SaveSiteInfo()
@@ -1004,6 +902,7 @@ bool CMainCtrl::DealHeightInfo()
 
         //restart app
     }
+    return true;
     //DBG("%s %d\n",__FUNCTION__,__LINE__);
 }
 void CMainCtrl::DiveideSettingInfomation(std::string &msg)
@@ -1157,13 +1056,87 @@ bool CMainCtrl::DealWorkSiteInfo()
 /*
 在这个地方填充算法模块的实时参数
 */
-void Gather_AD()
+void CMainCtrl::Gather_AD()
 {
-    static int i = 0;
-    g_TC[1].Angle = 23.4+i;
-    g_TC[1].AngleSpeed= 32;
-    g_TC[1].Position = 24;
-    i+=5;
+    int index= g_local_id-1;
+    int id   = 0;
+//用本机的实时参数，更新本机和算法的实时参数
+    g_TC[g_local_id].Angle    = g_angle;
+    g_TC[g_local_id].Position = g_car_dist;
+    g_TC[g_local_id].Dang     = g_up_angle;
+    if( ( index >= 0) && (index < NUMBER_OF_QTZ) )
+    {
+        g_qtzs[index].m_long_arm_angle   = g_angle;
+        g_qtzs[index].m_carrier_pos      = g_car_dist;
+        g_qtzs[index].m_sarm_angle       = g_up_angle;
+    }else{
+        return;
+    }
+//根据电台传来的周围塔机的实时参数，更新算法模块需要的实时参数
+    for(size_t i = 0; i < g_conflict_tj_list.size(); i++)
+    {
+        id = g_conflict_tj_list.at(i)-1;
+        if( (id >= 0) &&  (id < NUMBER_OF_QTZ))
+        {
+            g_qtzs[id].m_long_arm_angle   = g_TC[id+1].Angle;
+            g_qtzs[id].m_carrier_pos      = g_TC[id+1].Position;
+            g_qtzs[id].m_sarm_angle       = g_TC[id+1].Dang;
+        }
+    }
+    QtzCollideDetectOne(&g_qtzs[index]);
+    m_control_state = g_qtzs[index].m_controled_status;
+
+    if(m_control_state.b1 != m_old_ctrl_state.b1){
+        if(m_control_state.b1)m_gpio.Output(0,JDQ_OPEN);
+        else m_gpio.Output(0,JDQ_CLOSE);
+    }
+    if(m_control_state.b2 != m_old_ctrl_state.b2){
+        if(m_control_state.b2)m_gpio.Output(1,JDQ_OPEN);
+        else m_gpio.Output(1,JDQ_CLOSE);
+    }
+    if(m_control_state.b3 != m_old_ctrl_state.b3){
+        if(m_control_state.b3)m_gpio.Output(2,JDQ_OPEN);
+        else m_gpio.Output(2,JDQ_CLOSE);
+    }
+    if(m_control_state.b4 != m_old_ctrl_state.b4){
+        if(m_control_state.b4)m_gpio.Output(3,JDQ_OPEN);
+        else m_gpio.Output(3,JDQ_CLOSE);
+    }
+    if(m_control_state.b5 != m_old_ctrl_state.b5){
+        if(m_control_state.b5)m_gpio.Output(4,JDQ_OPEN);
+        else m_gpio.Output(4,JDQ_CLOSE);
+    }
+    if(m_control_state.b6 != m_old_ctrl_state.b6){
+        if(m_control_state.b6)m_gpio.Output(5,JDQ_OPEN);
+        else m_gpio.Output(5,JDQ_CLOSE);
+    }
+    if(m_control_state.b7 != m_old_ctrl_state.b7){
+        if(m_control_state.b7)m_gpio.Output(6,JDQ_OPEN);
+        else m_gpio.Output(6,JDQ_CLOSE);
+    }
+    if(m_control_state.b8 != m_old_ctrl_state.b8){
+        if(m_control_state.b8)m_gpio.Output(7,JDQ_OPEN);
+        else m_gpio.Output(7,JDQ_CLOSE);
+    }
+    if(m_control_state.b9 != m_old_ctrl_state.b9){
+        if(m_control_state.b9)m_gpio.Output(8,JDQ_OPEN);
+        else m_gpio.Output(8,JDQ_CLOSE);
+    }
+    if(m_control_state.b10 != m_old_ctrl_state.b10){
+        if(m_control_state.b10)m_gpio.Output(9,JDQ_OPEN);
+        else m_gpio.Output(9,JDQ_CLOSE);
+    }
+    if(m_control_state.b11 != m_old_ctrl_state.b11){
+        if(m_control_state.b11)m_gpio.Output(10,JDQ_OPEN);
+        else m_gpio.Output(10,JDQ_CLOSE);
+    }
+    if(m_control_state.b12 != m_old_ctrl_state.b12){
+        if(m_control_state.b12)m_gpio.Output(11,JDQ_OPEN);
+        else m_gpio.Output(11,JDQ_CLOSE);
+    }
+
+    m_old_ctrl_state=m_control_state ;
+
 
 }
 /*
@@ -1173,16 +1146,22 @@ void    CMainCtrl::LjService()
 {
     int out_state = CLijuCtrl::Get().Service(g_car_dist,g_dg_weight);
     //根据力矩输出的状态来控制继电器的动作
-
+    if(out_state == 4) //超过105
+    {
+        m_gpio.Output(4,JDQ_CLOSE);//限制小车向外
+        m_gpio.Output(7,JDQ_CLOSE);//限制吊钩向上
+    }else if(out_state == 1){ //小于了95
+        m_gpio.Output(4,JDQ_OPEN);//恢复小车向外
+        m_gpio.Output(7,JDQ_OPEN);//恢复吊钩向上
+    }
 }
 void CMainCtrl::run()
 {
     bool AddState=false;
-
+    set_thread_title("ctx2000.mainctrl");
     m_rdyEvt.set();
     m_quitEvt.reset();
     m_quit = false;
-
 
     while (false == AddState) {
         WatchNetWork(MainMachineID,AddState);
@@ -1204,7 +1183,7 @@ void CMainCtrl::run()
         }else{
             std::cerr << "unkown mode\n";
         }
-
+        Poco::Thread::sleep(10);
 
     }
 }
@@ -1292,36 +1271,56 @@ void CMainCtrl::ad_handle(ADNotification* pNf)
     }
 
 }
+void* dispatch_thread(void* arg)
+{
+    while(1)
+    {
+        Poco::Thread::sleep(1000);
+        fprintf(stderr,"dispath_thread run\n");
+    }
+    return NULL;
+}
+void create_dispath_thread()
+{
+    pthread_t tid;
+    pthread_create(&tid,NULL,dispatch_thread,NULL);
+    Poco::Thread::sleep(100);
+    pthread_detach(tid);
+}
 bool CMainCtrl::Start()
 {
-
+//这是仅仅打开了数据库
     if( !CTajiDbMgr::Get().load("ctx2000.sqlite3",g_qtzs, NUMBER_OF_QTZ))
     {
         fprintf(stderr,"TajiDbMgr load failed\n");
         return false;
     }
 
-    fprintf(stderr,"tj num = %d\n",CTajiDbMgr::Get().get_tj_num());
     init_tj_data();
 
+#if 1
+//启动编码器采集和6路外部AD采集模块
     if( ! CDataAcquire::Get().Start(g_ad_com1,g_ad_com2))
     {
         fprintf(stderr,"DataAcquire Start Failed\n");
         return false;
     }
-
+#endif
+//启动电台模块
     if( ! CDianTai::Get().Start(g_diantai_com))
     {
         fprintf(stderr,"DianTai Start Failed\n");
         //return false;
     }
-    blockRtSignal();
-    //CDataAcquire::Get().addObserver(Notifyer(CMainCtrl,ADNotification,handle_ad));
-    TelEngine::Engine::install(new MainCtrlHandler(this));
 
-    CDataAcquire::Get().addObserver(Notifyer(CMainCtrl,ADNotification,ad_handle));
+//初始化gpio模块
+    m_gpio.CreateVirtualFiles();
+    m_gpio.Init();
+    //create_dispath_thread();
+    //blockRtSignal();
+
+    //TelEngine::Engine::install(new MainCtrlHandler(this));
     m_thread.start(*this);
-
     return m_rdyEvt.tryWait(1000);
 
 }

@@ -5,6 +5,7 @@
 #include <Poco/String.h>
 #include <Poco/Mutex.h>
 #include <iostream>
+#include "iniFile.h"
 static Poco::FastMutex _mutex;
 CLijuCtrl&  CLijuCtrl::Get()
 {
@@ -13,7 +14,8 @@ CLijuCtrl&  CLijuCtrl::Get()
 }
 CLijuCtrl::CLijuCtrl(std::string type, int armlen, int beilv)
 {
-
+    m_percent=0;
+    m_max_weight=1;
 }
 bool CLijuCtrl::Load(std::string type, std::string armlen, std::string beilv)
 {
@@ -23,6 +25,15 @@ bool CLijuCtrl::Load(std::string type, std::string armlen, std::string beilv)
     m_BeilvList.clear();
     m_curBeilvIndex = -1;
     bool bExistBeilv= false;
+    if(type=="")
+    {
+        type=m_tc_type;
+    }
+    if(armlen=="")
+    {
+        armlen=m_arm_len;
+    }
+
     //获取指定的塔机类型和大臂长度所对应的所有倍率，存入倍率列表
     if(CTajiDbMgr::Get().getTjBeilv(type,armlen,m_BeilvList))
     {
@@ -76,14 +87,20 @@ bool CLijuCtrl::Load(std::string type, std::string armlen, std::string beilv)
 int CLijuCtrl::Service(double car_pos, double weight)
 {
     double max_weight = 0;
+    double prev_pos=99999;
     bool   find       = false;
     for(size_t i = 0; i < m_lijuGrp.size(); i++)
     {
+        //fprintf(stderr,"car_pos=%0.2f cur=%0.2f\n",car_pos , m_lijuGrp.at(i).car_pos);
         if(car_pos <= m_lijuGrp.at(i).car_pos)
         {
-            max_weight = m_lijuGrp.at(i).max_weight;
+            if(m_lijuGrp.at(i).car_pos <= prev_pos)
+            {
+                prev_pos = m_lijuGrp.at(i).car_pos;
+                max_weight = m_lijuGrp.at(i).max_weight;
+            }
             find       = true;
-            break;
+            //break;
         }
     }
     if( !find )
@@ -94,13 +111,16 @@ int CLijuCtrl::Service(double car_pos, double weight)
     }
     if( max_weight < 0.1 )//得到了异常的重量
         return 0;
+    m_max_weight = max_weight;
     m_percent = weight / max_weight;
     if(m_percent >= 1.05)
     {
-        m_cur_state = 3;
+        m_cur_state = 4;
     }else if(m_percent >= 1)
-        m_cur_state = 2;
+        m_cur_state = 3;
     else if(m_percent >= 0.95)
+        m_cur_state = 2;
+    else if(m_percent >= 0.90)
         m_cur_state = 1;
     else
         m_cur_state = 0;
@@ -130,4 +150,11 @@ int CLijuCtrl::ChangeBeilv(int newBeilv)
 
     }
     return 0;
+}
+bool CLijuCtrl::SaveData()
+{
+    TIniFile cfg("ctx2000.ini");
+    cfg.WriteString("device","TC_type",m_tc_type);
+    cfg.WriteString("device","armlen", m_arm_len);
+    cfg.WriteString("device","beilv",  m_curBeilv);
 }

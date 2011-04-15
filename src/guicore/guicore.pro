@@ -31,7 +31,7 @@ SOURCES += \
     src/dt_font.cpp
 
 INCLUDEPATH += ./include
-
+CONFIG   += debug
 LIB_PATH=lib
 TMPOBJ=tmpobj
 linux-arm-g++ {

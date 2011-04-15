@@ -25,7 +25,7 @@ public:
     int  GetCurSel();
     void SetSel(int index, bool selected);
     bool GetSel(int index);
-    int  FindItemByText(std::string text,int start,bool exact=false);
+    int  FindItemByText(std::string text,int start=0,bool exact=false);
     bool IsDrapDown();
     void ReadOnly(bool yes);
     void EditorReadOnly(bool yes);

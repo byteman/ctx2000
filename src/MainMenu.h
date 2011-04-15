@@ -24,7 +24,7 @@ public:
 private:
         void CreateStatusArea(HDC hdc,RECT rt);
         void DrawDevSerial(HDC hdc, RECT rt,std::string devserail);
-        CSkinButton* _skinBtns[MM_SKIN_BTN_NUM];
+        CSkinButton* _skinBtns[5];
 	int m_msg_delay;
         CFont* Font24;
         CStatusIcon* statusIcon[20];
@@ -38,6 +38,8 @@ private:
         CEdit* edt_up_angle,*edt_max_weight,*edt_fengsu,*edt_dg_height;
         CStatic* lbl_angle;
         CStatic* lbl_dist;
+        CStatic* lbl_beilv;
+        CStatic* lbl_max_weight;
         CStatic* m_areas[4];
         CStatic* lbl_rights[3];
         CStatic* m_liju;

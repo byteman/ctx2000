@@ -13,6 +13,7 @@
 #include <SerialStream.h>
 #include <SerialStreamBuf.h>
 #include "tajidbmgr.h"
+#include "comdata.h"
 using Poco::Runnable;
 using Poco::SingletonHolder;
 using Poco::Notification;
@@ -41,7 +42,7 @@ public:
         if ( ! m_port.good() )
         {
             std::cerr << "[" << __FILE__ << ":" << __LINE__ << "] "
-                      << "Error: Could not open serial port."
+                      << "Error: Could not open serial port." << m_path
                       << std::endl ;
             return false;
         }
@@ -205,6 +206,7 @@ public:
     }
     void run()
     {
+        set_thread_title("ctx2000.diantai");
         m_rdyEvt.set();
         m_quitEvt.reset();
         m_quit = false;

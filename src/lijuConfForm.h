@@ -19,7 +19,7 @@
 #include "SkinForm.h"
 #include "dt_core.h"
 class TUser;
-#define USERMAN_SKIN_BTNS_NUM    5
+#define USERMAN_SKIN_BTNS_NUM    6
 class CLiJuManForm:public CSkinForm
 {
 public:

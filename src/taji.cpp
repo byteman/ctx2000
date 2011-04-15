@@ -8,19 +8,6 @@
 #define w    10
 #define h    8
 
-
-CTaji::CTaji(QtzParam* tzPar,int zoom):
-    m_tzPar(tzPar)
-{
-    m_tzPar->height;
-    x_pt = (tzPar->pos.x)/zoom;
-    y_pt = (tzPar->pos.y)/zoom;
-    m_r  = (tzPar->long_arm_len) / zoom;
-    m_short_arm = (tzPar->short_arm_len) / zoom;
-    SetRect(&m_rt,x_pt-m_r,y_pt-m_r,x_pt+m_r,y_pt+m_r);
-    fprintf(stderr,"taji rect x=%d y=%d r=%d b=%d\n",m_rt.left,m_rt.top,m_rt.right,m_rt.bottom);
-    m_tj_num = Poco::format("%u",tzPar->number);
-}
 CTaji::CTaji(int x, int y, int r,int s, int id,double zoom):
     x_pt(x),y_pt(y),m_r(r),m_zoom(zoom)
 {
@@ -87,7 +74,7 @@ bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
      SetBkMode (hdc,BM_TRANSPARENT);
      //SetTextColor (hdc,PIXEL_red);
      SelectFont(hdc,GetSystemFont(SYSLOGFONT_FIXED));
-     DrawText(hdc,m_tj_num.c_str(),m_tj_num.length (),&rect,DT_CENTER|DT_VCENTER|DT_SINGLELINE);
+     //DrawText(hdc,m_tj_num.c_str(),m_tj_num.length (),&rect,DT_CENTER|DT_VCENTER|DT_SINGLELINE);
 
 //Ð¡³µ
      if(m_is_local)

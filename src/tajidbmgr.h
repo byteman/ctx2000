@@ -40,7 +40,7 @@ public:
     bool getTjBeilv(std::string type, std::string armlen,TStringList& rst);
     bool deleteTjItem(std::string type,  std::string armlen, std::string beilv,std::string len, std::string weight);
     std::string getTableName(std::string  type,  std::string  armlen, std::string  beilv);
-    bool load(std::string dbpath);
+    //bool load(std::string dbpath);
     bool load(std::string dbpath, QtzParam tz[], int num);
     //通过远程广播修改，通过本地设置
     bool UpdateWorksite(TWorkSiteParam* par);

@@ -16,7 +16,6 @@ DEFINES+=_PC_DBG
 INCLUDEPATH+=/usr/local/include/yate guicore/include ime
 SOURCES += \
     Main.cpp \
-    LoginForm.cpp \
     MainMenu.cpp \
     ime/SoftKeyboardForm.cpp \
     ime/SoftKeyboard.cpp \
@@ -49,9 +48,7 @@ SOURCES += \
     diantai.cpp \
     mainctrl.cpp \
     formworksite.cpp \
-    centerrecver.cpp \
     formcalib.cpp \
-    formcalibdist.cpp \
     AlarmInfoManForm.cpp \
     comdata.cpp \
     tcparam.cpp \
@@ -59,21 +56,23 @@ SOURCES += \
     lijuConfForm.cpp \
     MineAddBox.cpp \
     lijuctrl.cpp \
-    biaoding.cpp \
-    percent.cpp
+    percent.cpp \
+    filter.cpp \
+    extdev/gpio.cpp
 LIBS+=-lPocoFoundation
 
 DEPENDPATH=../include
 TMPOBJ=../tmpobj
 linux-arm-g++ {
     message(g++ = linux-arm-g++)
-    LIBS+=-L./extlib/arm -L./guicore/lib/libmx27 -lttf
+    LIBS+=-L./extlib/arm -L./guicore/lib/libmx27 -lttf \
+             ./extlib/arm/libQtzCollideLib.a -lstdc++
     OBJECTS_DIR = $$TMPOBJ/arm
 }
 linux-g++ {
     message(g++ = linux-g++)
     OBJECTS_DIR = $$TMPOBJ/x86
-    LIBS+=-L./extlib/x86 -L./guicore/lib/libpc
+    LIBS+=-L./extlib/x86 -L./guicore/lib/libpc ./extlib/x86/libQtzCollideLib.a
 }
 
 LIBS+=-lyate -lminigui -lmgext -lpng -ljpeg \
@@ -108,11 +107,8 @@ HEADERS += \
     diantai.h \
     mainctrl.h \
     formworksite.h \
-    centerrecver.h \
     formcalib.h \
     formcalibitem.h \
-    formcalibdistitem.h \
-    formcalibdist.h \
     AlarmInfoManForm.h \
     AlarmInfoManFormItem.h \
     comdata.h \
@@ -126,5 +122,6 @@ HEADERS += \
     MineAddBox.h \
     MineAddBoxItem.h \
     lijuctrl.h \
-    biaoding.h \
-    percent.h
+    percent.h \
+    filter.h \
+    extdev/gpio.h

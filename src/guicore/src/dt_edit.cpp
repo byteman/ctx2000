@@ -132,7 +132,7 @@ void CEdit::SetFloatText(double value,int pos)
         snprintf(buf,32,"%0.6f",value);
     else
         snprintf(buf,32,"%0.1f",value);
-    SetText(buf);
+    SetText(buf,true);
 }
 double CEdit::GetFloatValue(bool ok)
 {

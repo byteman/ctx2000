@@ -5,7 +5,6 @@
 #include "SysSet.h"
 #include "worksite.h"
 #include "formcalib.h"
-#include "formcalibdist.h"
 #include "AlarmInfoManForm.h"
 #include "tcparam.h"
 #include "divparam.h"
@@ -79,8 +78,7 @@ void CSysSet::OnButtonClick(skin_item_t* item)
         CFormCalib cali;
         cali.CreateForm(m_hWnd);
     }else if(item->id == _skinBtns[2]->GetId()){
-        CFormCalibDist caldist;
-        caldist.CreateForm(m_hWnd);
+
     }else if(item->id == _skinBtns[3]->GetId()){
         CAlarmInfoManForm alarm;
         alarm.CreateForm(m_hWnd);

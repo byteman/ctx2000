@@ -30,7 +30,7 @@ static const char* mmenu_bmps[] = {
         PPRESET_BTN,
         PSYSCFG_BTN,
         PWETCFG_BTN,
-        PHELP_BTN
+        PMODIFY_BTN
 };
 static SKIN_BUTTON_DESC SkinBtns[] = {
     //SKIN_BUTTON_SCALE,
@@ -38,7 +38,7 @@ static SKIN_BUTTON_DESC SkinBtns[] = {
     //SKIN_BUTTON_PRESET,
     SKIN_BUTTON_WETCFG,
     SKIN_BUTTON_SYSCFG,
-    //SKIN_BUTTON_HELP
+    SKIN_BUTTON_HELP
 };
 #define Client_Height 72
 static COMM_CTRL_DESC areactrls[] = {
@@ -57,7 +57,9 @@ static COMM_CTRL_DESC commctrls[] = {
     {710,285,80,30,"Max Weight:"},//13
     {710,350,80,30,"Speed:"},//14
     {710,410,80,30,"Car Height:"},//15
-    {155,85,40,150,"0"}
+    {155,85,40,150,"0"}, //16
+    {20,370,40,40,"1"}, //17
+    {20,340,40,40,"1"} //17
 };
 static EDevStatus g_status[20];
 
@@ -78,7 +80,7 @@ CMainMenu::CMainMenu()
     m_show_max_weight = cfg.ReadBool("display","max_weight",  false);
 
 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 3; i++)
     {
         _skinBtns[i] = new CSkinButton(&SkinBtns[i],this);
     }
@@ -86,15 +88,9 @@ CMainMenu::CMainMenu()
     //edt_dist  = new CEdit(&commctrls[1],this);
     lbl_angle = new CStatic(&commctrls[0],this);
     lbl_dist  = new CStatic(&commctrls[1],this);
-
-
     edt_height = new CEdit(&commctrls[2],this);
     edt_long_arm_len= new CEdit(&commctrls[3],this);
     edt_short_arm_len= new CEdit(&commctrls[4],this);
-
-
-
-
     if(m_show_up_angle)
     {
         new CStatic(&commctrls[12],this);
@@ -116,6 +112,8 @@ CMainMenu::CMainMenu()
         new CStatic(&commctrls[15],this);
         edt_dg_height = new CEdit(&commctrls[11],this);
     }
+    lbl_max_weight = new CStatic(&commctrls[18],this);
+    lbl_beilv     = new CStatic(&commctrls[17],this);
     m_liju        = new CStatic(&commctrls[16],this);
     lbl_rights[0] = new CStatic(&commctrls[5],this);
     lbl_rights[1] = new CStatic(&commctrls[6],this);
@@ -143,9 +141,6 @@ CMainMenu::CMainMenu()
     m_angle.LoadFile("ctx2000/angle.jpg");
     m_dist.LoadFile("ctx2000/dist.jpg");
     InitSkinHeader("MainMenu");
-
-
-
 }
 
 CMainMenu::~CMainMenu()
@@ -218,6 +213,7 @@ int paintcircle(int x,int r)
 
 void CMainMenu::OnShow()
 {
+    lbl_beilv->SetText(CLijuCtrl::Get().m_curBeilv);
     m_worksite->init(m_hWnd);
     m_per.Init(this,m_liju,commctrls[16].w,commctrls[16].h);
 }
@@ -243,44 +239,30 @@ void CMainMenu::OnPaint(HWND hWnd)
 }
 void CMainMenu::OnTimer(int ID)
 {
-    if (m_msg_delay > 0)
-    {
-        if (--m_msg_delay <= 0)
-        {
-            UpdateWindow(m_hWnd, true);
-            m_msg_delay = 0;
-        }
-    }    
-    static int cnt =0;
-    static double angle = 0;
-    static int dist =0;
-    for(int i = 0; i < 20 ;i++)
-    {
-        cnt++;
-        g_status[i] = EDevStatus(cnt%3);
-    }
+
 
     lbl_dist->SetText(Poco::format("%0.2f",g_car_dist));
     lbl_angle->SetText(Poco::format("%0.2f",g_angle));
 
     if(m_show_up_angle)
     {
-        edt_up_angle->SetFloatText(g_up_angle,3);
+        edt_up_angle->SetFloatText(g_up_angle,0);
     }
     if(m_show_speed)
     {
-        edt_fengsu->SetFloatText(g_speed,2);
+        edt_fengsu->SetFloatText(g_speed,0);
     }
     if(m_show_dg_height)
     {
-        edt_dg_height->SetFloatText(g_dg_height,2);
+        edt_dg_height->SetFloatText(g_dg_height,0);
     }
     if(m_show_max_weight)
     {
-        edt_max_weight->SetFloatText(g_dg_weight,2);
+        edt_max_weight->SetFloatText(g_dg_weight,0);
     }
     m_per.Show(CLijuCtrl::Get().m_percent);
     m_worksite->update();
+    lbl_max_weight->SetText(Poco::format("%0.2f",CLijuCtrl::Get().m_max_weight));
 }
 void CMainMenu::OnButtonClick(skin_item_t* item)
 {
@@ -292,7 +274,9 @@ void CMainMenu::OnButtonClick(skin_item_t* item)
         lj.CreateForm(m_hWnd);
 
     }else if(item->id == _skinBtns[2]->GetId()){
-
+        int ret = CLijuCtrl::Get().ChangeBeilv();
+        lbl_beilv->SetText(Poco::format("%d",ret));
+        CLijuCtrl::Get().SaveData();
     }else if(item->id == _skinBtns[3]->GetId()){
 
     }else if(item->id == _skinBtns[4]->GetId()){

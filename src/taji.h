@@ -7,8 +7,6 @@ class CTaji
 {
 public:
     CTaji(int x, int y, int r, int s,int id,double zoom);
-    //param: 全局的塔机参数字
-    CTaji(QtzParam* tzPar,int zoom=1);
     bool Draw(HDC hdc);
     bool Draw(HDC hdc,std::string tjnum,double angle,double car_dist);
     bool Update(HWND hwnd);

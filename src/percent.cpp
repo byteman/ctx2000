@@ -33,6 +33,8 @@ int  CPercent::worksite_proc(HWND hwnd, int message, WPARAM w, LPARAM l)
     SetBkMode(hdc,BM_TRANSPARENT);
     DrawText(hdc,buf,strlen(buf),&m_rect,DT_TOP|DT_CENTER);
 
+    SetBrushColor(hdc,COLOR_lightwhite);
+    FillBox(hdc,0,30,m_w,m_h-old_height);
     if(tmp<90)
     {
         SetBrushColor(hdc,COLOR_green);
@@ -45,7 +47,7 @@ int  CPercent::worksite_proc(HWND hwnd, int message, WPARAM w, LPARAM l)
         SetBrushColor(hdc,COLOR_red);
     }
 
-    FillBox(hdc,0,m_h-old_height+30,m_w,old_height);
+    FillBox(hdc,0,m_h-old_height+30,m_w,old_height-30);
     EndPaint(hwnd,hdc);
 
 }
@@ -86,7 +88,9 @@ void CPercent::Show(double percent)
     //SetBrushColor(m_hdc,RGB2Pixel(HDC_SCREEN,255,255,255));
     //FillBox(m_hdc,0,0,m_w,m_h);
     m_percent = percent;
-    int height = (int)(m_percent*m_h);
+    if(percent>1.0)
+        percent = 1.0;
+    int height = (int)(percent*m_h);
     if(height == old_height)
     {
         return ;
