@@ -12,8 +12,10 @@ SoftKeyboard::SoftKeyboard(int left ,int top)
     if(T9key == HWND_INVALID)
     {
         fprintf(stderr, "Create SoftKeyForm Failed\n");
+        return;
     }
-    ShowWindow(T9key, SW_HIDE);
+    //SetWindowAdditionalData2(T9key,0xaa55);
+    //ShowWindow(T9key, SW_HIDE);
     _pmgi = new mgiSet(left,top-50,left+240,top);
     _pmgi->switchinput(T9_NUM);
     _skForm->SetInputMethod(T9_NUM);
@@ -38,6 +40,7 @@ void
 SoftKeyboard::T9_Show(bool show)
 {
     if (show) {
+        fprintf(stderr,"show t9key=%x\n",T9key);
         ShowWindow(T9key, SW_SHOWNORMAL);
     } else {
         _pmgi->switchinput(T9_NUM);

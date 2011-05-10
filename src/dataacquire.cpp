@@ -89,12 +89,10 @@ public:
         {
             ad_up_angle =  m_filter[3].Filter((data.at(7)<<8)+data.at(8));
             g_up_angle=(ad_up_angle-g_bd[BD_UP_ANGLE].zero_ad)/g_bd[BD_UP_ANGLE].bd_k+g_bd[BD_UP_ANGLE].start_value;
-
             ad_car_dist = m_filter[0].Filter((data.at(1)<<8)+data.at(2));
             //fprintf(stderr,"ad_car=%d up_angle=%0.2f\n",ad_car_dist,g_up_angle);
             if(g_TC[g_local_id].Dyna){ //动臂式的幅度计算
                 g_car_dist =g_TC[g_local_id].LongArmLength*cos(g_up_angle*3.14/180)+g_TC[g_local_id].a0;
-
                 //fprintf(stderr,"dist=%0.2f %0.2f %0.2f %0.2f\n",g_car_dist,g_TC[g_local_id].LongArmLength,cos(g_up_angle*3.14/180),g_TC[g_local_id].a0);
             }else{ //平臂式的幅度计算
                 g_car_dist=(ad_car_dist-g_bd[BD_CAR_DIST].zero_ad)/g_bd[BD_CAR_DIST].bd_k+g_bd[BD_CAR_DIST].start_value;
@@ -123,13 +121,10 @@ public:
         {
 
             try{
-
                 Poco::Thread::sleep(50);
                 m_buf.clear();
                 m_port->WriteByte(0x2);
-                //m_port->ReadLine(100,'U');
                 m_port->Read(m_buf,15,1000);
-
 #if 0
     for(size_t i = 0; i <m_buf.size();i++)
     {
@@ -205,12 +200,13 @@ public:
             try{
                 Poco::Thread::sleep(50);
                 m_buf.clear();
+
                 m_port->Write((unsigned char*)m_cmd,4);
-                m_port->Read(m_buf,13);
+                m_port->Read(m_buf,13,50);
                 memcpy(buf,m_buf.data()+1,11);
                 buf[11]=0;
                 //data=buf;
-                //fprintf(stderr,"data=%s\n",buf);
+               //fprintf(stderr,"data=%s\n",buf);
                 //data = m_port->ReadLine(100,'\r');
                 //if( (data.length() == 13) && (data.at(0)=='='))
                 {

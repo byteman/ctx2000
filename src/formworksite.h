@@ -12,7 +12,7 @@ public:
     int  worksite_proc(HWND hwnd, int message, WPARAM w, LPARAM l);
     //更新某个编号的塔机区域，如果0的话，就是更新所有塔机状态
     void update(int taji=-1);
-
+    void draw_zhangai(HDC hdc);
 private:
     CStatic* m_area;
     int m_width,m_height;

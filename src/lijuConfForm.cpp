@@ -272,6 +272,8 @@ void CLiJuManForm::OnShow()
     InitListCol();
     ReloadLijuItems();
 }
+#include "SoftKeyboard.h"
+extern SoftKeyboard* skt;
 void CLiJuManForm::OnCommCtrlNotify(HWND hwnd, int id, int nc)
 {
     fprintf(stderr,"nc=%d\n",nc);
@@ -313,6 +315,10 @@ void CLiJuManForm::OnCommCtrlNotify(HWND hwnd, int id, int nc)
             cbx_beilv->SetCurSel(-1);
         }
         ReloadLijuItems();
+    }
+    if( (nc==EN_SETFOCUS) || (nc==CBN_SETFOCUS ))
+    {
+        if(skt)skt->T9_Show(true);
     }
 }
 #include <Poco/Format.h>

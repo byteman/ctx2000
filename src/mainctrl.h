@@ -3,6 +3,7 @@
 #include <Poco/Runnable.h>
 #include <Poco/Event.h>
 #include <Poco/Thread.h>
+#include <Poco/Timer.h>
 #include "tajidbmgr.h"
 #include "dataacquire.h"
 #include "diantai.h"
@@ -10,9 +11,14 @@
 using Poco::Event;
 using Poco::Runnable;
 using Poco::Thread;
+using Poco::Timer;
 
 typedef std::vector<int> TIDList;
-
+typedef struct tag_JDQ{
+    bool set_flag;
+    int  set_timer;
+    int  cur_timer;
+}TJDQ;
 class CMainCtrl:public Poco::Runnable
 {
 public:
@@ -36,6 +42,8 @@ public:
     void ReadSiteInfo();
     void SaveTowerCraneInfo();
     void SaveBuildingInfo();
+    void onTimer(Timer& timer);
+    ControledStatus m_control_state,m_old_ctrl_state;
 private:
     EWorkMode m_mode;
     int      m_local_id;
@@ -74,9 +82,12 @@ private:
     Poco::Event  m_rdyEvt;
     Poco::Event  m_quitEvt;
     volatile bool m_quit;
-    ControledStatus m_control_state,m_old_ctrl_state;
+
     Poco::Timestamp lastDateTime,sendInfoTime;
     CGpio m_gpio;
+    Poco::Timer* m_timer;
+    TJDQ m_jdq[3];
+    //bool right_turn_limit,left_turn_limit,turn_brake;
 };
 
 #endif // MAINCTRL_H

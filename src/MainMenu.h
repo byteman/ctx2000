@@ -47,6 +47,7 @@ private:
         CIcon m_angle;
         CIcon m_dist;
         CPercent m_per;
+        HDC m_hdc;
         bool m_show_up_angle,m_show_speed,m_show_dg_height,m_show_max_weight;
 };
 

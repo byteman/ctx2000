@@ -9,11 +9,13 @@ static const char* mmenu_bmps[] = {
      PCOMM_BACKGROUND,
      PSETZERO_BTN,
      PCALB_BTN,
+    PCOMM_CLOSE_BTN,
      PCOMM_SAVE_BTN,
      PCOMM_CLOSE_BTN,
      PCOMM_RET_BTN,
      PMODIFY_BTN,  //new add button for line k
      PREAD_BTN,  //new add button for read line k
+
 };
 static COMM_CTRL_DESC CommCtrls[] =
 {
@@ -59,7 +61,8 @@ static SKIN_CTRL_DESC SkinCtrls[] = {
     BUTTON_CAB_WET_START,
     BUTTON_CAB_WET_STOP,
     BUTTON_CAB_HIG_START,
-    BUTTON_CAB_HIG_STOP
+    BUTTON_CAB_HIG_STOP,
+    SKIN_BUTTON_EXIT
 };
 #define MSG_AD MSG_USER+0x100
 class ADMessageHandler:public MessageHandler{
@@ -211,6 +214,21 @@ void CFormCalib::calibrate_car_dist(int type)
         MessageBox(m_hWnd,"Please Press start first\n","Error",MB_OK);
     }
 }
+#include "SoftKeyboard.h"
+extern SoftKeyboard *skt;
+void CFormCalib::OnCommCtrlNotify(HWND hwnd, int id, int nc)
+{
+
+    if(nc==EN_SETFOCUS)
+    {
+        fprintf(stderr,"setfocus\n");
+        if(skt)
+        {
+            //fprintf(stderr,"t9show\n");
+            skt->T9_Show(true);
+        }
+    }
+}
 void CFormCalib::calibrate_weight(int type)
 {
     static int start_ad = 0;
@@ -337,5 +355,8 @@ void CFormCalib::OnButtonClick(skin_item_t* item)
     }else if(item->id == _btns[9]->GetId()){
         //吊钩高度标定结束
         calibrate_height(1);
+    }else if(item->id == _btns[10]->GetId()){
+        //吊钩高度标定结束
+        Close();
     }
 }

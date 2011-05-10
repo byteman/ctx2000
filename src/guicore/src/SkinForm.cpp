@@ -226,7 +226,10 @@ bool CSkinForm::HasLoadRes()
 	//fprintf(stderr,"%s HasLoadRes\n",m_title);
 	return m_Load_Res;
 }
-
+void CSkinForm::SetIMEWindow(HWND hwnd)
+{
+    //m_ime_wnd=hwnd;
+}
 bool CSkinForm::LoadRes(const char **path, int pic_num)
 {
 	if (!AllocPicRes(path, pic_num))
@@ -285,11 +288,13 @@ CSkinForm::InitSkinHeader(const char *p_name, int bk_bmp_index,
 void
 CSkinForm::Close()
 {
+    /*
     if(m_hWnd != curHwnd)
     {
         fprintf(stderr,"====================CSkinForm::Close() mismatch m_hWnd=%x curHwnd=%x\n",m_hWnd,curHwnd);
         return;
     }
+    */
     m_bColse = true;
     m_Showflag = false;
 
@@ -417,7 +422,7 @@ CSkinForm::WinProc(HWND hWnd, int message, WPARAM wParam, LPARAM lParam,
                     std::string titleStr = this->m_title;
                     //fprintf(stderr,"Close %s\n",titleStr.c_str ());
                     if(titleStr != "CLoginForm") {
-                        if(curHwnd == hWnd)
+                        //if(curHwnd == hWnd)
                             Close();
                     }
 
@@ -491,17 +496,15 @@ CSkinForm::msg_cb_func(HWND hWnd, int message, WPARAM wParam,
     {
         return 0;
     }
-#if 1
+#if 0
     if(message == MSG_SHOWWINDOW)
     {
         //fprintf(stderr,"hWnd=0x%x recv showmsg\n",hWnd);
+        //if(string(m_title) != "SoftKeyboardForm")
         curHwnd = hWnd;
 
     }
-
-
-
-       if(hWnd != curHwnd)
+      if(hWnd != curHwnd)
         {
 
             if( (message == MSG_KEYUP) && (wParam==SCANCODE_ENTER)&&(wParam == SCANCODE_ESCAPE))
@@ -521,22 +524,7 @@ CSkinForm::msg_cb_func(HWND hWnd, int message, WPARAM wParam,
                 //fprintf(stderr,"***********curHwnd=0x%x  hWnd=0x%x recv msg %d\n",curHwnd,hWnd,message);
                 return 0;
             }
- /*
-            else if( (message >= MSG_LBUTTONDOWN)  && (message <= MSG_LBUTTONDBLCLK))
-            {
-                //fprintf(stderr,"button msg\n");
-                return 0;
-            }
-            else if( (message >= MSG_DT_LBUTTONDOWN)  && (message <= MSG_DT_LBUTTONDBLCLK))
-            {
-                //fprintf(stderr,"button msg\n");
-                return 0;
-            }
-            else if( (message == MSG_ERASEBKGND) || (message == MSG_PAINT))
-            {
-                return 0;
-            }
-        */
+
             else if(message > MSG_USER)
             {
                 fprintf(stderr,"mismatch user msg=0x%x\n",message);
@@ -582,11 +570,12 @@ CSkinForm::event_cb_func(HWND hWnd, skin_item_t * p_item, int event,
 {
     //EVENT_CB_LOCK;
     fprintf(stderr,"hwnd=%x,cur=%x\n",hWnd,curHwnd);
-    if ( (hWnd == HWND_INVALID) || (hWnd != curHwnd))
+    if ( (hWnd == HWND_INVALID))
+    //if ( (hWnd == HWND_INVALID) || (hWnd != curHwnd))
     {
-        //EVENT_CB_UNLOCK;
-        DWORD ime_flag = GetWindowAdditionalData(hWnd);
-        if(ime_flag != 0xaa55)
+
+        //DWORD ime_flag = GetWindowAdditionalData2(hWnd);
+        //if(ime_flag != 0xaa55)
             return 0;
     }
 

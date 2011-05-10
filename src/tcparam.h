@@ -10,6 +10,7 @@ class CTCParam : public CSkinForm
 public:
         CTCParam();
         virtual ~CTCParam();
+        virtual void  OnCommCtrlNotify(HWND hwnd, int id, int nc);
 	virtual void   OnPaint(HWND hWnd);
         virtual void   OnShow();
         virtual void   OnButtonClick(skin_item_t* item);

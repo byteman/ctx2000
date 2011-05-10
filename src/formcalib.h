@@ -16,6 +16,7 @@ public:
     virtual void OnPaint(HWND hWnd);
     virtual void OnShow();
     virtual void OnUserMsg(HWND hWnd, int message, WPARAM wParam, LPARAM lParam);
+    virtual void OnCommCtrlNotify(HWND hwnd, int id, int nc);
     virtual void OnButtonClick(skin_item_t* item);
 private:
     void calibrate_angle(int type);

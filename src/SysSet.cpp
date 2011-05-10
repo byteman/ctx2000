@@ -22,7 +22,8 @@ static const char* mmenu_bmps[] = {
         PPRESET_BTN,
         PSYSCFG_BTN,
         PWETCFG_BTN,
-        PHELP_BTN
+        PHELP_BTN,
+    PCOMM_CLOSE_BTN
 };
 static SKIN_BUTTON_DESC SkinBtns[] = {
     SKIN_BUTTON_SCALE,
@@ -30,7 +31,8 @@ static SKIN_BUTTON_DESC SkinBtns[] = {
     SKIN_BUTTON_PRESET,
     SKIN_BUTTON_SYSCFG,
     SKIN_BUTTON_WETCFG,
-    SKIN_BUTTON_HELP
+    SKIN_BUTTON_HELP,
+    {7,738,8}
 };
 static COMM_CTRL_DESC commctrls[] = {
     EDIT_ANGLE,
@@ -88,6 +90,8 @@ void CSysSet::OnButtonClick(skin_item_t* item)
     }else if(item->id == _skinBtns[5]->GetId()){
         CDivParam form;
         form.CreateForm(m_hWnd);
+    }else if(item->id == _skinBtns[6]->GetId()){
+        Close();
     }
 
 }

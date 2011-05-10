@@ -21,6 +21,7 @@
 using namespace TelEngine;
 using Poco::SingletonHolder;
 using Poco::StringTokenizer;
+using Poco::TimerCallback;
 //QtzParam  g_qtzs[NUMBER_OF_QTZ];
 #define JDQ_OPEN  IO_HIGH_LEVEL
 #define JDQ_CLOSE IO_LOW_LEVEL
@@ -65,8 +66,8 @@ private:
 };
 CMainCtrl::CMainCtrl()
 {
-    m_mode = mode_slave;
-
+    m_mode  = mode_slave;
+    m_timer = NULL;
 }
 CMainCtrl::~CMainCtrl()
 {
@@ -75,6 +76,13 @@ CMainCtrl::~CMainCtrl()
 void CMainCtrl::init_tj_data()
 {
     TCTotalNum  = 20;
+    for(int i =0 ;i <3; i++)
+    {
+        m_jdq[i].set_flag = false;
+        m_jdq[i].set_timer=0;
+        m_jdq[i].cur_timer=0;
+    }
+
     ReadSetting();
 }
 int       CMainCtrl::ValideTCNum()
@@ -89,8 +97,11 @@ int       CMainCtrl::ValideTCNum()
  int       CMainCtrl::MaxNo()
  {
     int result = 0;
-    if(ValideTCNum() == 1){
+    int valid_num = ValideTCNum();
+    fprintf(stderr,"valid=%d\n",valid_num);
+    if(valid_num == 1){
         result =  m_local_id;
+        fprintf(stderr,"m_local_id=%d\n",m_local_id);
     }else{
         for(int i =1 ;i <= TCTotalNum;i++){
             if( (g_TC[i].Valide) && (i != m_main_id)){
@@ -119,7 +130,7 @@ std::string CMainCtrl::GetNextID()
     bool found = false;
     std::string result = "0";
     DBG("RightNo=%d\n",RightNo);
-    //DBG("%s %d\n",__FUNCTION__,__LINE__);
+
     if (RightNo==TCTotalNum ){
         for(int i = 1; i <= TCTotalNum; i++){
             if( (g_TC[i].Valide) && ( i != m_local_id ) )
@@ -208,8 +219,9 @@ std::string      CMainCtrl::build_qurey_msg()
     if(m_mode==mode_master){
 
         int nextId=Poco::NumberParser::parse(Next);
-
-        if(MaxNo() == nextId){
+        int maxid = MaxNo() ;
+        fprintf(stderr,"maxid=%d,nextid=%d\n",maxid,nextId);
+        if(maxid == nextId){//已经呼叫了最后一个有效塔机，申请加入一个新的塔机
             tmpStr=Poco::format("%2s",GetAddID());
 
         }else
@@ -257,13 +269,16 @@ void      CMainCtrl::DripMainNoAndAddNo(std::string &MainNo, std::string &RightN
           RightNo= token[1];
           if(Poco::NumberParser::tryParse(MainNo,id))
           {
-              g_TC[id].Angle = Poco::NumberParser::parseFloat(token[2]);
-              g_TC[id].Position = Poco::NumberParser::parseFloat(token[3]);
-              g_TC[id].AngleSpeed = Poco::NumberParser::parseFloat(token[4]);
-              g_TC[id].Dang = Poco::NumberParser::parseFloat(token[5]);
-              g_TC[id].DLong   = g_TC[id].Position;
-              g_TC[id].DHeight = g_TC[id].Height+g_TC[id].L*sin(g_TC[id].Dang);
-              AddNo =token[6];
+              if(id < 21 )
+              {
+                  g_TC[id].Angle      = Poco::NumberParser::parseFloat(token[2]);
+                  g_TC[id].Position   = Poco::NumberParser::parseFloat(token[3]);
+                  g_TC[id].AngleSpeed = Poco::NumberParser::parseFloat(token[4]);
+                  g_TC[id].Dang       = Poco::NumberParser::parseFloat(token[5]);
+                  g_TC[id].DLong      = g_TC[id].Position;
+                  g_TC[id].DHeight    = g_TC[id].Height+g_TC[id].L*sin(g_TC[id].Dang);
+                  AddNo =token[6];
+              }
           }
 
     }
@@ -285,7 +300,7 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
         DBG("%s Wait RtMsg\n",__FUNCTION__);
         if(CDianTai::Get().GetMessage(msg))
         {
-                DBG("%s Recv RtMsg\n",__FUNCTION__);
+                fprintf(stderr,"%s Recv RtMsg\n",__FUNCTION__);
                 FoundM = true;
                 break;
         }
@@ -300,13 +315,14 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
         {
                 DripMainNoAndAddNo(MainDevID,RightNo,AddNo);
         }
-        fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
         while( (RightNo=="0") || (AddNo != CurID) || (MainDevID == CurID) ){
             Poco::Thread::sleep(10);
+            fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
             if(CDianTai::Get().CheckMessage(msg))
             {
+                fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
                 DripMainNoAndAddNo(MainDevID,RightNo,AddNo);
-                DBG("%s DripMainNoAndAddNo Ok MainId=%s RightId=%s AddNo=%s\n",__FUNCTION__,MainDevID.c_str(),RightNo.c_str(),AddNo.c_str());
+                fprintf(stderr,"%s DripMainNoAndAddNo Ok MainId=%s RightId=%s AddNo=%s\n",__FUNCTION__,MainDevID.c_str(),RightNo.c_str(),AddNo.c_str());
                 AddState = true;
             }
         }
@@ -362,20 +378,22 @@ void      CMainCtrl::DistillData(std::string &msg,std::string &ID)
 {
     int id = 0;
     Poco::StringTokenizer token(msg,"N");
+#if 0
     for(size_t i = 0 ; i < token.count(); i++)
     {
         fprintf(stderr,"token[%d]=%s\n",i,token[i].c_str());
     }
+#endif
     std::string MainNo = token[0];
-    RightNo= Poco::NumberParser::parse(token[1]);
+    RightNo= Poco::NumberParser::parse(Poco::trim(token[1]));
     if(Poco::NumberParser::tryParse(MainNo,id))
     {
         ID=MainNo;
-        g_TC[id].InfoTime.update();
-        g_TC[id].Angle      = Poco::NumberParser::parseFloat(token[2]);
-        g_TC[id].Position   = Poco::NumberParser::parseFloat(token[3]);
-        g_TC[id].AngleSpeed = Poco::NumberParser::parseFloat(token[4]);
-        g_TC[id].Dang       = Poco::NumberParser::parseFloat(token[5]);
+        g_TC[id].InfoTime.update(); //更新塔机信息更新时间
+        g_TC[id].Angle      = Poco::NumberParser::parseFloat(Poco::trim(token[2]));
+        g_TC[id].Position   = Poco::NumberParser::parseFloat(Poco::trim(token[3]));
+        g_TC[id].AngleSpeed = Poco::NumberParser::parseFloat(Poco::trim(token[4]));
+        g_TC[id].Dang       = Poco::NumberParser::parseFloat(Poco::trim(token[5]));
         g_TC[id].DLong      = g_TC[id].Position;
         g_TC[id].DHeight    = g_TC[id].Height+g_TC[id].L*sin(g_TC[id].Dang);
         //AddNo = token[6];
@@ -413,7 +431,7 @@ void CMainCtrl::slave_loop()
 }
 void CMainCtrl::master_loop()
 {
-    DBG("master_loop\n");
+    //fprintf(stderr,"master_loop\n");
     CTX_Message msg;
     std::string ID;
     int  msg_count = 0;
@@ -435,17 +453,19 @@ void CMainCtrl::master_loop()
     {
         curTime.update();
         span = curTime - start;
-        //DBG("Master Wait Recv RtMsg\n");
+        //fprintf(stderr,"Master Wait Recv RtMsg\n");
         while (CDianTai::Get().GetMessage(msg)) {
                 msg_count++;
-                fprintf(stderr,"Master recv RtMsg %d,context=%s\n",msg.wType,msg.context.c_str());
+                //fprintf(stderr,"Master recv RtMsg %d,context=%s\n",msg.wType,msg.context.c_str());
                 DistillData(msg.context,ID);
                 RecieveValidData=true;
         }
         if(RecieveValidData)
         {
-            DBG("Master Recved %d Data\n",msg_count);
+            //fprintf(stderr,"Master Recved %d Data\n",msg_count);
             break;
+        }else{
+            //fprintf(stderr,"Master Can't Recved Data\n");
         }
         Poco::Thread::sleep(10);
     }
@@ -454,13 +474,13 @@ void CMainCtrl::master_loop()
         DBG("Master can not receive slave ack \n");
     }
 
-    MaxTCNo = MaxNo();
+    MaxTCNo = MaxNo(); //获取有效塔机编号中最后一个塔机
     DBG("Master MaxTCNo=%d RightNo=%d\n",MaxTCNo,RightNo);
     //判断能否接收到塔机加入的回应信息
-    if(MaxTCNo == RightNo){
+    if(MaxTCNo == RightNo){//如果呼叫完了最后一个塔机 ，就申请加入一个新的塔机
         DBG("Master wait New Add TC slave's ack \n");
         //等待200ms，等新加入塔机的响应消息
-        Poco::Thread::sleep(200);
+        Poco::Thread::sleep(20);
 
         if(CDianTai::Get().GetMessage(msg)){
 
@@ -470,9 +490,9 @@ void CMainCtrl::master_loop()
         }
     }
 
-    std::string sendInfo =build_qurey_msg();
+    std::string sendInfo = build_qurey_msg();
 
-    //DBG("Master SendData %s len=%d\n",sendInfo.c_str(),sendInfo.length());
+    fprintf(stderr,"Master SendData %s len=%d\n",sendInfo.c_str(),sendInfo.length());
     CDianTai::Get().SendMessage(sendInfo);
 
 }
@@ -596,16 +616,16 @@ void      CMainCtrl::CreateDefaultTjParam()
 void CMainCtrl::ReadSetting()
 {
     cfg.Open("ctx2000.ini");
-    TCTypeName = Poco::trim(cfg.ReadString("device","TC_type",""));
-    CurID      = Poco::trim(cfg.ReadString("device","CurID","0"));
-    CurSerial  = Poco::trim(cfg.ReadString("device","Serial",""));
-    StrTCArmLen = Poco::trim(cfg.ReadString("device","armlen",""));
-    StrTCBeilv  = Poco::trim(cfg.ReadString("device","beilv",""));
+    TCTypeName   = Poco::trim(cfg.ReadString("device","TC_type","def_typename"));
+    CurID        = Poco::trim(cfg.ReadString("device","CurID","0"));
+    CurSerial    = Poco::trim(cfg.ReadString("device","Serial","def_serial"));
+    StrTCArmLen  = Poco::trim(cfg.ReadString("device","armlen","70"));
+    StrTCBeilv   = Poco::trim(cfg.ReadString("device","beilv","1"));
     encoder_addr = cfg.ReadInteger("device","encoder_addr",0);
-    g_diantai_com=Poco::trim(cfg.ReadString("serial","diantai_com","/dev/ttymxc0"));
-    g_ad_com1    =Poco::trim(cfg.ReadString("serial","ad_com1","/dev/ttymxc1"));
-    g_ad_com2    =Poco::trim(cfg.ReadString("serial","ad_com2","/dev/ttymxc2"));
-    g_gprs_com   =Poco::trim(cfg.ReadString("serial","gprs_com","/dev/ttymxc3"));
+    g_diantai_com= Poco::trim(cfg.ReadString("serial","diantai_com","/dev/ttymxc0"));
+    g_ad_com1    = Poco::trim(cfg.ReadString("serial","ad_com1","/dev/ttymxc1"));
+    g_ad_com2    = Poco::trim(cfg.ReadString("serial","ad_com2","/dev/ttymxc2"));
+    g_gprs_com   = Poco::trim(cfg.ReadString("serial","gprs_com","/dev/ttymxc3"));
 
 //根据设定的当前塔机类型和倍率还有长度加载载荷曲线表
     if( !CLijuCtrl::Get().Load(TCTypeName,StrTCArmLen,StrTCBeilv))
@@ -644,13 +664,14 @@ void CMainCtrl::ReadSetting()
         CreateDefaultTjParam();
         std::cerr << "Can not open tc.red" << std::endl;
     }
-
+    g_TC[1].Height = 120;
 
     std::string tmp = CurID;
     m_local_id = Poco::NumberParser::parse(tmp);
     g_local_id = m_local_id;
 
     ReadSiteInfo();
+    memset(&wba[0],0,11*sizeof(Twb));
     tcfile.open("bd.red",std::ios::binary);
     if(tcfile.good())
     {
@@ -666,14 +687,17 @@ void CMainCtrl::ReadSetting()
     }else{
         DBG("bd.red open failed\n");
     }
-    DBG("wbanum=%d\n",wbNum);
+    fprintf(stderr,"wbanum=%d\n",wbNum);
     for (int i = 1; i <= TCTotalNum ; i++)
     {
          g_TC[i].DHeight=0;
          g_TC[i].Valide=false;
     }
     fd_time = cfg.ReadInteger("device","FD_time",5);
+    m_jdq[0].set_timer = fd_time;
+    m_jdq[1].set_timer = fd_time;
     brake_time= cfg.ReadInteger("device","brake_time",5);
+    m_jdq[2].set_timer = brake_time;
     tcfile.open("DivideLine.tc",std::ios::in);
     if(tcfile.good())
     {
@@ -768,6 +792,7 @@ void CMainCtrl::InitAlgoData()
                 i,g_qtzs[i].m_carrier_pos,g_qtzs[i].m_height,g_qtzs[i].m_long_arm_len,g_qtzs[i].m_short_arm_len,\
                 g_qtzs[i].m_coord.x,g_qtzs[i].m_coord.y,BrakeDis,DangerDis,WarnDis,VWarnDis,VStopDis);
     }
+
     int index =  g_local_id - 1;
     if(index >= 0)
     {
@@ -776,8 +801,8 @@ void CMainCtrl::InitAlgoData()
             int id = g_conflict_tj_list.at(i);
             if(id < NUMBER_OF_QTZ)
             {
-                fprintf(stderr,"QtzAddDetect %d\n ",id);
-                g_qtzs[index].QtzAddDetect(&g_qtzs[id]);
+                fprintf(stderr,"QtzAddDetect %d\n ",id-1);
+                g_qtzs[index].QtzAddDetect(&g_qtzs[id-1]);
 
             }
         }
@@ -833,12 +858,14 @@ void CMainCtrl::SaveDivideInfo()
 }
 void CMainCtrl::SaveBuildingInfo()
 {
-    FILE* fp = fopen("bd.red","wb+");
-    for(int i = 0 ;i < wbNum;i++)
+    FILE* fp = fopen("bd.red","wb");
+    fseek(fp,0,SEEK_SET);
+    for(int i = 0 ;i < wbNum-1;i++)
     {
         fwrite((const void*)&wba[i],sizeof(Twb),1,fp);
     }
     fclose(fp);
+    fprintf(stderr,"wbnum=%d\n",wbNum);
 }
 void CMainCtrl::SaveWorksiteInfomation()
 {
@@ -1033,10 +1060,12 @@ bool CMainCtrl::DealWorkSiteInfo()
 */
 void CMainCtrl::Gather_AD()
 {
+    fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
     int index= g_local_id-1;
     int id   = 0;
 //用本机的实时参数，更新本机和算法的实时参数
-    g_TC[g_local_id].Angle    = g_angle;
+    fprintf(stderr,"g_local_id=%d angle=%0.2f\n",g_local_id,g_TC[g_local_id].Angle);
+    g_TC[g_local_id].Angle    = g_angle*3.14/180;
     g_TC[g_local_id].Position = g_car_dist;
     g_TC[g_local_id].Dang     = g_up_angle;
     if( ( index >= 0) && (index < NUMBER_OF_QTZ) )
@@ -1047,30 +1076,54 @@ void CMainCtrl::Gather_AD()
     }else{
         return;
     }
+    //fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
 //根据电台传来的周围塔机的实时参数，更新算法模块需要的实时参数
     for(size_t i = 0; i < g_conflict_tj_list.size(); i++)
     {
         id = g_conflict_tj_list.at(i)-1;
         if( (id >= 0) &&  (id < NUMBER_OF_QTZ))
         {
-            g_qtzs[id].m_long_arm_angle   = g_TC[id+1].Angle;
+            g_qtzs[id].m_long_arm_angle   = g_TC[id+1].Angle*180.0f/3.14f;//
             g_qtzs[id].m_carrier_pos      = g_TC[id+1].Position;
             g_qtzs[id].m_sarm_angle       = g_TC[id+1].Dang;
         }
     }
+    //fprintf(stderr,"tj[%d][%d] angle=%0.2f %0.2f h1=%0.2f h2=%0.2f p1=%0.2f p2=%0.2f\n ",index,id,g_qtzs[index].m_long_arm_angle,g_qtzs[id].m_long_arm_angle,g_qtzs[index].m_height,g_qtzs[id].m_height,g_qtzs[index].m_carrier_pos,g_qtzs[id].m_carrier_pos);
     QtzCollideDetectOne(&g_qtzs[index]);
     m_control_state = g_qtzs[index].m_controled_status;
-
-    if(m_control_state.b1 != m_old_ctrl_state.b1){
-        if(m_control_state.b1)m_gpio.Output(0,JDQ_OPEN);
-        else m_gpio.Output(0,JDQ_CLOSE);
+/*
+    fprintf(stderr,"state=%d%d%d%d%d%d%d%d%d%d%d%d\n",m_control_state.b1,m_control_state.b2,m_control_state.b3,\
+            m_control_state.b4,m_control_state.b5,m_control_state.b6,m_control_state.b7,m_control_state.b8,\
+            m_control_state.b9,m_control_state.b10,m_control_state.b11,m_control_state.b12);
+*/
+if(m_control_state.b1 != m_old_ctrl_state.b1){
+        if(m_control_state.b1)
+        {
+            m_gpio.Output(0,JDQ_OPEN);
+            m_jdq[0].cur_timer=fd_time;
+            m_jdq[0].set_flag = true;
+        }
+        else
+        {
+            m_gpio.Output(0,JDQ_CLOSE);
+        }
     }
     if(m_control_state.b2 != m_old_ctrl_state.b2){
-        if(m_control_state.b2)m_gpio.Output(1,JDQ_OPEN);
+        if(m_control_state.b2)
+        {
+            m_gpio.Output(1,JDQ_OPEN);
+            m_jdq[1].cur_timer=brake_time;
+            m_jdq[1].set_flag = true;
+        }
         else m_gpio.Output(1,JDQ_CLOSE);
     }
     if(m_control_state.b3 != m_old_ctrl_state.b3){
-        if(m_control_state.b3)m_gpio.Output(2,JDQ_OPEN);
+        if(m_control_state.b3)
+        {
+            m_gpio.Output(2,JDQ_OPEN);
+            m_jdq[2].cur_timer= fd_time;
+            m_jdq[2].set_flag = true;
+        }
         else m_gpio.Output(2,JDQ_CLOSE);
     }
     if(m_control_state.b4 != m_old_ctrl_state.b4){
@@ -1101,6 +1154,7 @@ void CMainCtrl::Gather_AD()
         if(m_control_state.b10)m_gpio.Output(9,JDQ_OPEN);
         else m_gpio.Output(9,JDQ_CLOSE);
     }
+    /*
     if(m_control_state.b11 != m_old_ctrl_state.b11){
         if(m_control_state.b11)m_gpio.Output(10,JDQ_OPEN);
         else m_gpio.Output(10,JDQ_CLOSE);
@@ -1108,7 +1162,7 @@ void CMainCtrl::Gather_AD()
     if(m_control_state.b12 != m_old_ctrl_state.b12){
         if(m_control_state.b12)m_gpio.Output(11,JDQ_OPEN);
         else m_gpio.Output(11,JDQ_CLOSE);
-    }
+    }*/
 
     m_old_ctrl_state=m_control_state ;
 
@@ -1141,7 +1195,7 @@ void CMainCtrl::run()
     while (false == AddState) {
         WatchNetWork(MainMachineID,AddState);
     }
-    DBG("watch ok mode=%d mainID=%s\n",m_mode,MainMachineID.c_str());
+    fprintf(stderr,"watch ok mode=%d mainID=%s\n",m_mode,MainMachineID.c_str());
     while(!m_quit)
     {
         Gather_AD();
@@ -1149,7 +1203,7 @@ void CMainCtrl::run()
         DealHeightInfo();
         UpdateTCStatus();
         LjService();
-        //DBG("%s %d\n",__FUNCTION__,__LINE__);
+
         if(m_mode == mode_master)
         {
             master_loop();
@@ -1265,12 +1319,17 @@ void create_dispath_thread()
 bool CMainCtrl::Start()
 {
 //这是仅仅打开了数据库
-    if( !CTajiDbMgr::Get().load("ctx2000.sqlite3",g_qtzs, NUMBER_OF_QTZ))
+    if( !CTajiDbMgr::Get().load("ctx2000.sqlite3"))
     {
         fprintf(stderr,"TajiDbMgr load failed\n");
         return false;
     }
-
+    if(m_timer==NULL)
+    {
+        m_timer = new Timer(1000,1000);
+        TimerCallback<CMainCtrl> tc(*this, &CMainCtrl::onTimer);
+        m_timer->start(tc);
+    }
     init_tj_data();
 
 #if 1
@@ -1280,22 +1339,35 @@ bool CMainCtrl::Start()
         fprintf(stderr,"DataAcquire Start Failed\n");
         return false;
     }
-#endif
+
 //启动电台模块
     if( ! CDianTai::Get().Start(g_diantai_com))
     {
         fprintf(stderr,"DianTai Start Failed\n");
-        //return false;
+        return false;
     }
-
+#endif
 //初始化gpio模块
     m_gpio.CreateVirtualFiles();
     m_gpio.Init();
-    //create_dispath_thread();
-    //blockRtSignal();
-
-    //TelEngine::Engine::install(new MainCtrlHandler(this));
     m_thread.start(*this);
     return m_rdyEvt.tryWait(1000);
 
+}
+void CMainCtrl::onTimer(Timer& timer)
+{
+    for(int i =0 ;i < 3; i++)
+    {
+        if(m_jdq[i].set_flag)
+        {
+            if(m_jdq[i].cur_timer<=0)
+            {
+                m_gpio.Output(i,JDQ_CLOSE);
+                m_jdq[i].set_flag=false;
+            }else{
+                m_jdq[i].cur_timer--;
+            }
+        }
+    }
+    //std::cout << "Callback called after  milliseconds." << std::endl;
 }

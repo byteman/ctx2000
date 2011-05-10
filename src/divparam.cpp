@@ -107,7 +107,20 @@ static SKIN_BUTTON_DESC skinctrls[] = {
 static const char* icon_path[] = {
 
 };
-
+#include "SoftKeyboard.h"
+extern SoftKeyboard* skt;
+void  CDivParam::OnCommCtrlNotify(HWND hwnd, int id, int nc)
+{
+    if(nc==EN_SETFOCUS)
+    {
+        fprintf(stderr,"setfocus\n");
+        if(skt)
+        {
+            //fprintf(stderr,"t9show\n");
+            skt->T9_Show(true);
+        }
+    }
+}
 CDivParam::CDivParam()
 {
     if(!LoadRes(&mmenu_bmps[0],ARRAY_SIZE(mmenu_bmps,char*)))
@@ -170,9 +183,11 @@ void    CDivParam::OnShow()
 {
     Update(1);
 }
+#include <Poco/Format.h>
 void    CDivParam::Update(int id)
 {
 
+    fprintf(stderr,"update=%d\n",id);
     edits[0]->SetIntText(id);
     id--;
     edits[1]->SetFloatText(wba[id].h);
@@ -181,8 +196,11 @@ void    CDivParam::Update(int id)
         //3 point
         if(i < wba[id].VertexNum)
         {
-            edits[2+i*2]->SetFloatText(wba[id].Pointxy[i][0]);
-            edits[3+i*2]->SetFloatText(wba[id].Pointxy[i][1]);
+            fprintf(stderr,"i=%d\n",i);
+            edits[2+i*2]->SetText(Poco::format("%0.2f",wba[id].Pointxy[i][0]),false);
+            edits[3+i*2]->SetText(Poco::format("%0.2f",wba[id].Pointxy[i][1]),false);
+            //edits[2+i*2]->SetFloatText();
+            //edits[3+i*2]->SetFloatText(wba[id].Pointxy[i][1]);
         }
         else
         {
@@ -201,18 +219,35 @@ void    CDivParam::Update(int id)
     edits[10]->SetFloatText(g_TC[id].a0);
     */
 }
+#include "mainctrl.h"
+#include <Poco/NumberParser.h>
 void    CDivParam::SaveTC(int id)
 {
-    bool ok =false;
+    bool ok1 =false,ok2=false;
 
-
-    wba[id].h =  edits[1]->GetFloatValue(ok);
-
+    id--;
+    wba[id].h =  edits[1]->GetFloatValue(ok1);
+    int num = 0;
     for(int i = 0; i < 6; i++)
     {
-        wba[id].Pointxy[i][0] =  edits[2*i+2]->GetFloatValue(ok);
-        wba[id].Pointxy[i][1] =  edits[2*i+3]->GetFloatValue(ok);
+        double x;
+        if(Poco::NumberParser::tryParseFloat(edits[2*i+2]->GetText(),x))
+        {
+            wba[id].Pointxy[i][0] = x;
+            if(Poco::NumberParser::tryParseFloat(edits[2*i+3]->GetText(),x))
+            {
+                wba[id].Pointxy[i][1] = x;
+                num++;
+            }
+        }
+        //wba[id].Pointxy[i][0] =  edits[2*i+2]->GetFloatValue(ok1);
+        //wba[id].Pointxy[i][1] =  edits[2*i+3]->GetFloatValue(ok2);
+        //if(ok1&&ok2)num++;
     }
+    wba[id].VertexNum=num;
+    fprintf(stderr,"savebuild id =%d,x=%0.2f,y=%0.2f num=%d\n",id,wba[id].Pointxy[0][0],wba[id].Pointxy[0][1],num);
+    CMainCtrl::Get().SaveBuildingInfo();
+
 }
 void    CDivParam::OnButtonClick(skin_item_t* item)
 {

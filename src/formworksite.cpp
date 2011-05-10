@@ -58,15 +58,61 @@ CFormWorksite::~CFormWorksite()
         m_tajis[i] = NULL;
     }
 }
+
+void CFormWorksite::draw_zhangai(HDC hdc)
+{
+    POINT area[6];
+    gal_pixel old = SetBrushColor(hdc,PIXEL_red);
+ /*
+    int oft_x=-50,oft_y=100;
+    area[0].x = 100+oft_x;
+    area[0].y = 100+oft_y;
+    area[1].x = 200+oft_x;
+    area[1].y = 100+oft_y;
+    area[2].x = 200+oft_x;
+    area[2].y = 200+oft_y;
+    area[3].x = 100+oft_x;
+    area[3].y = 200+oft_y;
+    gal_pixel old = SetBrushColor(hdc,PIXEL_red);
+*/
+    for(size_t i=0; i <wbNum;i++)
+    {
+        //fprintf(stderr,"i=%d num=%d h=%0.2f\n",i,wba[i].VertexNum,wba[i].h);
+        if( (wba[i].VertexNum>0) && (wba[i].VertexNum<6))
+        {
+            //fprintf(stderr,"l_x=%d,zom=%0.2f,c_x=%d\n",m_local_x,m_zoom,m_center_x);
+            for(int j =0; j < wba[i].VertexNum;j++)
+            {
+
+                double x = wba[i].Pointxy[j][0];
+                double y = wba[i].Pointxy[j][1];
+                area[j].x =  (x-m_local_x)*m_zoom + m_center_x;
+                area[j].y =  (m_local_y-y)*m_zoom + m_center_y;
+                //fprintf(stderr,"j=%d,x=%d,y=%d\n",j,area[j].x,area[j].y);
+            }
+
+            FillPolygon(hdc,area,wba[i].VertexNum);
+        }
+    }
+    //FillPolygon(hdc,area,4);
+    SetBrushColor(hdc,old);
+
+}
 int  CFormWorksite::worksite_proc(HWND hwnd, int message, WPARAM w, LPARAM l)
 {
+    static bool draw_flag=false;
     HDC hdc = BeginPaint(hwnd);
 
     Rectangle(hdc,0,0,m_width-1,m_height-1);
 
-    for( int i = 0 ; i < m_tj_num; i++)
+    for( size_t i = 0 ; i < g_conflict_tj_list.size()+1; i++)
     {
         m_tajis[i]->Draw(hdc);
+    }
+    if(!draw_flag)
+    {
+        //draw_zhangai(hdc);
+        //draw_flag=true;
     }
     EndPaint(hwnd,hdc);
 }

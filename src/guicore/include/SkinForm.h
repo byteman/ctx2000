@@ -96,6 +96,7 @@ class CSkinForm
   public:
 	CSkinForm();
 	virtual ~CSkinForm();
+        void SetIMEWindow(HWND hwnd);
 	virtual bool LoadRes(const char **path, int pic_num);
 	virtual bool UnloadRes();
 	virtual HWND CreateForm(HWND hWnd, int lx = 0, int ly = 0, int rx =

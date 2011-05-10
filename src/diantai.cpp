@@ -118,7 +118,7 @@ public:
             m_start_flag = true;
         }else if( m_start_flag && c=='#')
         {
-            DBG("recv # char m_pos = %d\n",m_pos);
+            //fprintf(stderr,"recv # char m_pos = %d\n",m_pos);
             if(m_pos == 38)
             {
                 type = 1;
@@ -172,21 +172,24 @@ public:
                     m_recv_stamp.update();
                     m_signal=true;
                     m_msg_que.push(msg);
-                    fprintf(stderr,"m_msg_que push data size=%d\n",m_msg_que.size());
+                    if(m_msg_que.size() > 10)
+                        fprintf(stderr,"m_msg_que push data size=%d\n",m_msg_que.size());
 
                 }
                 else if(type == 2)
                 {
                     Poco::FastMutex::ScopedLock lock(_mutex);
                     m_height_msg_que.push(msg);
-                    fprintf(stderr,"m_height_msg_que push data size=%d\n",m_height_msg_que.size());
+                    if(m_height_msg_que.size() > 10)
+                        fprintf(stderr,"m_height_msg_que push data size=%d\n",m_height_msg_que.size());
                 }
                 else if(type == 3) // worksite
                 {
                     Poco::FastMutex::ScopedLock lock(_mutex);
                     m_ws_msg_que.push(msg);
                     m_allow_send=true;
-                    fprintf(stderr,"m_ws_msg_que push data size=%d\n",m_ws_msg_que.size());
+                    if(m_ws_msg_que.size() > 10)
+                        fprintf(stderr,"m_ws_msg_que push data size=%d\n",m_ws_msg_que.size());
                 }
                 m_start_flag = false;
 
@@ -421,7 +424,6 @@ int  CDianTai::GetMessage(CTX_Message& msg,int type, int timeout_ms)
 }
 int  CDianTai::SendMessage(CTX_Message& msg, int timeout_ms)
 {
-
     m_recv_worker->SendData(msg.context);
     return 0;
 }

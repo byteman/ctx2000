@@ -5,11 +5,11 @@
 #include <Poco/Format.h>
 #include "tajidbmgr.h"
 #include "comdata.h"
-#define w    10
-#define h    8
+#define w    12
+#define h    12
 
 CTaji::CTaji(int x, int y, int r,int s, int id,double zoom):
-    x_pt(x),y_pt(y),m_r(r),m_zoom(zoom)
+    x_pt(x),y_pt(y),m_r(r),m_zoom(zoom),m_id(id)
 {
     m_tj_num = Poco::format("%d",id);
     m_short_arm = s;
@@ -29,7 +29,9 @@ bool CTaji::Update(HWND hwnd)
 }
 bool CTaji::Draw(HDC hdc)
 {
-    return Draw(hdc,m_tj_num,g_angle,g_car_dist);
+    //return Draw(hdc,m_tj_num,g_angle,g_car_dist);
+    fprintf(stderr,"draw %d angle=%0.2f,pos=%0.2f\n",m_id,g_TC[m_id].Angle,g_TC[m_id].Position);
+    return Draw(hdc,m_tj_num,g_TC[m_id].Angle,g_TC[m_id].Position);
 }
 /*
 在画布上绘制塔机的实时状态
@@ -46,11 +48,11 @@ bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
      int w2 = 2*m_r;
      ArcEx(hdc,x_pt-m_r,y_pt-m_r,w2,w2,0 ,360*64);
      //fprintf(stderr,"angle=%0.2f\n",angle);
-     angle=angle*3.14/180;
+     //angle=angle*3.14/180;
 
  //长臂
 
-     if(m_is_local)
+     //if(m_is_local)
      {
          y = m_r * sin(angle);
          x = m_r * cos(angle);
@@ -74,10 +76,10 @@ bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
      SetBkMode (hdc,BM_TRANSPARENT);
      //SetTextColor (hdc,PIXEL_red);
      SelectFont(hdc,GetSystemFont(SYSLOGFONT_FIXED));
-     //DrawText(hdc,m_tj_num.c_str(),m_tj_num.length (),&rect,DT_CENTER|DT_VCENTER|DT_SINGLELINE);
+     DrawText(hdc,m_tj_num.c_str(),m_tj_num.length (),&rect,DT_CENTER|DT_VCENTER|DT_SINGLELINE);
 
 //小车
-     if(m_is_local)
+     //if(m_is_local)
      {
          SetBrushColor(hdc,PIXEL_red);
          x = x_pt + car_dist * cos(angle)*m_zoom;

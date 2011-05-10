@@ -269,7 +269,7 @@ bool CTajiDbMgr::getTjTypes(TStringList &types)
     }
     return bExist;
 }
-bool CTajiDbMgr::load(std::string dbpath, QtzParam tz[], int num)
+bool CTajiDbMgr::load(std::string dbpath)
 {
     try{
         if(m_opened)
@@ -288,7 +288,7 @@ bool CTajiDbMgr::load(std::string dbpath, QtzParam tz[], int num)
         fprintf(stderr,"DataBase Open Error : %s\n",e.errorMessage());
         return false;
     }
-
+    return false;
 }
 /*
 bool CTajiDbMgr::load(std::string dbpath)

@@ -17,6 +17,7 @@ public:
     virtual void   OnClose();
     virtual void   OnShow();
     virtual void   OnButtonClick(skin_item_t* item);
+    void  OnCommCtrlNotify(HWND hwnd, int id, int nc);
     std::string m_arm_len;
     std::string m_weight;
     bool    m_bOk;

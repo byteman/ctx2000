@@ -41,7 +41,7 @@ public:
     bool deleteTjItem(std::string type,  std::string armlen, std::string beilv,std::string len, std::string weight);
     std::string getTableName(std::string  type,  std::string  armlen, std::string  beilv);
     //bool load(std::string dbpath);
-    bool load(std::string dbpath, QtzParam tz[], int num);
+    bool load(std::string dbpath);
     //通过远程广播修改，通过本地设置
     bool UpdateWorksite(TWorkSiteParam* par);
     //更新或者添加塔机参数

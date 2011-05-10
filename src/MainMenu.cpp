@@ -14,12 +14,15 @@
 #include "iniFile.h"
 #include "comdata.h"
 #include "lijuctrl.h"
+#include "mainctrl.h"
+#include "SoftKeyboard.h"
 #define EDIT_ANGLE   {20,285,160,30,"20.8"}
 #define EDIT_DIST    {20,335,160,30,"12.4"}
 #define EDIT_UP_ANGL {710,250,80,30,"12.4"}
-#define EDIT_WEIGHT  {710,310,80,30,"12.4"}
+#define EDIT_WEIGHT  {710,318,80,30,"12.4"}
 #define EDIT_SPEED   {710,370,80,30,"12.4"}
 #define EDIT_HEIGHT  {710,430,80,30,"12.4"}
+SoftKeyboard *skt=NULL;
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -199,6 +202,7 @@ void CMainMenu::OnCreate()
     }
 
     SetTimer(m_hWnd,100,10);
+
 }
 #include <math.h>
 int paintcircle(int x,int r)
@@ -216,10 +220,21 @@ void CMainMenu::OnShow()
     lbl_beilv->SetText(CLijuCtrl::Get().m_curBeilv);
     m_worksite->init(m_hWnd);
     m_per.Init(this,m_liju,commctrls[16].w,commctrls[16].h);
+    edt_height->SetFloatText(g_TC[g_local_id].Height,1);
+    edt_long_arm_len->SetFloatText(g_TC[g_local_id].LongArmLength,1);
+    edt_short_arm_len->SetFloatText(g_TC[g_local_id].ShortArmLenght,1);
+
+    m_hdc = GetDC(m_hWnd);
+    if(skt==NULL)
+    {
+        skt=new SoftKeyboard();
+        skt->T9_Show(false);
+    }
 }
 void CMainMenu::OnPaint(HWND hWnd)
 {
     HDC hdc = BeginPaint(hWnd);
+    //m_hdc = hdc;
     CreateStatusArea(hdc ,m_status_rect);
     DrawDevSerial(hdc,m_dev_serail_rect,"No.C8001");
 
@@ -229,10 +244,6 @@ void CMainMenu::OnPaint(HWND hWnd)
         statusIcon[i]->SetStatus(hdc,g_status[i]);
     for(int i = 6; i < 10 ;i++)
         statusIcon[i]->SetStatus(hdc,g_status[i]);
-
-    m_dir_mgr->Show(hdc,EOK,EOK,EWARNING,EALARM);
-    m_dir_mgr->Show(hdc,EOK,EOK,EWARNING,EALARM);
-
     m_angle.Show(hdc,80,245,1);
     m_dist.Show(hdc, 58,310,1);
     EndPaint(hWnd, hdc);
@@ -262,7 +273,67 @@ void CMainMenu::OnTimer(int ID)
     }
     m_per.Show(CLijuCtrl::Get().m_percent);
     m_worksite->update();
-    lbl_max_weight->SetText(Poco::format("%0.2f",CLijuCtrl::Get().m_max_weight));
+    lbl_max_weight->SetText(Poco::format("%d",(int)CLijuCtrl::Get().m_max_weight));
+//up down left right
+
+    if(CMainCtrl::Get().m_control_state.b1)
+    {
+        m_dir_mgr->Show(m_hdc,"right",EALARM);
+    }else{
+        m_dir_mgr->Show(m_hdc,"right",EOK);
+    }
+    if(CMainCtrl::Get().m_control_state.b3)
+    {
+        m_dir_mgr->Show(m_hdc,"left",EALARM);
+    }else{
+        m_dir_mgr->Show(m_hdc,"left",EOK);
+    }
+
+    if(CMainCtrl::Get().m_control_state.b3)
+    {
+        m_dir_mgr->Show(m_hdc,"left",EALARM);
+    }else{
+        m_dir_mgr->Show(m_hdc,"left",EOK);
+    }
+
+    if(CMainCtrl::Get().m_control_state.b9)
+    {
+        m_dir_mgr->Show(m_hdc,"left",EWARNING);
+    }else{
+        m_dir_mgr->Show(m_hdc,"left",EOK);
+    }
+    if(CMainCtrl::Get().m_control_state.b8)
+    {
+        m_dir_mgr->Show(m_hdc,"right",EWARNING);
+    }else{
+        m_dir_mgr->Show(m_hdc,"right",EOK);
+    }
+    if(CMainCtrl::Get().m_control_state.b4)
+    {
+        m_dir_mgr->Show(m_hdc,"up",EWARNING);
+    }else{
+        m_dir_mgr->Show(m_hdc,"up",EOK);
+    }
+    if(CMainCtrl::Get().m_control_state.b5)
+    {
+        m_dir_mgr->Show(m_hdc,"up",EWARNING);
+    }else{
+        m_dir_mgr->Show(m_hdc,"up",EOK);
+    }
+    if(CMainCtrl::Get().m_control_state.b6)
+    {
+        m_dir_mgr->Show(m_hdc,"down",EWARNING);
+    }else{
+        m_dir_mgr->Show(m_hdc,"down",EOK);
+    }
+    if(CMainCtrl::Get().m_control_state.b7)
+    {
+        m_dir_mgr->Show(m_hdc,"down",EWARNING);
+    }else{
+        m_dir_mgr->Show(m_hdc,"down",EOK);
+    }
+
+
 }
 void CMainMenu::OnButtonClick(skin_item_t* item)
 {

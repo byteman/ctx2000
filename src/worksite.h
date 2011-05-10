@@ -13,6 +13,7 @@ public:
 	virtual void   OnPaint(HWND hWnd);
         virtual void   OnShow();
         virtual void   OnButtonClick(skin_item_t* item);
+        virtual void   OnCommCtrlNotify(HWND hwnd, int id, int nc);
 private:
         CEdit*      edt_leftdown_x;
         CEdit*      edt_range2;

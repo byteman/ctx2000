@@ -5,7 +5,7 @@
 #include "SkinForm.h"
 #include "dt_core.h"
 #include "taji.h"
-#define SYS_SKIN_BTN_NUM  6
+#define SYS_SKIN_BTN_NUM  7
 
 class CSysSet : public CSkinForm
 {

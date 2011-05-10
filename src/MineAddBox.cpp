@@ -102,7 +102,20 @@ static POS Msgs[] =
         MINETYPEMSG_Y
     }
 };
-
+#include "SoftKeyboard.h"
+extern SoftKeyboard* skt;
+void  CMineAddBox::OnCommCtrlNotify(HWND hwnd, int id, int nc)
+{
+    if(nc==EN_SETFOCUS)
+    {
+        fprintf(stderr,"setfocus\n");
+        if(skt)
+        {
+            //fprintf(stderr,"t9show\n");
+            skt->T9_Show(true);
+        }
+    }
+}
 CMineAddBox::CMineAddBox()
 {
     m_msg_delay = 0;

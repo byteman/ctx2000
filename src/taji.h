@@ -13,7 +13,7 @@ public:
 private:
     QtzParam* m_tzPar;
     double x_pt,y_pt,m_r,m_short_arm;
-
+    int  m_id;
     std::string m_tj_num;
     RECT m_rt;
     bool m_is_local;

@@ -66,7 +66,7 @@ TMPOBJ=../tmpobj
 linux-arm-g++ {
     message(g++ = linux-arm-g++)
     LIBS+=-L./extlib/arm -L./guicore/lib/libmx27 -lttf \
-             ./extlib/arm/libQtzCollideLib.a -lstdc++
+             ./extlib/arm/libQtzCollideLib.a -lstdc++  -lts
     OBJECTS_DIR = $$TMPOBJ/arm
 }
 linux-g++ {

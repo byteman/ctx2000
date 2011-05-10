@@ -106,6 +106,10 @@ void    CAlarmInfoManForm::OnButtonClick(skin_item_t* item)
         }else if(item->id == _skinBtns[1]->GetId()){
             start = (start+10);
             RefreshList(start);
+        }else if(item->id == _skinBtns[2]->GetId()){
+            Close();
+        }else if(item->id == _skinBtns[3]->GetId()){
+            Close();
         }
 
 }
