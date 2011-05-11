@@ -37,6 +37,7 @@ public:
     bool start()
     {
         DBG("%s %d\n",__FUNCTION__,__LINE__);
+
         m_port.Open(m_path.c_str());
 
         if ( ! m_port.good() )
@@ -95,6 +96,7 @@ public:
                       << std::endl ;
              return false;
         }
+        m_port.flush();
 
         m_quit = false;
         m_thread.start(*this);
@@ -112,7 +114,7 @@ public:
     {
         static int work_site_count=0;
         int type = 0;
-        //std::cerr << c << std::endl;
+        std::cerr << c << std::endl;
         if( (c == '%') || (c=='(') || (c=='$')){
             m_pos = 0;
             m_start_flag = true;

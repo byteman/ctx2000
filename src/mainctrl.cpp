@@ -98,7 +98,7 @@ int       CMainCtrl::ValideTCNum()
  {
     int result = 0;
     int valid_num = ValideTCNum();
-    fprintf(stderr,"valid=%d\n",valid_num);
+    //fprintf(stderr,"valid=%d\n",valid_num);
     if(valid_num == 1){
         result =  m_local_id;
         //fprintf(stderr,"m_local_id=%d\n",m_local_id);
@@ -255,10 +255,10 @@ void      CMainCtrl::UpdateTCStatus()
             cnt++;
         }
     }
-    fprintf(stderr,"valid=%d\n",cnt);
+    //fprintf(stderr,"valid=%d\n",cnt);
     //DBG("%s main_id=%d local_id=%d\n",__FUNCTION__,m_main_id,m_local_id);
-    g_TC[m_main_id].Valide  = true;
-    g_TC[m_local_id].Valide = true;
+    g_TC[m_main_id].Valide  = true; //主机始终有效
+    g_TC[m_local_id].Valide = true; //本机始终有效
 }
 void      CMainCtrl::DripMainNoAndAddNo(std::string &MainNo, std::string &RightNo, std::string &AddNo)
 {
@@ -360,7 +360,7 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
         {
             fprintf(stderr,"[Ready Add TC] Wait Slave Ack Failed\n");
         }
-        //这里为什么要回应数据
+        //这里为什么要回应数据,因为要发送塔机加入命令
         std::string sendInfo = build_qurey_msg();
         fprintf(stderr,"[New Add TC] Send %s\n",sendInfo.c_str());
         CDianTai::Get().SendMessage(sendInfo);
@@ -427,7 +427,7 @@ void CMainCtrl::slave_loop()
         lastDateTime.update();
         DistillData(msg.context,ID);
         span = lastDateTime-sendInfoTime; //计算多长时间没有收到主机发来的请求包了，超时后重新申请加入网络
-        fprintf(stderr,"span=%d\n",span.seconds());
+        //fprintf(stderr,"span=%d\n",span.seconds());
         if(span > sub_wait_span){
             AddState=false;
             while(AddState==false)
@@ -1104,11 +1104,11 @@ void CMainCtrl::Gather_AD()
     //fprintf(stderr,"tj[%d][%d] angle=%0.2f %0.2f h1=%0.2f h2=%0.2f p1=%0.2f p2=%0.2f\n ",index,id,g_qtzs[index].m_long_arm_angle,g_qtzs[id].m_long_arm_angle,g_qtzs[index].m_height,g_qtzs[id].m_height,g_qtzs[index].m_carrier_pos,g_qtzs[id].m_carrier_pos);
     QtzCollideDetectOne(&g_qtzs[index]);
     m_control_state = g_qtzs[index].m_controled_status;
-/*
+
     fprintf(stderr,"state=%d%d%d%d%d%d%d%d%d%d%d%d\n",m_control_state.b1,m_control_state.b2,m_control_state.b3,\
             m_control_state.b4,m_control_state.b5,m_control_state.b6,m_control_state.b7,m_control_state.b8,\
             m_control_state.b9,m_control_state.b10,m_control_state.b11,m_control_state.b12);
-*/
+
 if(m_control_state.b1 != m_old_ctrl_state.b1){
         if(m_control_state.b1)
         {
