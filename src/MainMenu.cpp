@@ -227,8 +227,8 @@ void CMainMenu::OnShow()
     m_hdc = GetDC(m_hWnd);
     if(skt==NULL)
     {
-        skt=new SoftKeyboard();
-        skt->T9_Show(false);
+        //skt=new SoftKeyboard();
+        //skt->T9_Show(false);
     }
 }
 void CMainMenu::OnPaint(HWND hWnd)

@@ -366,7 +366,8 @@ bool CDianTai::Init(std::string path)
 void CDianTai::ClearMessage()
 {
     Poco::FastMutex::ScopedLock lock(_mutex);
-    m_recv_worker->clear();
+    if(m_recv_worker)
+        m_recv_worker->clear();
 }
 bool CDianTai::haveSignal()
 {

@@ -30,7 +30,7 @@ bool CTaji::Update(HWND hwnd)
 bool CTaji::Draw(HDC hdc)
 {
     //return Draw(hdc,m_tj_num,g_angle,g_car_dist);
-    fprintf(stderr,"draw %d angle=%0.2f,pos=%0.2f\n",m_id,g_TC[m_id].Angle,g_TC[m_id].Position);
+    //fprintf(stderr,"draw %d angle=%0.2f,pos=%0.2f\n",m_id,g_TC[m_id].Angle,g_TC[m_id].Position);
     return Draw(hdc,m_tj_num,g_TC[m_id].Angle,g_TC[m_id].Position);
 }
 /*

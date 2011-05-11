@@ -25,7 +25,7 @@ using Poco::TimerCallback;
 //QtzParam  g_qtzs[NUMBER_OF_QTZ];
 #define JDQ_OPEN  IO_HIGH_LEVEL
 #define JDQ_CLOSE IO_LOW_LEVEL
-Poco::Timespan g_SubWaitSubTime(15,0);
+Poco::Timespan g_SubWaitSubTime(3,0);
 TIniFile cfg;
 class CDataHandler{
 public:
@@ -101,7 +101,7 @@ int       CMainCtrl::ValideTCNum()
     fprintf(stderr,"valid=%d\n",valid_num);
     if(valid_num == 1){
         result =  m_local_id;
-        fprintf(stderr,"m_local_id=%d\n",m_local_id);
+        //fprintf(stderr,"m_local_id=%d\n",m_local_id);
     }else{
         for(int i =1 ;i <= TCTotalNum;i++){
             if( (g_TC[i].Valide) && (i != m_main_id)){
@@ -244,7 +244,7 @@ void      CMainCtrl::UpdateTCStatus()
 {
     Poco::Timestamp curTime;
     Poco::Timespan  span;
-
+    int cnt =0;
     for(int i = 1; i <= TCTotalNum;i++){
         span = curTime-g_TC[i].InfoTime;
         if(span > g_SubWaitSubTime)
@@ -252,9 +252,11 @@ void      CMainCtrl::UpdateTCStatus()
             g_TC[i].Valide = false;
         }else{
             g_TC[i].Valide = true;
+            cnt++;
         }
     }
-    DBG("%s main_id=%d local_id=%d\n",__FUNCTION__,m_main_id,m_local_id);
+    fprintf(stderr,"valid=%d\n",cnt);
+    //DBG("%s main_id=%d local_id=%d\n",__FUNCTION__,m_main_id,m_local_id);
     g_TC[m_main_id].Valide  = true;
     g_TC[m_local_id].Valide = true;
 }
@@ -264,9 +266,10 @@ void      CMainCtrl::DripMainNoAndAddNo(std::string &MainNo, std::string &RightN
     int id = 0;
     if(CDianTai::Get().GetMessage(msg))
     {
+          fprintf(stderr,"DripMainNoAndAddNo %s\n",msg.context.c_str());
           Poco::StringTokenizer token(msg.context,"N");
-          MainNo = token[0];
-          RightNo= token[1];
+          MainNo = Poco::trim(token[0]);
+          RightNo= Poco::trim(token[1]);
           if(Poco::NumberParser::tryParse(MainNo,id))
           {
               if(id < 21 )
@@ -277,7 +280,7 @@ void      CMainCtrl::DripMainNoAndAddNo(std::string &MainNo, std::string &RightN
                   g_TC[id].Dang       = Poco::NumberParser::parseFloat(token[5]);
                   g_TC[id].DLong      = g_TC[id].Position;
                   g_TC[id].DHeight    = g_TC[id].Height+g_TC[id].L*sin(g_TC[id].Dang);
-                  AddNo =token[6];
+                  AddNo =Poco::trim(token[6]);
               }
           }
 
@@ -297,7 +300,7 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
 
     while( (CurTime-StartTime) < 5000000)
     {
-        DBG("%s Wait RtMsg\n",__FUNCTION__);
+        fprintf(stderr,"%s Wait RtMsg\n",__FUNCTION__);
         if(CDianTai::Get().GetMessage(msg))
         {
                 fprintf(stderr,"%s Recv RtMsg\n",__FUNCTION__);
@@ -307,7 +310,7 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
         Poco::Thread::sleep(50);
         CurTime.update();
     }
-    fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
+    //fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
     if(FoundM){
         //等待100ms，再接收一个消息
         Poco::Thread::sleep(100);
@@ -317,19 +320,24 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
         }
         while( (RightNo=="0") || (AddNo != CurID) || (MainDevID == CurID) ){
             Poco::Thread::sleep(10);
-            fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
+            //fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
             if(CDianTai::Get().CheckMessage(msg))
             {
-                fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
+                //fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
                 DripMainNoAndAddNo(MainDevID,RightNo,AddNo);
-                fprintf(stderr,"%s DripMainNoAndAddNo Ok MainId=%s RightId=%s AddNo=%s\n",__FUNCTION__,MainDevID.c_str(),RightNo.c_str(),AddNo.c_str());
+                fprintf(stderr,"%s DripMainNoAndAddNo Ok MainId=%s RightId=%s AddNo=%s CurId\n",__FUNCTION__,MainDevID.c_str(),RightNo.c_str(),AddNo.c_str());
+                if( (RightNo!="0") && (AddNo == CurID) && (MainDevID != CurID))
+                {
+                    fprintf(stderr,"========================\n");
+                }
+
                 AddState = true;
             }
         }
         m_mode = mode_slave;
         m_main_id = Poco::NumberParser::parse(MainDevID);
 
-        DBG("DripMainNoAndAddNo ok MainDevID=%d local_id=%d\n ",m_main_id,m_local_id);
+        fprintf(stderr,"DripMainNoAndAddNo ok MainDevID=%d local_id=%d\n ",m_main_id,m_local_id);
         g_TC[m_local_id].Valide = true;
         g_TC[m_main_id].Valide  = true;
         AddState=true;
@@ -350,10 +358,11 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
         }
         if(!AddState)
         {
-            DBG("[Ready Add TC] Wait Slave Ack Failed\n");
+            fprintf(stderr,"[Ready Add TC] Wait Slave Ack Failed\n");
         }
+        //这里为什么要回应数据
         std::string sendInfo = build_qurey_msg();
-        DBG("[New Add TC] Send %s\n",sendInfo.c_str());
+        fprintf(stderr,"[New Add TC] Send %s\n",sendInfo.c_str());
         CDianTai::Get().SendMessage(sendInfo);
         lastDateTime.update();
         sendInfoTime=lastDateTime;
@@ -384,11 +393,11 @@ void      CMainCtrl::DistillData(std::string &msg,std::string &ID)
         fprintf(stderr,"token[%d]=%s\n",i,token[i].c_str());
     }
 #endif
-    std::string MainNo = token[0];
+    std::string MainNo = Poco::trim(token[0]);
     RightNo= Poco::NumberParser::parse(Poco::trim(token[1]));
     if(Poco::NumberParser::tryParse(MainNo,id))
     {
-        ID=MainNo;
+        ID=Poco::trim(token[1]); //被呼叫的id
         g_TC[id].InfoTime.update(); //更新塔机信息更新时间
         g_TC[id].Angle      = Poco::NumberParser::parseFloat(Poco::trim(token[2]));
         g_TC[id].Position   = Poco::NumberParser::parseFloat(Poco::trim(token[3]));
@@ -409,19 +418,22 @@ void CMainCtrl::slave_loop()
     CTX_Message msg;
     std::string ID;
     Poco::Timespan span;
-    Poco::Timespan sub_wait_span(60);
+    Poco::Timespan sub_wait_span(60,0);
     bool AddState=false;
-    DBG("slave_loop\n");
+
     Poco::Thread::sleep(20);
     while (CDianTai::Get().GetMessage(msg)) {
+        fprintf(stderr,"slave_loop\n");
         lastDateTime.update();
         DistillData(msg.context,ID);
-        span = lastDateTime-sendInfoTime;
+        span = lastDateTime-sendInfoTime; //计算多长时间没有收到主机发来的请求包了，超时后重新申请加入网络
+        fprintf(stderr,"span=%d\n",span.seconds());
         if(span > sub_wait_span){
             AddState=false;
             while(AddState==false)
                   WatchNetWork(MainMachineID,AddState);
         }
+
         if(ID==CurID){ //收到了主机发给本机的查询消息
             std::string sendInfo = build_qurey_msg();
             CDianTai::Get().SendMessage(sendInfo);
@@ -477,7 +489,7 @@ void CMainCtrl::master_loop()
     MaxTCNo = MaxNo(); //获取有效塔机编号中最后一个塔机
     DBG("Master MaxTCNo=%d RightNo=%d\n",MaxTCNo,RightNo);
     //判断能否接收到塔机加入的回应信息
-    if(MaxTCNo == RightNo){//如果呼叫完了最后一个塔机 ，就申请加入一个新的塔机
+    if(MaxTCNo == RightNo){//如果呼叫完了最后一个塔机 ，并且发送过申请加入一个新的塔机的指令，就等待接收新加入塔机的回应
         DBG("Master wait New Add TC slave's ack \n");
         //等待200ms，等新加入塔机的响应消息
         Poco::Thread::sleep(20);
@@ -485,7 +497,7 @@ void CMainCtrl::master_loop()
         if(CDianTai::Get().GetMessage(msg)){
 
             DistillData(msg.context,ID);
-            DBG("Master received New Add TC slave's ack id=%s \n",ID.c_str());
+            //DBG("Master received New Add TC slave's ack id=%s \n",ID.c_str());
             UpdateTCStatus();
         }
     }
@@ -658,6 +670,7 @@ void CMainCtrl::ReadSetting()
                 CurID = Poco::format("%d",TcNum);
                 DBG("Find CurID:%s\n",CurID.c_str());
             }
+            g_TC[TcNum].InfoTime.update();
         }
         tcfile.close();
     }else{
@@ -1060,11 +1073,11 @@ bool CMainCtrl::DealWorkSiteInfo()
 */
 void CMainCtrl::Gather_AD()
 {
-    fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
+    //fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
     int index= g_local_id-1;
     int id   = 0;
 //用本机的实时参数，更新本机和算法的实时参数
-    fprintf(stderr,"g_local_id=%d angle=%0.2f\n",g_local_id,g_TC[g_local_id].Angle);
+    //fprintf(stderr,"g_local_id=%d angle=%0.2f\n",g_local_id,g_TC[g_local_id].Angle);
     g_TC[g_local_id].Angle    = g_angle*3.14/180;
     g_TC[g_local_id].Position = g_car_dist;
     g_TC[g_local_id].Dang     = g_up_angle;
@@ -1231,7 +1244,6 @@ void CMainCtrl::handle_ad(ADNotification* pNf)
         m_angle = 0;
         m_dist  = 0;
     }
-
 }
 //处理接收到的电台数据，调用算法模块，得出冲突值，通知界面更新，通知gpio进行控制子，已经更新参数
 void CMainCtrl::handle_diantai(Poco::Notification* pNf)
@@ -1280,7 +1292,7 @@ void CMainCtrl::ad_handle(ADNotification* pNf)
         }else  if(ad.m_type == 1)
         {
             ad_up_angle = ad.m_value;
-            g_up_angle = (ad_up_angle-g_bd[BD_UP_ANGLE].zero_ad)*g_bd[BD_UP_ANGLE].bd_k;
+            g_up_angle  = (ad_up_angle-g_bd[BD_UP_ANGLE].zero_ad)*g_bd[BD_UP_ANGLE].bd_k;
         }else if(ad.m_type == 2)
         {
             ad_weight = ad.m_value;
@@ -1339,14 +1351,14 @@ bool CMainCtrl::Start()
         fprintf(stderr,"DataAcquire Start Failed\n");
         return false;
     }
-
+#endif
 //启动电台模块
     if( ! CDianTai::Get().Start(g_diantai_com))
     {
         fprintf(stderr,"DianTai Start Failed\n");
         return false;
     }
-#endif
+
 //初始化gpio模块
     m_gpio.CreateVirtualFiles();
     m_gpio.Init();

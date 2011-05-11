@@ -125,16 +125,11 @@ public:
                 m_buf.clear();
                 m_port->WriteByte(0x2);
                 m_port->Read(m_buf,15,1000);
-#if 0
-    for(size_t i = 0; i <m_buf.size();i++)
-    {
-        fprintf(stderr,"0x%x ",m_buf.at(i));
-    }
-    fprintf(stderr,"\n");
-#endif
+
                 calc_rt_value(m_buf);
             }catch(LibSerial::SerialPort::ReadTimeout& e)
             {
+
                 fprintf(stderr,"%s timeout len=%d\n",m_path.c_str(),m_buf.size());
                 continue;
             }
@@ -202,7 +197,9 @@ public:
                 m_buf.clear();
 
                 m_port->Write((unsigned char*)m_cmd,4);
-                m_port->Read(m_buf,13,50);
+                //fprintf(stderr,"send data%s\n",m_cmd);
+                m_port->Read(m_buf,13,1000);
+
                 memcpy(buf,m_buf.data()+1,11);
                 buf[11]=0;
                 //data=buf;
@@ -219,6 +216,13 @@ public:
                 }
             }catch(LibSerial::SerialPort::ReadTimeout& e)
             {
+#if 0
+    for(size_t i = 0; i <m_buf.size();i++)
+    {
+        fprintf(stderr,"0x%x ",m_buf.at(i));
+    }
+    fprintf(stderr,"\n");
+#endif
                 fprintf(stderr,"%s timeout len=%d\n",m_path.c_str(),m_buf.size());
                 continue;
             }

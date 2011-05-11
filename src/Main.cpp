@@ -88,8 +88,9 @@ int MiniGUIMain (int argc, const char* argv[])
         fprintf ( stderr, "Can't InitMiniGUIExt!\n" );
         return 2;
     }
-    fprintf(stderr,"len=%d\n",sizeof(Poco::Timestamp));
+
     //启动主控制模块
+
     if( ! CMainCtrl::Get().Start())
     {
         fprintf(stderr,"MainCtrl Start Failed\n");
