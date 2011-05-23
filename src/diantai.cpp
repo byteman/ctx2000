@@ -33,11 +33,14 @@ public:
          m_queue(queue)
     {
         m_allow_send = true;
+        m_port = NULL;
+        if(m_port == NULL)
+            m_port = new SerialPort(m_path);
     }
-    bool start()
+    bool start(SerialPort::BaudRate baud)
     {
         DBG("%s %d\n",__FUNCTION__,__LINE__);
-
+/*
         m_port.Open(m_path.c_str());
 
         if ( ! m_port.good() )
@@ -97,7 +100,14 @@ public:
              return false;
         }
         m_port.flush();
-
+*/
+        try{
+            if(m_port)
+                m_port->Open(baud);
+        }catch(...){
+            fprintf(stderr,"serial %s open failed\n",m_path.c_str());
+            return false;
+        }
         m_quit = false;
         m_thread.start(*this);
 
@@ -114,7 +124,7 @@ public:
     {
         static int work_site_count=0;
         int type = 0;
-        std::cerr << c << std::endl;
+        //std::cerr << c << std::endl;
         if( (c == '%') || (c=='(') || (c=='$')){
             m_pos = 0;
             m_start_flag = true;
@@ -174,6 +184,7 @@ public:
                     m_recv_stamp.update();
                     m_signal=true;
                     m_msg_que.push(msg);
+                    //fprintf(stderr,"m_msg_que push data size=%d\n",m_msg_que.size());
                     if(m_msg_que.size() > 10)
                         fprintf(stderr,"m_msg_que push data size=%d\n",m_msg_que.size());
 
@@ -218,7 +229,8 @@ public:
         m_buf.clear();
         while(!m_quit)
         {
-             //char c = m_port->ReadByte();
+/*
+             char c = m_port->ReadByte();
              char c;
              m_port.get(c);
              if(checkValid(c)){
@@ -227,17 +239,35 @@ public:
              else{
                 DBG("***********************Invalid char 0x%x\n",c);
              }
+*/
+             try{
+                if(m_port)
+                {
+                    char c = m_port->ReadByte(1000);
+                    if(checkValid(c)){
+                       parse_recv_data(c);
+                    }else{
+                        fprintf(stderr,"***********************Invalid char 0x%x\n",c);
+                     }
+                }
+             }catch(LibSerial::SerialPort::ReadTimeout& e)
+             {
+
+                 fprintf(stderr,"%s timeout len=%d\n",m_path.c_str(),m_buf.size());
+                 continue;
+             }
 
         }
-        m_port.Close();
+        if(m_port)
+            m_port->Close();
 
         m_quitEvt.set();
     }
     void SendData(std::string data)
     {
         //m_port->Write(data);
-        if(m_allow_send)
-            m_port.write(data.c_str(),data.length());
+        if(m_allow_send && m_port)
+            m_port->Write(data);
     }
     void clear()
     {
@@ -251,7 +281,8 @@ public:
     bool    m_signal;
     bool    m_allow_send;
 private:
-    SerialStream m_port;
+    //SerialStream m_port;
+    SerialPort  *m_port;
     Poco::Thread m_thread;
     Poco::Event  m_rdyEvt;
     Poco::Event  m_quitEvt;
@@ -343,7 +374,7 @@ CDianTai& CDianTai::Get()
 }
 bool CDianTai::Start(std::string path)
 {
-  return ( Init(path) && m_recv_worker->start());
+  return ( Init(path) && m_recv_worker->start(SerialPort::BAUD_19200));
 }
 bool CDianTai::Stop()
 {

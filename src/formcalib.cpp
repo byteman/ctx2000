@@ -165,7 +165,11 @@ void CFormCalib::calibrate_height(int type)
             return;
         }
         double k = (end_ad - start_ad) / (bd_height-zero_height);
-
+        if(k < 0.001)
+        {
+            MessageBox(m_hWnd,"Calibration ERROR! Please Calibrate again.","Error",MB_OK);
+            return;
+        }
         g_bd[BD_HEIGHT].bd_k        = k;
         g_bd[BD_HEIGHT].zero_ad     = start_ad;
         g_bd[BD_HEIGHT].bd_ad       = end_ad;
@@ -254,7 +258,11 @@ void CFormCalib::calibrate_weight(int type)
         }
         */
         double k = (end_ad - start_ad) / bd_weight;
-
+        if(k < 0.001)
+        {
+            MessageBox(m_hWnd,"Calibration ERROR! Please Calibrate again.","Error",MB_OK);
+            return;
+        }
         g_bd[BD_WEIGHT].bd_k        = k;
         g_bd[BD_WEIGHT].zero_ad     = start_ad;
         g_bd[BD_WEIGHT].bd_ad       = end_ad;
@@ -311,7 +319,11 @@ void CFormCalib::calc_up_angle(int type)
         double min_up_angle = g_TC[g_local_id].L2;
         double max_up_angle = g_TC[g_local_id].L1;
         double k = (end_ad-start_ad)/(max_up_angle-min_up_angle);
-
+        if(k < 0.001)
+        {
+            MessageBox(m_hWnd,"Calibration ERROR! Please Calibrate again.","Error",MB_OK);
+            return;
+        }
         g_bd[BD_UP_ANGLE].bd_k        = k;
         g_bd[BD_UP_ANGLE].zero_ad     = start_ad;
         g_bd[BD_UP_ANGLE].start_value = min_up_angle;
