@@ -1,0 +1,5 @@
+1.增加hwclock -s
+2.在 /etc/profile 
+TSLIB_CALIBFILE=/etc/pointercal
+TSLIB_CONSOLEDEVICE=none
+TSLIB_TSDEVICE=/dev/input/event2

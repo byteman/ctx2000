@@ -94,7 +94,7 @@ int MiniGUIMain (int argc, const char* argv[])
     if( ! CMainCtrl::Get().Start())
     {
         fprintf(stderr,"MainCtrl Start Failed\n");
-        return 3;
+       // return 3;
     }
     //启动主界面模块
     InitMainUI ();

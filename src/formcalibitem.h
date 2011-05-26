@@ -120,15 +120,15 @@
 
 #define BUTTON_CAB_ANGLE_START     {1,400,100}
 #define BUTTON_CAB_ANGLE_STOP      {2,500,100}
-#define BUTTON_CAB_UPAGL_START     {1,400,150}
-#define BUTTON_CAB_UPAGL_STOT      {2,500,150}
-#define BUTTON_CAB_CAR_START       {1,400,200}
-#define BUTTON_CAB_CAR_STOP        {2,500,200}
-#define BUTTON_CAB_WET_START       {1,400,250}
-#define BUTTON_CAB_WET_STOP        {2,500,250}
-#define BUTTON_CAB_HIG_START       {1,400,300}
-#define BUTTON_CAB_HIG_STOP        {2,500,300}
-#define SKIN_BUTTON_EXIT           {3,738,     8}
+#define BUTTON_CAB_UPAGL_START     {3,400,150}
+#define BUTTON_CAB_UPAGL_STOT      {4,500,150}
+#define BUTTON_CAB_CAR_START       {5,400,200}
+#define BUTTON_CAB_CAR_STOP        {6,500,200}
+#define BUTTON_CAB_WET_START       {7,400,250}
+#define BUTTON_CAB_WET_STOP        {8,500,250}
+#define BUTTON_CAB_HIG_START       {9,400,300}
+#define BUTTON_CAB_HIG_STOP        {10,500,300}
+#define SKIN_BUTTON_EXIT           {11,738,     8}
 #define  BUTTON_LINEK      {6,BUTTON_LINEK_X_MDF,BUTTON_SAVE_Y}
 #define  BUTTON_READ_LINEK      {7,BUTTON_LINEK_X,BUTTON_SAVE_Y-65}
 

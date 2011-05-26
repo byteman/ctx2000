@@ -23,6 +23,7 @@ public:
 
 private:
         void CreateStatusArea(HDC hdc,RECT rt);
+        void CreateInfoArea(HDC hdc);
         void DrawDevSerial(HDC hdc, RECT rt,std::string devserail);
         CSkinButton* _skinBtns[5];
 	int m_msg_delay;
@@ -32,10 +33,17 @@ private:
         RECT m_dev_serail_rect;
         CDirStatusMgr* m_dir_mgr;
 
+        CEdit* edt_angle;
+        CEdit* edt_dist;
+        CEdit* edt_weight;
+        CEdit* edt_beilv;
+        CEdit* edt_tower_height;
         CEdit* edt_long_arm_len;
         CEdit* edt_short_arm_len;
         CEdit* edt_height;
         CEdit* edt_up_angle,*edt_max_weight,*edt_fengsu,*edt_dg_height;
+
+
         CStatic* lbl_angle;
         CStatic* lbl_dist;
         CStatic* lbl_beilv;
@@ -46,6 +54,8 @@ private:
         CFormWorksite* m_worksite;
         CIcon m_angle;
         CIcon m_dist;
+
+        CIconGroup m_lables;
         CPercent m_per;
         HDC m_hdc;
         bool m_show_up_angle,m_show_speed,m_show_dg_height,m_show_max_weight;

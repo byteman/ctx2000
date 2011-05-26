@@ -103,7 +103,8 @@ int  CFormWorksite::worksite_proc(HWND hwnd, int message, WPARAM w, LPARAM l)
     static bool draw_flag=false;
     HDC hdc = BeginPaint(hwnd);
 
-    Rectangle(hdc,0,0,m_width-1,m_height-1);
+    SetPenColor(hdc,PIXEL_lightgray);
+    Rectangle(hdc,0,0,m_width-1,m_height);
 
     for( size_t i = 0 ; i < g_conflict_tj_list.size()+1; i++)
     {

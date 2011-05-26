@@ -495,4 +495,32 @@
 #define PMODIFY_ICON "cwetform/lbl_modify_value.png"
 #define PADDR_ICON "cwetform/lbl_dizhi.png"
 
+//=================Form Biaoding res============================
+#define PMAINMENU    "ctx2000/main.png"
+
+#define PANGLE_A     "ctx2000/A.png"
+#define PANGLE_B     "ctx2000/B.png"
+
+
+#define PMAX_DIST    "ctx2000/max_dist.png"
+#define PMIN_DIST    "ctx2000/min_dist.png"
+
+#define PMAX_HEIGHT  "ctx2000/max_height.png"
+#define PMIN_HEIGHT  "ctx2000/min_height.png"
+
+#define PMAX_UP_ANGLE "ctx2000/max_angle.png"
+#define PMIN_UP_ANGLE "ctx2000/min_angle.png"
+
+#define PCAL_ZERO     "ctx2000/cali_zero.png"
+#define PCAL_KG       "ctx2000/cali_kg.png"
+
+//======================form system set res=====================
+#define PSYSET_BK    "ctx2000/sysetbk.jpg"
+#define PTOWERSET    "ctx2000/tower.png"
+#define PPARAMSET    "ctx2000/param.png"
+#define PDIVDING     "ctx2000/div.png"
+#define PZONE     "ctx2000/protect.png"
+#define PHISTORY     "ctx2000/history.png"
+#define PWORKSITE    "ctx2000/worksite.png"
+#define PMAINBK      "ctx2000/mainbk.jpg"
 #endif // BMPRES_H

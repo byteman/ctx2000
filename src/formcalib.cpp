@@ -6,16 +6,18 @@
 #include <math.h>
 #include <Poco/NumberParser.h>
 static const char* mmenu_bmps[] = {
-     PCOMM_BACKGROUND,
-     PSETZERO_BTN,
-     PCALB_BTN,
-    PCOMM_CLOSE_BTN,
-     PCOMM_SAVE_BTN,
-     PCOMM_CLOSE_BTN,
-     PCOMM_RET_BTN,
-     PMODIFY_BTN,  //new add button for line k
-     PREAD_BTN,  //new add button for read line k
-
+       PCOMM_BACKGROUND,
+       PANGLE_A ,
+       PANGLE_B ,
+       PMIN_UP_ANGLE,
+       PMAX_UP_ANGLE,
+       PMIN_DIST ,
+       PMAX_DIST ,
+       PCAL_ZERO,
+       PCAL_KG,
+       PMIN_HEIGHT ,
+       PMAX_HEIGHT ,
+       PCOMM_CLOSE_BTN
 };
 static COMM_CTRL_DESC CommCtrls[] =
 {
@@ -34,8 +36,6 @@ static COMM_CTRL_DESC StaticCtrls[] =
     STATIC_CUR_AD,
     STATIC_START_X,
     STATIC_START_Y,
-    //STATIC_END_X,
-    //STATIC_END_Y,
     STATIC_START_AD,
     STATIC_END_AD,
 };

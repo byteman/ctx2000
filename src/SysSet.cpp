@@ -16,22 +16,24 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 static const char* mmenu_bmps[] = {
-        PMAIN_MENU_BACKGROUND,
-        PSCALE_BTN,
-        PQUERY_BTN,
-        PPRESET_BTN,
-        PSYSCFG_BTN,
-        PWETCFG_BTN,
-        PHELP_BTN,
+
+    PSYSET_BK,
+    PZONE,
+    PTOWERSET,
+    PWORKSITE,
+    PDIVDING,
+    PHISTORY,
+    PPARAMSET,
     PCOMM_CLOSE_BTN
 };
 static SKIN_BUTTON_DESC SkinBtns[] = {
-    SKIN_BUTTON_SCALE,
-    SKIN_BUTTON_QUERY ,
-    SKIN_BUTTON_PRESET,
-    SKIN_BUTTON_SYSCFG,
-    SKIN_BUTTON_WETCFG,
-    SKIN_BUTTON_HELP,
+
+    SKIN_BUTTON_ZONE,
+    SKIN_BUTTON_TOWER,
+    SKIN_BUTTON_WORKSITE,
+    SKIN_BUTTON_DIV,
+    SKIN_BUTTON_HISTORY,
+    SKIN_BUTTON_PARAM,
     {7,738,8}
 };
 static COMM_CTRL_DESC commctrls[] = {
@@ -74,22 +76,25 @@ void CSysSet::OnPaint(HWND hWnd)
 void CSysSet::OnButtonClick(skin_item_t* item)
 {
     if(item->id == _skinBtns[0]->GetId()){
-        CWorkSite ws;
-        ws.CreateForm(m_hWnd);
-    }else if(item->id == _skinBtns[1]->GetId()){
-        CFormCalib cali;
-        cali.CreateForm(m_hWnd);
-    }else if(item->id == _skinBtns[2]->GetId()){
-
-    }else if(item->id == _skinBtns[3]->GetId()){
-        CAlarmInfoManForm alarm;
-        alarm.CreateForm(m_hWnd);
-    }else if(item->id == _skinBtns[4]->GetId()){
-        CTCParam form;
-        form.CreateForm(m_hWnd);
-    }else if(item->id == _skinBtns[5]->GetId()){
         CDivParam form;
         form.CreateForm(m_hWnd);
+
+    }else if(item->id == _skinBtns[1]->GetId()){
+
+        CTCParam param;
+        param.CreateForm(m_hWnd);
+    }else if(item->id == _skinBtns[2]->GetId()){
+        CWorkSite ws;
+        ws.CreateForm(m_hWnd);
+    }else if(item->id == _skinBtns[3]->GetId()){
+
+    }else if(item->id == _skinBtns[4]->GetId()){
+        CAlarmInfoManForm alarm;
+        alarm.CreateForm(m_hWnd);
+
+    }else if(item->id == _skinBtns[5]->GetId()){
+        CFormCalib cali;
+        cali.CreateForm(m_hWnd);
     }else if(item->id == _skinBtns[6]->GetId()){
         Close();
     }

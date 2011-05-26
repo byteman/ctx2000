@@ -3,7 +3,7 @@
 #include "dt_commctrl.h"
 #define MAX_TEXT_LENGTH 256
 
-#define DEF_EDIT_EXSTYLE WS_EX_NONE //WS_EX_TRANSPARENT
+#define DEF_EDIT_EXSTYLE WS_EX_TRANSPARENT
 #define DEF_EDIT_STYLE   WS_VISIBLE| WS_GROUP
 class CEdit:public CCommCtrl
 {
