@@ -342,6 +342,7 @@ void MyDrawText(std::string text,COMM_CTRL_DESC *desc)
 {
     RECT rt;
     SetRect(&rt,desc->x,desc->y,desc->x+desc->w,desc->y+desc->h);
+    SetBkMode(HDC_SCREEN,BM_TRANSPARENT);
     SelectFont(HDC_SCREEN,GetSystemFont(SYSLOGFONT_FIXED));
     DrawText(HDC_SCREEN,text.c_str(),text.length (),&rt,0);
 }
@@ -350,43 +351,31 @@ void CMainMenu::OnTimer(int ID)
 
 
     EmulateSensor();
-    static int value = 0;
-    value++;
-    std::string t = Poco::format("%d m",value);
-    //for(int i = 0; i < 10; i++)
-    //    MyDrawText(t,commctrls+i);
 
-    fast_dist->SetText(value);
-    fast_angle->SetText(value);
-   fast_up_angle->SetText(value);
-   fast_fengsu->SetText(value);
-    fast_height->SetText(value);
-    fast_max_weight->SetText(value);
-    fast_weight->SetText(value);
-
-
-/*
-    edt_dist->SetText(Poco::format("%0.1f",g_car_dist));
-    edt_angle->SetText(Poco::format("%0.1f",g_angle));
+    for(int i = 0; i < 7; i++)
+        MyDrawText("123",commctrls[i]);
+#if 0
+    fast_dist->SetText(g_car_dist);
+    fast_angle->SetText(g_angle);
 
     if(m_show_up_angle)
     {
-        edt_up_angle->SetText(Poco::format("%0.1f",g_up_angle));
+        fast_up_angle->SetText(g_up_angle);
     }
     if(m_show_speed)
     {
-        edt_fengsu->SetText(Poco::format("%0.1f",g_speed));
+        fast_fengsu->SetText(g_speed);
     }
     if(m_show_dg_height)
     {
-        edt_height->SetText(Poco::format("%0.1f",g_dg_height));
+       fast_height->SetText(g_dg_weight);
     }
     if(m_show_max_weight)
     {
         edt_max_weight->SetText(Poco::format("%d",(int)CLijuCtrl::Get().m_max_weight));
-        edt_weight->SetText(Poco::format("%0.1f",g_dg_weight));
+
     }
-*/
+#endif
 
     m_per.Show(CLijuCtrl::Get().m_percent);
 
