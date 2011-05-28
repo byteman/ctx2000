@@ -239,32 +239,34 @@ void CMainMenu::CreateStatusArea(HDC hdc, RECT rt)
 }
 void CMainMenu::OnCreate()
 {
+#define START_X 530 - 270
     RECT rt;
     bool local=false;
-    int  width = 50;
+    int  width = 30;
+    int  height = 20;
     int  span  = 5;
-    for(int i = 0; i < 5 ;i++)
+    for(int i = 0; i < 10 ;i++)
     {
-        rt.left   = 530+i*width+i*span;
+        rt.left   = START_X+i*width+i*span;
         rt.top    = 5;
         rt.right  = rt.left + width;
-        rt.bottom = rt.top  + 30;
-        if(i == 3)
+        rt.bottom = rt.top  + height;
+        if(i == 6)
             statusIcon[i] = new CStatusIcon(this,i+1,rt,true);
         else
             statusIcon[i] = new CStatusIcon(this,i+1,rt);
-        //statusIcon[i] = new CStatusIcon(this,20+i*20,100,8);
+
     }
-    for(int i = 0; i < 5 ;i++)
+    for(int i = 0; i < 10 ;i++)
     {
-        rt.left   = 530+i*width+i*span;
+        rt.left   = START_X+i*width+i*span;
         rt.top    = 40;
         rt.right  = rt.left + width;
-        rt.bottom = rt.top  + 30;
-        if(i == 3)
-            statusIcon[i+5] = new CStatusIcon(this,i+6,rt,true);
+        rt.bottom = rt.top  + height;
+        if(i == 6)
+            statusIcon[i+10] = new CStatusIcon(this,i+11,rt,true);
         else
-            statusIcon[i+5] = new CStatusIcon(this,i+6,rt);
+            statusIcon[i+10] = new CStatusIcon(this,i+11,rt);
         //statusIcon[i] = new CStatusIcon(this,20+i*20,100,8);
     }
 
@@ -317,11 +319,7 @@ void CMainMenu::OnPaint(HWND hWnd)
     DrawDevSerial(hdc,m_dev_serail_rect,"No.C8001");
     CreateInfoArea(hdc);
 
-    for(int i = 0; i < 2 ;i++)
-        statusIcon[i]->SetStatus(hdc,g_status[i]);
-    for(int i = 2; i < 6 ;i++)
-        statusIcon[i]->SetStatus(hdc,g_status[i]);
-    for(int i = 6; i < 10 ;i++)
+    for(int i = 0; i < 20 ;i++)
         statusIcon[i]->SetStatus(hdc,g_status[i]);
 
     EndPaint(hWnd, hdc);
@@ -342,19 +340,21 @@ void MyDrawText(std::string text,COMM_CTRL_DESC *desc)
 {
     RECT rt;
     SetRect(&rt,desc->x,desc->y,desc->x+desc->w,desc->y+desc->h);
-    SetBkMode(HDC_SCREEN,BM_TRANSPARENT);
+    //SetBkMode(HDC_SCREEN,BM_TRANSPARENT);
     SelectFont(HDC_SCREEN,GetSystemFont(SYSLOGFONT_FIXED));
-    DrawText(HDC_SCREEN,text.c_str(),text.length (),&rt,0);
+    DrawText(HDC_SCREEN,text.c_str(),text.length (),&rt,DT_CENTER);
 }
 void CMainMenu::OnTimer(int ID)
 {
 
 
     EmulateSensor();
-
-    for(int i = 0; i < 7; i++)
-        MyDrawText("123",commctrls[i]);
 #if 0
+    static int j = 0;
+    j++;
+    for(int i = 0; i < 7; i++)
+        MyDrawText(Poco::format("%d",j),&commctrls[i]);
+#endif
     fast_dist->SetText(g_car_dist);
     fast_angle->SetText(g_angle);
 
@@ -375,7 +375,7 @@ void CMainMenu::OnTimer(int ID)
         edt_max_weight->SetText(Poco::format("%d",(int)CLijuCtrl::Get().m_max_weight));
 
     }
-#endif
+
 
     m_per.Show(CLijuCtrl::Get().m_percent);
 
