@@ -22,8 +22,9 @@ CStatusIcon::CStatusIcon(CSkinForm* parent,int num, RECT rt,bool islocal):
     DevStatusColorMaps[2] = PIXEL_red;
     DevBkColorMaps[0]     = PIXEL_lightgray;
     DevBkColorMaps[1]     = PIXEL_darkblue;
-    m_r = 10;
+    m_r = RECTH(rt)/4;
     font = CFontMgr::Get().GetFont("song",16);
+    font->setFontColor(PIXEL_black);
     m_num_str = Poco::format("%d",m_num);
     m_font_color = PIXEL_black;
 }
@@ -45,17 +46,20 @@ bool CStatusIcon::SetStatus(HDC hdc,EDevStatus status)
 
 
     SetBkMode(hdc,BM_TRANSPARENT);
-    gal_pixel oldcolor = SetBrushColor(hdc,DevBkColorMaps[index]);
+    //gal_pixel oldcolor = SetBrushColor(hdc,DevBkColorMaps[index]);
     //FillEllipse(hdc,m_rect.left, m_rect.right, m_rect.right, m_rect.bottom);
-    FillBox(hdc,m_rect.left, m_rect.top,RECTW(m_rect), RECTH(m_rect));
+    //FillBox(hdc,m_rect.left, m_rect.top,RECTW(m_rect), RECTH(m_rect));
+
     SetBrushColor(hdc,DevStatusColorMaps[status]);
     int x = m_rect.left + RECTW(m_rect)/2;
     int y = m_rect.top  + RECTH(m_rect)/2;
+
     FillCircle(hdc, m_rect.left + m_r, y, m_r);
     RECT fontrect;
+
     SetRect(&fontrect,x,m_rect.top,m_rect.right,m_rect.bottom);
 
     m_parent->DrawMyText(hdc,font,&fontrect,m_num_str);
-    SetBrushColor(hdc,oldcolor);
+    //SetBrushColor(hdc,oldcolor);
 
 }

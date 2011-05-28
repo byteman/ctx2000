@@ -239,15 +239,17 @@ void CMainMenu::CreateStatusArea(HDC hdc, RECT rt)
 }
 void CMainMenu::OnCreate()
 {
-#define START_X 530 - 270
+
     RECT rt;
     bool local=false;
-    int  width = 30;
-    int  height = 20;
-    int  span  = 5;
+    int  width   = 30;
+    int  height  = 20;
+    int  span    = 5;
+    int  START_X = 800-10*(width+span);
+
     for(int i = 0; i < 10 ;i++)
     {
-        rt.left   = START_X+i*width+i*span;
+        rt.left   = START_X + i*width+i*span;
         rt.top    = 5;
         rt.right  = rt.left + width;
         rt.bottom = rt.top  + height;
@@ -355,26 +357,26 @@ void CMainMenu::OnTimer(int ID)
     for(int i = 0; i < 7; i++)
         MyDrawText(Poco::format("%d",j),&commctrls[i]);
 #endif
-    fast_dist->SetText(g_car_dist);
-    fast_angle->SetText(g_angle);
+//    fast_dist->SetText(g_car_dist);
+//    fast_angle->SetText(g_angle);
 
-    if(m_show_up_angle)
-    {
-        fast_up_angle->SetText(g_up_angle);
-    }
-    if(m_show_speed)
-    {
-        fast_fengsu->SetText(g_speed);
-    }
-    if(m_show_dg_height)
-    {
-       fast_height->SetText(g_dg_weight);
-    }
-    if(m_show_max_weight)
-    {
-        edt_max_weight->SetText(Poco::format("%d",(int)CLijuCtrl::Get().m_max_weight));
+//    if(m_show_up_angle)
+//    {
+//        fast_up_angle->SetText(g_up_angle);
+//    }
+//    if(m_show_speed)
+//    {
+//        fast_fengsu->SetText(g_speed);
+//    }
+//    if(m_show_dg_height)
+//    {
+//       fast_height->SetText(g_dg_weight);
+//    }
+//    if(m_show_max_weight)
+//    {
+//        edt_max_weight->SetText(Poco::format("%d",(int)CLijuCtrl::Get().m_max_weight));
 
-    }
+//    }
 
 
     m_per.Show(CLijuCtrl::Get().m_percent);

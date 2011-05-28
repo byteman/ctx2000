@@ -28,6 +28,7 @@ private:
     CEdit* _edit[MINEADD_EDIT_NUM];
     CSkinButton* _skinBtns[MINEADD_BTN_NUM];
     CIconGroup _lables;
+
     CIconGroup _msgs;
 
 };
