@@ -50,24 +50,24 @@ static COMM_CTRL_DESC lablectrls[] = {
         */
 };
 static COMM_CTRL_DESC editctrls[] = {
-    {80,  80,  80,30,"0"},
-    {80,  80,  80,30,"0"},
-    {190, 80,  80,30,"0"},
+    {230,  60,  80,30,"0"},
+    {230,  110,  80,30,"0"},
+    {230,  160,  80,30,"0"},
 
-    {80,  150, 80,30,"0"},
-    {190, 150, 80,30,"0"},
+    {230,  210, 80,30,"0"},
+    {230,  260, 80,30,"0"},
 
-    {80,  220, 80,30,"0"},
-    {80,  220, 80,30,"0"},
-    {190, 220, 80,30,"0"},
+    {230,  310, 80,30,"0"},
+    {230,  360, 80,30,"0"},
+    {520, 60, 80,30,"0"},
 
-    {80,  290, 80,30,"0"},
-    {190, 290, 80,30,"0"},
+    {520,  110, 80,30,"0"},
+    {520, 160, 80,30,"0"},
 //===============
-    {320, 80,  100,30,"0"},
-    {320, 80,  100,30,"0"},
-    {320, 80,  100,30,"0"},
-    {320, 80,  100,30,"0"},
+    {520, 210,  100,30,"0"},
+    {520, 260,  100,30,"0"},
+    {520, 310,  100,30,"0"},
+    {520, 360,  100,30,"0"},
 
    // {320, 150,  80,30,"1"},
     /*
@@ -86,7 +86,7 @@ static COMM_CTRL_DESC editctrls[] = {
         */
 };
 static const char* mmenu_bmps[] = {
-        PCOMM_BACKGROUND,
+        PBACKGROUND,
         PCOMM_MDY_BTN,
         PCOMM_SAVE_BTN,
         PCOMM_CLOSE_BTN,
@@ -100,11 +100,17 @@ static SKIN_BUTTON_DESC skinctrls[] = {
         {2,BUTTON_SAVE_X,BUTTON_SAVE_Y},
         {3,BUTTON_EXIT_X,BUTTON_EXIT_Y},
         {4,BUTTON_RETURN_XX,BUTTON_SAVE_Y},
-        {5,650,100},
-        {6,650,300},
+        {5,710,80},
+        {6,710,280},
         {7,355,58+8*29}
 };
-static const char* icon_path[] = {
+static const char *icon_path[] =
+{
+
+};
+
+static POS IconsPos[] =
+{
 
 };
 #include "SoftKeyboard.h"
@@ -131,6 +137,7 @@ CDivParam::CDivParam()
 #define V_SPAN 29
 #define H      24
 #define Y      100
+    /*
     for(int i = 0 ;i < (sizeof(lablectrls)/sizeof(COMM_CTRL_DESC));i++)
     {
         if(i >= 7)
@@ -146,8 +153,10 @@ CDivParam::CDivParam()
         lablectrls[i].h = H;
         lables[i] = new CStatic(&lablectrls[i],this);
     }
+    */
     for(int i = 0 ;i < (sizeof(editctrls)/sizeof(COMM_CTRL_DESC)) ;i++)
     {
+        /*
         if(i >= 7)
         {
             editctrls[i].x = 450;
@@ -156,7 +165,7 @@ CDivParam::CDivParam()
             editctrls[i].x = 200;
             editctrls[i].y = Y+i*V_SPAN;
         }
-
+        */
         editctrls[i].h = H;
         editctrls[i].w = 150;
         edits[i] = new CEdit(&editctrls[i],this);
@@ -167,6 +176,7 @@ CDivParam::CDivParam()
     btn_ret     = new CSkinButton(&skinctrls[3],this);
     btn_next    = new CSkinButton(&skinctrls[4],this);
     btn_prev    = new CSkinButton(&skinctrls[5],this);
+
     InitSkinHeader("WET_param");
     m_tc_id = 1;
 }

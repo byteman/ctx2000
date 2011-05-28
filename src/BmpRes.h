@@ -527,4 +527,7 @@
 //=====================form mainmenu res================
 #define PMAINCFG       "ctx2000/main.png"
 #define PBYPASS        "ctx2000/bypass.png"
+
+//=====================divparam res=====================
+#define PBACKGROUND    "comm/frm_div.png"
 #endif // BMPRES_H
