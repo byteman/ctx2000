@@ -29,6 +29,7 @@ CDirStatusMgr::CDirStatusMgr(int left, int top)
 
       m_upRect.top    = top+span;
       m_upRect.left   = left+left_w;
+
       fprintf(stderr,"top=%d,left=%d\n",m_upRect.top,m_upRect.left );
 
 

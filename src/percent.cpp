@@ -31,6 +31,7 @@ int  CPercent::worksite_proc(HWND hwnd, int message, WPARAM w, LPARAM l)
     snprintf(buf,32,"%d%",tmp);
     //fprintf(stderr,"text=%s height=%d\n",buf,height);
     SetBkMode(hdc,BM_TRANSPARENT);
+    SelectFont(hdc,GetSystemFont(SYSLOGFONT_FIXED));
     DrawText(hdc,buf,strlen(buf),&m_rect,DT_TOP|DT_CENTER);
 
     SetBrushColor(hdc,COLOR_lightwhite);

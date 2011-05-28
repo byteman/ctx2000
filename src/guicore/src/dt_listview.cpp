@@ -403,8 +403,9 @@ void CListView::ex_listview_draw_item(HWND hwnd, int idx, HDC hdc , RECT *rcDraw
 
     const char* strTitle = GetColHeaderText(idx).c_str();
     assert(strTitle != NULL);
+    PLOGFONT old = SelectFont(hdc,GetSystemFont(SYSLOGFONT_CAPTION));
     sDrawText(hdc,rcDraw->left+3,0,rcDraw->right-rcDraw->left-4,rcDraw->bottom-rcDraw->top,strTitle,DT_SINGLELINE|DT_LEFT);
-
+    SelectFont(hdc,old);
 }
 void listview_draw_item(HWND hwnd, int idx, HDC hdc , RECT *rcDraw)
 {

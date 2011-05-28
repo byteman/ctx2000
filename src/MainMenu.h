@@ -7,6 +7,7 @@
 #include "dirstatus.h"
 #include "taji.h"
 #include "percent.h"
+#include "FastStatic.h"
 #define MM_SKIN_BTN_NUM  3
 class CStatusIcon;
 class CFormWorksite;
@@ -20,10 +21,12 @@ public:
         virtual void OnPaint(HWND hWnd);
         virtual void OnShow();
 	virtual void OnButtonClick(skin_item_t* item);
+        virtual void OnLButtonUp(int x, int y);
 
 private:
         void CreateStatusArea(HDC hdc,RECT rt);
         void CreateInfoArea(HDC hdc);
+        void EmulateSensor();
         void DrawDevSerial(HDC hdc, RECT rt,std::string devserail);
         CSkinButton* _skinBtns[5];
 	int m_msg_delay;
@@ -31,18 +34,28 @@ private:
         CStatusIcon* statusIcon[20];
         RECT m_status_rect;
         RECT m_dev_serail_rect;
+        RECT m_liju_rect;
         CDirStatusMgr* m_dir_mgr;
 
-        CEdit* edt_angle;
-        CEdit* edt_dist;
-        CEdit* edt_weight;
-        CEdit* edt_beilv;
-        CEdit* edt_tower_height;
-        CEdit* edt_long_arm_len;
-        CEdit* edt_short_arm_len;
-        CEdit* edt_height;
-        CEdit* edt_up_angle,*edt_max_weight,*edt_fengsu,*edt_dg_height;
+        CStatic* edt_angle;
+        CStatic* edt_dist;
+        CStatic* edt_weight;
+        CStatic* edt_beilv;
+        CStatic* edt_tower_height;
+        CStatic* edt_long_arm_len;
+        CStatic* edt_short_arm_len;
+        CStatic* edt_height;
+        CStatic* edt_up_angle,*edt_max_weight,*edt_fengsu,*edt_dg_height;
 
+        CFastStatic* fast_angle;
+        CFastStatic* fast_dist;
+        CFastStatic* fast_weight;
+        CFastStatic* fast_beilv;
+        CFastStatic* fast_tower_height;
+        CFastStatic* fast_long_arm_len;
+        CFastStatic* fast_short_arm_len;
+        CFastStatic* fast_height;
+        CFastStatic* fast_up_angle,*fast_max_weight,*fast_fengsu,*fast_dg_height;
 
         CStatic* lbl_angle;
         CStatic* lbl_dist;

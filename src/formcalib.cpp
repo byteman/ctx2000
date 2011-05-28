@@ -3,6 +3,7 @@
 #include "BmpRes.h"
 #include "comdata.h"
 #include "iniFile.h"
+#include "lijuConfForm.h"
 #include <math.h>
 #include <Poco/NumberParser.h>
 static const char* mmenu_bmps[] = {
@@ -17,18 +18,13 @@ static const char* mmenu_bmps[] = {
        PCAL_KG,
        PMIN_HEIGHT ,
        PMAX_HEIGHT ,
-       PCOMM_CLOSE_BTN
+       PCOMM_CLOSE_BTN,
+       PLIJU
 };
 static COMM_CTRL_DESC CommCtrls[] =
 {
-    //EDIT_CUR_AD,
-    //EDIT_START_X,
-    //EDIT_START_Y,
-    //EDIT_END_X,
-    //EDIT_END_Y,
     EDIT_START_AD,
     EDIT_END_AD,
-
 };
 static COMM_CTRL_DESC StaticCtrls[] =
 {
@@ -62,7 +58,8 @@ static SKIN_CTRL_DESC SkinCtrls[] = {
     BUTTON_CAB_WET_STOP,
     BUTTON_CAB_HIG_START,
     BUTTON_CAB_HIG_STOP,
-    SKIN_BUTTON_EXIT
+    SKIN_BUTTON_EXIT,
+    BUTTON_LIJU
 };
 #define MSG_AD MSG_USER+0x100
 class ADMessageHandler:public MessageHandler{
@@ -370,5 +367,8 @@ void CFormCalib::OnButtonClick(skin_item_t* item)
     }else if(item->id == _btns[10]->GetId()){
         //吊钩高度标定结束
         Close();
+    }else if(item->id == _btns[11]->GetId()){
+        CLiJuManForm lj;
+        lj.CreateForm(m_hWnd);
     }
 }

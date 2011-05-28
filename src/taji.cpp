@@ -58,6 +58,7 @@ bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
          x = m_r * cos(angle);
          //fprintf(stderr,"x=%0.2f,y=%0.2f\n",x,y);
          SetPenColor(hdc,PIXEL_blue);
+         SetPenWidth(hdc, 8);
          LineEx(hdc,x_pt,y_pt,x_pt + x,y_pt-y);
          //fprintf(stderr,"angle=%0.2f,x=%0.2f,y=%0.2f\n",angle,sin(angle),cos(angle));
      //短臂
@@ -69,13 +70,14 @@ bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
      }
 //原点的编号
      RECT rect;
-     SetBrushColor(hdc,PIXEL_lightwhite);
-     SetRect(&rect,x_pt-w,y_pt+h,x_pt+w,y_pt-h);
+     SetBrushColor(hdc,PIXEL_lightgray);
+     SetRect(&rect,x_pt-2*w,y_pt+2*h,x_pt+2*w,y_pt-2*h);
      FillBox(hdc,x_pt-w,y_pt-h,w+h,w+h);
+     //Rectangle(hdc,x_pt-w,y_pt-h,x_pt+w,y_pt+h);
      SetTextColor (hdc,PIXEL_red);
      SetBkMode (hdc,BM_TRANSPARENT);
      //SetTextColor (hdc,PIXEL_red);
-     SelectFont(hdc,GetSystemFont(SYSLOGFONT_FIXED));
+     SelectFont(hdc,GetSystemFont(SYSLOGFONT_DEFAULT));
      DrawText(hdc,m_tj_num.c_str(),m_tj_num.length (),&rect,DT_CENTER|DT_VCENTER|DT_SINGLELINE);
 
 //小车
@@ -83,7 +85,7 @@ bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
      {
          SetBrushColor(hdc,PIXEL_red);
          x = x_pt + car_dist * cos(angle)*m_zoom;
-         y = y_pt - car_dist * sin(angle)*m_zoom;
+         y = y_pt - car_dist * sin(angle)*m_zoom-h/2;
 
          FillBox(hdc,x,y,10,10);
      }

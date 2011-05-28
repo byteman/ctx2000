@@ -58,7 +58,8 @@ SOURCES += \
     lijuctrl.cpp \
     percent.cpp \
     filter.cpp \
-    extdev/gpio.cpp
+    extdev/gpio.cpp \
+    FastStatic.cpp
 LIBS+=-lPocoFoundation
 
 DEPENDPATH=../include
@@ -76,7 +77,7 @@ linux-g++ {
 }
 
 LIBS+=-lyate -lminigui -lmgext -lpng -ljpeg \
-         -lguicore -lsqlite3 -lserial -lttf -lPocoNet
+         -lguicore -lsqlite3 -lserial -lttf -lPocoNet  -lts
 DEFINES+=
 HEADERS += \
     ime/wt_input.h \
@@ -124,4 +125,5 @@ HEADERS += \
     lijuctrl.h \
     percent.h \
     filter.h \
-    extdev/gpio.h
+    extdev/gpio.h \
+    FastStatic.h

@@ -513,7 +513,7 @@
 
 #define PCAL_ZERO     "ctx2000/cali_zero.png"
 #define PCAL_KG       "ctx2000/cali_kg.png"
-
+#define PLIJU         "ctx2000/liju.png"
 //======================form system set res=====================
 #define PSYSET_BK    "ctx2000/sysetbk.jpg"
 #define PTOWERSET    "ctx2000/tower.png"
@@ -523,4 +523,8 @@
 #define PHISTORY     "ctx2000/history.png"
 #define PWORKSITE    "ctx2000/worksite.png"
 #define PMAINBK      "ctx2000/mainbk.jpg"
+
+//=====================form mainmenu res================
+#define PMAINCFG       "ctx2000/main.png"
+#define PBYPASS        "ctx2000/bypass.png"
 #endif // BMPRES_H

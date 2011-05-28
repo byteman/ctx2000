@@ -129,6 +129,7 @@
 #define BUTTON_CAB_HIG_START       {9,400,300}
 #define BUTTON_CAB_HIG_STOP        {10,500,300}
 #define SKIN_BUTTON_EXIT           {11,738,     8}
+#define BUTTON_LIJU                 {12,400,350}
 #define  BUTTON_LINEK      {6,BUTTON_LINEK_X_MDF,BUTTON_SAVE_Y}
 #define  BUTTON_READ_LINEK      {7,BUTTON_LINEK_X,BUTTON_SAVE_Y-65}
 
