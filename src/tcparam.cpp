@@ -49,21 +49,58 @@ static COMM_CTRL_DESC lablectrls[] = {
         */
 };
 static COMM_CTRL_DESC editctrls[] = {
-    {80,  80,  80,30,"0"},
-    {190, 80,  80,30,"0"},
+    //===========taji one==========
+    {150,  56,  80,30,"0"},
+    {150,  91,  80,30,"0"},
 
-    {80,  150, 80,30,"0"},
-    {190, 150, 80,30,"0"},
+    {150,  120, 80,30,"0"},
+    {150,  150, 80,30,"0"},
 
-    {80,  220, 80,30,"0"},
-    {80,  220, 80,30,"0"},
-    {190, 220, 80,30,"0"},
+    {150,  180, 80,30,"0"},
+    {150,  210, 80,30,"0"},
 
-    {80,  290, 80,30,"0"},
-    {190, 290, 80,30,"0"},
-//===============
-    {320, 80,  100,30,"0"},
-    {320, 80,  100,30,"0"},
+    {150,  240, 80,30,"0"},
+
+    {150,  270, 80,30,"0"},
+    {150,  330, 80,30,"0"},
+
+    {150,  360,  100,30,"0"},
+    {150,  390,  100,30,"0"},
+    //===========taji two============
+
+    {350,  56,  80,30,"0"},
+    {350,  94,  80,30,"0"},
+
+    {350,  120, 80,30,"0"},
+    {350,  150, 80,30,"0"},
+
+    {350,  180, 80,30,"0"},
+    {350,  210, 80,30,"0"},
+
+    {350,  240, 80,30,"0"},
+
+    {350,  270, 80,30,"0"},
+    {350,  330, 80,30,"0"},
+
+    {350,  360,  100,30,"0"},
+    {350,  390,  100,30,"0"},
+    //===========taji three==========
+    {570,  56,  80,30,"0"},
+    {570,  94,  80,30,"0"},
+
+    {570,  120, 80,30,"0"},
+    {570,  150, 80,30,"0"},
+
+    {570,  180, 80,30,"0"},
+    {570,  210, 80,30,"0"},
+
+    {570,  240, 80,30,"0"},
+
+    {570,  270, 80,30,"0"},
+    {570,  330, 80,30,"0"},
+
+    {570,  360,  100,30,"0"},
+    {570,  390,  100,30,"0"},
 
    // {320, 150,  80,30,"1"},
     /*
@@ -82,7 +119,7 @@ static COMM_CTRL_DESC editctrls[] = {
         */
 };
 static const char* mmenu_bmps[] = {
-        PCOMM_BACKGROUND,
+        PTJBACKGROUND,
         PCOMM_MDY_BTN,
         PCOMM_SAVE_BTN,
         PCOMM_CLOSE_BTN,
@@ -92,13 +129,15 @@ static const char* mmenu_bmps[] = {
         PCOMM_CHECK_BTN
 };
 static SKIN_BUTTON_DESC skinctrls[] = {
-        {1,BUTTON_DEFAULE_X,BUTTON_DEFAULE_Y},
-        {2,BUTTON_SAVE_X,BUTTON_SAVE_Y},
+        {1,680,330},
+        {2,680,370},
         {3,BUTTON_EXIT_X,BUTTON_EXIT_Y},
-        {4,BUTTON_RETURN_XX,BUTTON_SAVE_Y},
-        {5,550,100},
-        {6,550,300},
-        {7,355,58+8*29}
+        {4,680,410},
+        {5,710,80},
+        {6,710,240},
+        {7,135,305},
+        {7,345,305},
+        {7,555,305}
 };
 static const char* icon_path[] = {
 
@@ -126,6 +165,7 @@ CTCParam::CTCParam()
     }
 #define V_SPAN 29
 #define H      24
+    /*
     for(int i = 0 ;i < (sizeof(lablectrls)/sizeof(COMM_CTRL_DESC));i++)
     {
         lablectrls[i].x = 250;
@@ -134,25 +174,22 @@ CTCParam::CTCParam()
         lablectrls[i].h = H;
         lables[i] = new CStatic(&lablectrls[i],this);
     }
+    */
     for(int i = 0 ;i < (sizeof(editctrls)/sizeof(COMM_CTRL_DESC)) ;i++)
     {
-        editctrls[i].x = 250+105;
-        editctrls[i].y = 58+i*V_SPAN;
         editctrls[i].h = H;
         editctrls[i].w = 150;
-        if(i >= 8)
-        {
-            editctrls[i].y += V_SPAN;
-        }
         edits[i] = new CEdit(&editctrls[i],this);
     }
-    btn_mdy     = new CSkinButton(&skinctrls[0],this);
-    btn_save    = new CSkinButton(&skinctrls[1],this);
-    btn_exit    = new CSkinButton(&skinctrls[2],this);
-    btn_ret     = new CSkinButton(&skinctrls[3],this);
-    btn_next    = new CSkinButton(&skinctrls[4],this);
-    btn_prev    = new CSkinButton(&skinctrls[5],this);
-    chk_dynamic = new CSkinChkButton(&skinctrls[6],this);
+    btn_mdy      = new CSkinButton(&skinctrls[0],this);
+    btn_save     = new CSkinButton(&skinctrls[1],this);
+    btn_exit     = new CSkinButton(&skinctrls[2],this);
+    btn_ret      = new CSkinButton(&skinctrls[3],this);
+    btn_next     = new CSkinButton(&skinctrls[4],this);
+    btn_prev     = new CSkinButton(&skinctrls[5],this);
+    chk_dynamic1 = new CSkinChkButton(&skinctrls[6],this);
+    chk_dynamic2 = new CSkinChkButton(&skinctrls[7],this);
+    chk_dynamic3 = new CSkinChkButton(&skinctrls[8],this);
     InitSkinHeader("WET_param");
     m_tc_id = 1;
 }
@@ -167,51 +204,122 @@ void    CTCParam::OnPaint(HWND hWnd)
 }
 void    CTCParam::OnShow()
 {
-    Update(1);
+    Update(1,1);
+    Update(2,2);
+    Update(3,3);
 }
-void    CTCParam::Update(int id)
+void    CTCParam::Update(int id,int where)
 {
-    edits[0]->SetIntText(id);
+    int pos;
+    pos = (where-1)*11;
+    edits[0+pos]->SetIntText(id);
     std::string serial = g_TC[id].Serial;
-    edits[1]->SetText(Poco::trim(serial));
-    edits[2]->SetFloatText(g_TC[id].x);
-    edits[3]->SetFloatText(g_TC[id].y);
-    edits[4]->SetFloatText(g_TC[id].Height);
-    edits[5]->SetFloatText(g_TC[id].LongArmLength);
-    edits[6]->SetFloatText(g_TC[id].ShortArmLenght);
+    edits[1+pos]->SetText(Poco::trim(serial));
+    edits[2+pos]->SetFloatText(g_TC[id].x);
+    edits[3+pos]->SetFloatText(g_TC[id].y);
+    edits[4+pos]->SetFloatText(g_TC[id].Height);
+    edits[5+pos]->SetFloatText(g_TC[id].LongArmLength);
+    edits[6+pos]->SetFloatText(g_TC[id].ShortArmLenght);
 
-    edits[7]->SetFloatText(g_TC[id].Rs);
-    edits[8]->SetFloatText(g_TC[id].L1);
-    edits[9]->SetFloatText(g_TC[id].L2);
-    edits[10]->SetFloatText(g_TC[id].a0);
-    if(g_TC[id].Dyna)
-        chk_dynamic->SetCheckStatus(true);
-    else
-        chk_dynamic->SetCheckStatus(false);
+    edits[7+pos]->SetFloatText(g_TC[id].Rs);
+    edits[8+pos]->SetFloatText(g_TC[id].L1);
+    edits[9+pos]->SetFloatText(g_TC[id].L2);
+    edits[10+pos]->SetFloatText(g_TC[id].a0);
+    switch(where)
+    {
+        case 1:
+        {
+          if(g_TC[id].Dyna)
+              chk_dynamic1->SetCheckStatus(true);
+          else
+              chk_dynamic1->SetCheckStatus(false);
+          break;
+        }
+        case 2:
+        {
+          if(g_TC[id].Dyna)
+              chk_dynamic2->SetCheckStatus(true);
+          else
+              chk_dynamic2->SetCheckStatus(false);
+          break;
+        }
+        case 3:
+        {
+          if(g_TC[id].Dyna)
+              chk_dynamic3->SetCheckStatus(true);
+          else
+              chk_dynamic3->SetCheckStatus(false);
+          break;
+        }
+        default:
+            break;
+    }
 
 }
 void    CTCParam::SaveTC(int id)
 {
     bool ok =false;
+    int pos;
+    if(id>7) return; //error return
+    if(id>0)
+    pos = (id-1)*3+1;
+    memset(g_TC[pos].Serial,0,20);
+    edits[1]->GetText().copy(g_TC[pos].Serial,20);
+    g_TC[pos].x =  edits[2]->GetFloatValue(ok);
+    g_TC[pos].y =  edits[3]->GetFloatValue(ok);
+    g_TC[pos].Height =  edits[4]->GetFloatValue(ok);
+    g_TC[pos].LongArmLength  =  edits[5]->GetFloatValue(ok);
+    g_TC[pos].ShortArmLenght =  edits[6]->GetFloatValue(ok);
+    g_TC[pos].Rs =  edits[7]->GetFloatValue(ok);
 
-    memset(g_TC[id].Serial,0,20);
-    edits[1]->GetText().copy(g_TC[id].Serial,20);
-    g_TC[id].x =  edits[2]->GetFloatValue(ok);
-    g_TC[id].y =  edits[3]->GetFloatValue(ok);
-    g_TC[id].Height =  edits[4]->GetFloatValue(ok);
-    g_TC[id].LongArmLength =  edits[5]->GetFloatValue(ok);
-    g_TC[id].ShortArmLenght =  edits[6]->GetFloatValue(ok);
-    g_TC[id].Rs =  edits[7]->GetFloatValue(ok);
-
-    g_TC[id].L1 =  edits[8]->GetFloatValue(ok);
-    g_TC[id].L2 =  edits[9]->GetFloatValue(ok);
-    g_TC[id].a0 =  edits[10]->GetFloatValue(ok);
-    if(chk_dynamic->GetCheckStatus())
-        g_TC[id].Dyna = 1;
+    g_TC[pos].L1 =  edits[8]->GetFloatValue(ok);
+    g_TC[pos].L2 =  edits[9]->GetFloatValue(ok);
+    g_TC[pos].a0 =  edits[10]->GetFloatValue(ok);
+    if(chk_dynamic1->GetCheckStatus())
+        g_TC[pos].Dyna = 1;
     else
-        g_TC[id].Dyna = 0;
+        g_TC[pos].Dyna = 0;
+    //========refresh channel 2====
+    memset(g_TC[pos+1].Serial,0,20);
+    edits[12]->GetText().copy(g_TC[pos+1].Serial,20);
+    g_TC[pos+1].x =  edits[13]->GetFloatValue(ok);
+    g_TC[pos+1].y =  edits[14]->GetFloatValue(ok);
+    g_TC[pos+1].Height =  edits[15]->GetFloatValue(ok);
+    g_TC[pos+1].LongArmLength  =  edits[16]->GetFloatValue(ok);
+    g_TC[pos+1].ShortArmLenght =  edits[17]->GetFloatValue(ok);
+    g_TC[pos+1].Rs =  edits[18]->GetFloatValue(ok);
 
+    g_TC[pos+1].L1 =  edits[19]->GetFloatValue(ok);
+    g_TC[pos+1].L2 =  edits[20]->GetFloatValue(ok);
+    g_TC[pos+1].a0 =  edits[21]->GetFloatValue(ok);
+    if(chk_dynamic2->GetCheckStatus())
+        g_TC[pos+1].Dyna = 1;
+    else
+        g_TC[pos+1].Dyna = 0;
+    //========refresh channel 3====
+    if((pos+2)>20)
+    {
+       ;
+    }
+    else
+    {
+        memset(g_TC[pos+2].Serial,0,20);
+        edits[23]->GetText().copy(g_TC[pos+2].Serial,20);
+        g_TC[pos+2].x =  edits[24]->GetFloatValue(ok);
+        g_TC[pos+2].y =  edits[25]->GetFloatValue(ok);
+        g_TC[pos+2].Height =  edits[26]->GetFloatValue(ok);
+        g_TC[pos+2].LongArmLength  =  edits[27]->GetFloatValue(ok);
+        g_TC[pos+2].ShortArmLenght =  edits[28]->GetFloatValue(ok);
+        g_TC[pos+2].Rs =  edits[29]->GetFloatValue(ok);
 
+        g_TC[pos+2].L1 =  edits[30]->GetFloatValue(ok);
+        g_TC[pos+2].L2 =  edits[31]->GetFloatValue(ok);
+        g_TC[pos+2].a0 =  edits[32]->GetFloatValue(ok);
+        if(chk_dynamic3->GetCheckStatus())
+            g_TC[pos+2].Dyna = 1;
+        else
+            g_TC[pos+2].Dyna = 0;
+    }
 }
 void    CTCParam::OnButtonClick(skin_item_t* item)
 {
@@ -236,16 +344,39 @@ void    CTCParam::OnButtonClick(skin_item_t* item)
     } else if(item->id == btn_prev->GetId())
     {
         m_tc_id++;
-        if(m_tc_id > 20)
-            m_tc_id = 1;
-        Update(m_tc_id);
+        if(m_tc_id >7)
+          m_tc_id=1;
+        if(m_tc_id==7)
+        {
+          Update(19,1);
+          Update(20,2);
+        }
+        else
+        {
+          if(m_tc_id>0)
+          {
+            Update((m_tc_id-1)*3+1,1);
+            Update((m_tc_id-1)*3+2,2);
+            Update((m_tc_id-1)*3+3,3);
+          }
+        }
 
     } else if(item->id == btn_next->GetId())
     {
         m_tc_id--;
-        if(m_tc_id < 1)
-            m_tc_id = 20;
-        Update(m_tc_id);
+        if(m_tc_id == 7)
+        {
+          Update(19,1);
+          Update(20,2);
+        }
+        else if(m_tc_id>0)
+        {
+          Update((m_tc_id-1)*3+1,1);
+          Update((m_tc_id-1)*3+2,2);
+          Update((m_tc_id-1)*3+3,3);
+        }
+        if(m_tc_id == 0)
+          m_tc_id = 8;
     }
 
 }

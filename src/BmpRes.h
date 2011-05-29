@@ -528,6 +528,12 @@
 #define PMAINCFG       "ctx2000/main.png"
 #define PBYPASS        "ctx2000/bypass.png"
 
-//=====================divparam res=====================
-#define PBACKGROUND    "comm/frm_div.png"
+//=====================divparam  res=====================
+#define PDIVBACKGROUND    "comm/frm_div.png"
+//=====================tjparam   res=====================
+#define PTJBACKGROUND  "comm/tjparam.png"
+//=====================worksite  res=====================
+#define PWSBACKGROUND  "comm/worksite.png"
+//=====================formcalib res=====================
+#define PCLBACKGROUND  "comm/calib.png"
 #endif // BMPRES_H

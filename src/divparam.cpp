@@ -86,7 +86,7 @@ static COMM_CTRL_DESC editctrls[] = {
         */
 };
 static const char* mmenu_bmps[] = {
-        PBACKGROUND,
+        PDIVBACKGROUND,
         PCOMM_MDY_BTN,
         PCOMM_SAVE_BTN,
         PCOMM_CLOSE_BTN,
