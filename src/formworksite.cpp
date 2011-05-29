@@ -138,8 +138,8 @@ void CFormWorksite::init(HWND parent)
     old_hwnd = GetDlgItem(parent,m_area->GetId());
     if(old_hwnd != HWND_INVALID)
     {
-        SetWindowAdditionalData2(old_hwnd,(DWORD)this);
-        old_static_proc = SetWindowCallbackProc(old_hwnd,static_proc);
+        //SetWindowAdditionalData2(old_hwnd,(DWORD)this);
+        //old_static_proc = SetWindowCallbackProc(old_hwnd,static_proc);
     }
     else{
         fprintf(stderr,"can't get hwnd\n");
@@ -149,8 +149,32 @@ bool CFormWorksite::addTaji(QtzParam* tzPar)
 {
 
 }
+void CFormWorksite::updateAll()
+{
+    for(int i = 0; i < m_tj_num; i++)
+        m_tajis[i]->is_update=true;
+}
 //更新某个编号的塔机区域，如果0的话，就是更新所有塔机状态
 void CFormWorksite::update(int taji)
 {
-    UpdateWindow(old_hwnd,FALSE);
+    //UpdateWindow(old_hwnd,FALSE);
+
+    static bool draw_flag=false;
+    HDC hdc = GetClientDC(old_hwnd);
+
+    SetPenColor(hdc,PIXEL_lightgray);
+    Rectangle(hdc,0,0,m_width-1,m_height);
+
+    for( size_t i = 0 ; i < g_conflict_tj_list.size()+1; i++)
+    {
+        m_tajis[i]->Draw(hdc);
+    }
+    if(!draw_flag)
+    {
+        //draw_zhangai(hdc);
+        //draw_flag=true;
+    }
+
+    ReleaseDC(hdc);
+    return ;
 }

@@ -32,7 +32,7 @@ int  CPercent::worksite_proc(HWND hwnd, int message, WPARAM w, LPARAM l)
     //fprintf(stderr,"text=%s height=%d\n",buf,height);
     SetBkMode(hdc,BM_TRANSPARENT);
     SelectFont(hdc,GetSystemFont(SYSLOGFONT_FIXED));
-    DrawText(hdc,buf,strlen(buf),&m_rect,DT_TOP|DT_CENTER);
+    DrawText(hdc,buf,strlen(buf),&m_rect,DT_TOP|DT_LEFT);
 
     SetBrushColor(hdc,COLOR_lightwhite);
     FillBox(hdc,0,30,m_w,m_h-old_height);
@@ -63,7 +63,7 @@ bool CPercent::Init(CSkinForm* parent,CStatic* ctrl,int w, int h)
     if(m_hwnd != HWND_INVALID){
        // m_hdc = GetClientDC(m_hwnd);
     }
-    SetRect(&m_rect,0,0,30,30);
+    SetRect(&m_rect,0,0,60,30);
 
     if(m_hwnd != HWND_INVALID)
     {

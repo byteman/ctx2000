@@ -21,11 +21,11 @@ CDirStatusMgr::CDirStatusMgr(int left, int top)
       m_dirs[2] = new CDirStatus("left");
       m_dirs[3] = new CDirStatus("right");
 
-      int up_h  = m_dirs[0]->m_icon.GetBitmap()->bmHeight;
-      int up_w  = m_dirs[0]->m_icon.GetBitmap()->bmWidth/3;
+      int up_h  = m_dirs[0]->m_icon.GetBitmap()->bmHeight-10;
+      int up_w  = m_dirs[0]->m_icon.GetBitmap()->bmWidth/3-10;
 
-      int left_h  = m_dirs[2]->m_icon.GetBitmap()->bmHeight;
-      int left_w  = m_dirs[2]->m_icon.GetBitmap()->bmWidth/3;
+      int left_h  = m_dirs[2]->m_icon.GetBitmap()->bmHeight-10;
+      int left_w  = m_dirs[2]->m_icon.GetBitmap()->bmWidth/3-10;
 
       m_upRect.top    = top+span;
       m_upRect.left   = left+left_w;

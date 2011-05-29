@@ -74,8 +74,10 @@ void CFastStatic::SetText(std::string value)
     SelectFont(m_hdc,GetSystemFont(SYSLOGFONT_FIXED));
     //SetBkMode(m_hdc,BM_TRANSPARENT);
     SetBkColor(m_hdc,RGB2Pixel(HDC_SCREEN,150,208,209));
+    SetBrushColor(m_hdc,RGB2Pixel(HDC_SCREEN,150,208,209));
+    FillBox(m_hdc,m_rect.left,m_rect.top,RECTW(m_rect),RECTH(m_rect));
     DrawText(m_hdc,  value.c_str(),value.length (),&m_rect,DT_LEFT|DT_TOP);
-
+    //InvalidateRect(m_hdc,&m_rect,TRUE);
     ReleaseDC(m_hdc);
 }
 void CFastStatic::SetText(double value)

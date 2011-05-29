@@ -24,9 +24,11 @@ public:
         virtual void OnLButtonUp(int x, int y);
 
 private:
+        void UpdateTopArea();
         void CreateStatusArea(HDC hdc,RECT rt);
         void CreateInfoArea(HDC hdc);
         void EmulateSensor();
+        void DrawTCType(HDC hdc, RECT rt,std::string tctype);
         void DrawDevSerial(HDC hdc, RECT rt,std::string devserail);
         CSkinButton* _skinBtns[5];
 	int m_msg_delay;
@@ -34,6 +36,7 @@ private:
         CStatusIcon* statusIcon[20];
         RECT m_status_rect;
         RECT m_dev_serail_rect;
+        RECT m_tc_type_rect;
         RECT m_liju_rect;
         CDirStatusMgr* m_dir_mgr;
 

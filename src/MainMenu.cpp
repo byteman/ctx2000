@@ -19,7 +19,7 @@
 #include <math.h>
 #include <Poco/Format.h>
 
-#define E_W  170
+#define E_W  85
 #define E_H  30
 #define L_S  55
 #define L_S_V 110
@@ -35,7 +35,7 @@
 #define EDIT_HEIGHT   {L_S,L_S_V+4*V_S, E_W,E_H,""}
 #define EDIT_UP_ANGL  {L_S,L_S_V+5*V_S, E_W,E_H,""}
 #define EDIT_BEILV    {150,350, 30,30,""}
-#define STATIC_LIJU    {150,84,40,150,""}
+#define STATIC_LIJU    {150,84,30,150,""}
 
 #define EDIT_T_H      {L_S2,L_S_V2+0*V_S, E_W,E_H,""}
 #define EDIT_L_ARM    {L_S2,L_S_V2+1*V_S, E_W,E_H,""}
@@ -186,13 +186,15 @@ CMainMenu::CMainMenu()
 */
     Font24 = CFontMgr::Get().GetFont("stxinwei",24);
     assert(Font24 != NULL);
-    Font24->setFontColor(RGB2Pixel(HDC_SCREEN,255,0,0));
+    Font24->setFontColor(RGB2Pixel(HDC_SCREEN,0,0,0));
 
     fprintf(stderr,"sbc=%s,mbc=%s\n",Font24->pfont->sbc_devfont->name,Font24->pfont->mbc_devfont->name);
 
 
     SetRect(&m_status_rect,    200,0,800,Client_Height);
     SetRect(&m_dev_serail_rect,0,0,200,  Client_Height);
+
+    SetRect(& m_tc_type_rect,   660,Client_Height+65,800,  Client_Height+115);
     SetRect(&m_liju_rect, 145, 345, 180, 380);
 
     for(int i = 0; i < 1; i++)
@@ -202,7 +204,7 @@ CMainMenu::CMainMenu()
 
     m_worksite = new CFormWorksite(m_areas[0],areactrls[0].w,areactrls[0].h);
 
-    m_dir_mgr = new CDirStatusMgr(680,Client_Height+10);
+    m_dir_mgr = new CDirStatusMgr(700,Client_Height+5);
 
     InitSkinHeader("MainMenu");
 }
@@ -213,6 +215,12 @@ CMainMenu::~CMainMenu()
     {
         delete m_worksite;
     }
+}
+void CMainMenu::DrawTCType(HDC hdc, RECT rt,std::string tctype)
+{
+    SetPenColor(hdc,PIXEL_black);
+
+    DrawMyText(hdc,Font24,&rt,tctype);
 }
 void CMainMenu::DrawDevSerial(HDC hdc, RECT rt,std::string devserail)
 {
@@ -273,11 +281,34 @@ void CMainMenu::OnCreate()
     }
 
     if(!skt)
+    {
         skt = new SoftKeyboard();
+        skt->T9_Show(false);
+    }
     SetTimer(m_hWnd,100,10);
 
 }
+void CMainMenu::UpdateTopArea()
+{
+    HDC hdc = GetClientDC(m_hWnd);
 
+    CreateStatusArea(hdc ,m_status_rect);
+    DrawDevSerial(hdc,m_dev_serail_rect,CurSerial);
+    DrawTCType(hdc,m_tc_type_rect,TCTypeName);
+
+    CreateInfoArea(hdc);
+    for(int i = 0; i < 20 ; i++)
+        statusIcon[i]->SetStatus(hdc,g_status[i]);
+
+    ReleaseDC(hdc);
+    //显示塔机高度
+        fast_tower_height->SetText(Poco::format("%0.1fm",g_TC[g_local_id].Height));
+    //显示大臂长度
+        fast_long_arm_len->SetText(Poco::format("%0.1fm",g_TC[g_local_id].LongArmLength));
+    //显示短臂长度
+        fast_short_arm_len->SetText(Poco::format("%0.1fm",g_TC[g_local_id].ShortArmLenght));
+        edt_beilv->SetText(StrTCBeilv);
+}
 void CMainMenu::OnShow()
 {
     fast_angle->Attach(edt_angle);
@@ -292,24 +323,11 @@ void CMainMenu::OnShow()
     fast_max_weight->Attach(edt_max_weight);
     fast_fengsu->Attach(edt_fengsu);
 
-    HDC hdc = GetClientDC(m_hWnd);
-
-    CreateStatusArea(hdc ,m_status_rect);
-    DrawDevSerial(hdc,m_dev_serail_rect,"No.C8001");
-    CreateInfoArea(hdc);
-    for(int i = 0; i < 20 ; i++)
-        statusIcon[i]->SetStatus(hdc,g_status[i]);
-
-    ReleaseDC(hdc);
+    UpdateTopArea();
 
     m_worksite->init(m_hWnd);
+    m_worksite->updateAll();
     m_per.Init(this,m_liju,commctrls[11].w,commctrls[11].h);
-//显示塔机高度
-    fast_tower_height->SetText(Poco::format("%0.1fm",g_TC[g_local_id].Height));
-//显示大臂长度
-    fast_long_arm_len->SetText(Poco::format("%0.1fm",g_TC[g_local_id].LongArmLength));
-//显示短臂长度
-    fast_short_arm_len->SetText(Poco::format("%0.1fm",g_TC[g_local_id].ShortArmLenght));
 
     m_hdc = GetDC(m_hWnd);
 
@@ -467,6 +485,8 @@ void CMainMenu::OnButtonClick(skin_item_t* item)
         CSysSet ss;
         ss.CreateForm(m_hWnd);
         SetTimer(m_hWnd,100,10);
+        UpdateTopArea();
+        m_worksite->updateAll();
     }else if(item->id == _skinBtns[1]->GetId()){
 
 

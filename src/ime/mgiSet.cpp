@@ -190,7 +190,7 @@ mgiSet::mgiSet(int left ,int top ,int right,int bottom)
     RECT rect;
     
     CallbackFun = NULL;
-    ime_handle = mgiCreateIMEContainer (2, TRUE);
+    ime_handle = mgiCreateIMEContainer (2, FALSE);
     SetRect(&rect, left, top, right, bottom);
 
 //T9 ‰»Î∑®

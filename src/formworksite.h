@@ -12,6 +12,7 @@ public:
     int  worksite_proc(HWND hwnd, int message, WPARAM w, LPARAM l);
     //更新某个编号的塔机区域，如果0的话，就是更新所有塔机状态
     void update(int taji=-1);
+    void updateAll();
     void draw_zhangai(HDC hdc);
     WNDPROC old_static_proc;
     HWND    old_hwnd;
