@@ -9,7 +9,11 @@ static char* alarminfolist_caption[] =
 	"时间",
         "塔吊编号",
         "小车指令",
-        "回转指令"
+        "回转指令",
+        "幅度",
+        "宽度",
+        "高度",
+        "速度"
 };
 #define COL_NR	TABLESIZE(alarminfolist_caption)
 
@@ -117,7 +121,7 @@ void    CAlarmInfoManForm::OnButtonClick(skin_item_t* item)
 void
 CAlarmInfoManForm::InitListCol()
 {
-        int width[COL_NR] = {50, 200, 80, 110,LIST_ALARMINFO_W-440};
+        int width[COL_NR] = {50, 200, 80, 110,50,50,50,50,LIST_ALARMINFO_W-240};
         for (int i = 0; i < COL_NR; i++) {
                  _lvAlarmInfo->AddColumn(i,alarminfolist_caption[i],width[i]);
         }
@@ -153,28 +157,28 @@ void CAlarmInfoManForm::add_alarminfo_item (StringList &alarminfoItems,THistoy& 
     {
         switch(j)
         {
-			case 0:
-                               alarminfoItems.push_back("0");
-                               break;
-			case 1:
-                                alarminfoItems.push_back(AlarmInfo.date);
-                                break;
+            case 0:
+                   alarminfoItems.push_back("0");
+                   break;
+            case 1:
+                    alarminfoItems.push_back(AlarmInfo.date);
+                    break;
 
-			case 2:
-                                alarminfoItems.push_back(AlarmInfo.serial);
-                                break;
+            case 2:
+                    alarminfoItems.push_back(AlarmInfo.serial);
+                    break;
 
-			case 3:
-                                sprintf (buff, "%d", AlarmInfo.slewing);
-                                alarminfoItems.push_back(buff);
-                                break;
-                        case 4:
-                                sprintf (buff, "%d", AlarmInfo.trolley);
-                                alarminfoItems.push_back(buff);
-                                break;
-			default:
-				break;
-		}
+            case 3:
+                    sprintf (buff, "%d", AlarmInfo.slewing);
+                    alarminfoItems.push_back(buff);
+                    break;
+            case 4:
+                    sprintf (buff, "%d", AlarmInfo.trolley);
+                    alarminfoItems.push_back(buff);
+                    break;
+            default:
+                    break;
+        }
     }
 }
 

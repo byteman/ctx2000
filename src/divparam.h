@@ -4,7 +4,6 @@
 
 #include "dt_core.h"
 
-
 class CDivParam : public CSkinForm
 {
 public:

@@ -4,7 +4,8 @@
 #include <yateclass.h>
 #include <yatengine.h>
 using namespace TelEngine;
-
+#define BUTTON_RETURN_X           640
+#define BUTTON_RETURN_Y           420
 class CFormCalib:public CSkinForm
 {
 public:
@@ -25,6 +26,7 @@ private:
     void calibrate_weight(int type);
     void calc_up_angle(int type);
     CSkinButton* _btns[20];
+    CSkinButton* btn_ret;
     CEdit*       _edits[10];
     CStatic*     _lables[10];
     MessageHandler* msgHandler;

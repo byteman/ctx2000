@@ -7,7 +7,7 @@
 #include <math.h>
 #include <Poco/NumberParser.h>
 static const char* mmenu_bmps[] = {
-       PCOMM_BACKGROUND,
+       PCLBACKGROUND,
        PANGLE_A ,
        PANGLE_B ,
        PMIN_UP_ANGLE,
@@ -19,7 +19,8 @@ static const char* mmenu_bmps[] = {
        PMIN_HEIGHT ,
        PMAX_HEIGHT ,
        PCOMM_CLOSE_BTN,
-       PLIJU
+       PLIJU,
+       PCOMM_RET_BTN
 };
 static COMM_CTRL_DESC CommCtrls[] =
 {
@@ -61,6 +62,10 @@ static SKIN_CTRL_DESC SkinCtrls[] = {
     SKIN_BUTTON_EXIT,
     BUTTON_LIJU
 };
+static SKIN_BUTTON_DESC skinctrls[] = {
+        {13,BUTTON_RETURN_X,BUTTON_RETURN_Y},
+
+};
 #define MSG_AD MSG_USER+0x100
 class ADMessageHandler:public MessageHandler{
 public:
@@ -93,11 +98,13 @@ CFormCalib::CFormCalib()
     {
         _edits[i] = new CEdit(&CommCtrls[i],this);
     }
-
+    btn_ret    = new CSkinButton(&skinctrls[0],this);;
+    /*
     for(int i = 0 ;i < (sizeof(StaticCtrls)/sizeof(COMM_CTRL_DESC));i++)
     {
         _lables[i] = new CStatic(&StaticCtrls[i],this);
     }
+    */
     InitSkinHeader("formcalib");
 }
 
@@ -370,5 +377,9 @@ void CFormCalib::OnButtonClick(skin_item_t* item)
     }else if(item->id == _btns[11]->GetId()){
         CLiJuManForm lj;
         lj.CreateForm(m_hWnd);
+    }
+    else if(item->id == btn_ret->GetId())
+    {
+        Close();
     }
 }
