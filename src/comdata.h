@@ -31,6 +31,7 @@ extern  std::string StrTCArmLen, StrTCBeilv;
 extern  double  wksp[4][2];
 extern  double  czwzb[2][2];
 extern  double  YNAngle,VStopDis,VWarnDis,BrakeDis,DangerDis,WarnDis,AddAngle;
+extern  int     FDTime,BrakeTime;
 extern  Twb     wba[11];
 extern  TDividePoint DividePoint[21];
 extern  int TcNum,wbNum,DividePointNum,TCTotalNum,fd_time,brake_time;

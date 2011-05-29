@@ -163,8 +163,8 @@ void    CWorkSite::OnShow()
     edits[16]->SetText(Poco::format("%0.2f",DangerDis));
     edits[17]->SetText(Poco::format("%0.2f",WarnDis));
     edits[18]->SetText(Poco::format("%0.2f",AddAngle));
-    edits[19]->SetText(Poco::format("%d",fd_time));
-    edits[20]->SetText(Poco::format("%d",brake_time));
+    edits[19]->SetText(Poco::format("%d",FDTime));
+    edits[20]->SetText(Poco::format("%d",BrakeTime));
 }
 void    CWorkSite::OnButtonClick(skin_item_t* item)
 {
@@ -195,12 +195,18 @@ void    CWorkSite::OnButtonClick(skin_item_t* item)
         WarnDis     = edits[17]->GetFloatValue(ok);
         AddAngle    = edits[18]->GetFloatValue(ok);
 
+        FDTime      = edits[19]->GetIntValue(ok);
+        BrakeTime   = edits[20]->GetIntValue(ok);
+
         edits[13]->SetText(Poco::format("%0.2f",VStopDis));
         edits[14]->SetText(Poco::format("%0.2f",VWarnDis));
         edits[15]->SetText(Poco::format("%0.2f",BrakeDis));
         edits[16]->SetText(Poco::format("%0.2f",DangerDis));
         edits[17]->SetText(Poco::format("%0.2f",WarnDis));
         edits[18]->SetText(Poco::format("%0.2f",AddAngle));
+
+        edits[19]->SetText(Poco::format("%d",FDTime));
+        edits[20]->SetText(Poco::format("%d",BrakeTime));
 
         CMainCtrl::Get().SaveSiteInfo();
     }

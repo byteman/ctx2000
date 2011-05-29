@@ -596,13 +596,16 @@ void CMainCtrl::ReadSiteInfo()
     czwzb[1][0] =  cfg.ReadFloat("device","cz_x1",0);
     czwzb[1][1] =  cfg.ReadFloat("device","cz_y1",0);
 
-    YNAngle = cfg.ReadFloat("device","YNAngle",0);
-    BrakeDis= cfg.ReadFloat("device","BrakeDis",0);
+    YNAngle  = cfg.ReadFloat("device","YNAngle",0);
+    BrakeDis = cfg.ReadFloat("device","BrakeDis",0);
     DangerDis= cfg.ReadFloat("device","DangerDis",0);
-    WarnDis= cfg.ReadFloat("device","WarnDis",0);
-    VWarnDis= cfg.ReadFloat("device","VWarnDis",0);
-    VStopDis= cfg.ReadFloat("device","VStopDis",0);
-    AddAngle= cfg.ReadFloat("device","AddAngle",0);
+    WarnDis  = cfg.ReadFloat("device","WarnDis",0);
+    VWarnDis = cfg.ReadFloat("device","VWarnDis",0);
+    VStopDis = cfg.ReadFloat("device","VStopDis",0);
+    AddAngle = cfg.ReadFloat("device","AddAngle",0);
+    FDTime   = cfg.ReadFloat("device","FDTime",0);
+    BrakeTime= cfg.ReadFloat("device","BrakeTime",0);
+
 }
 bool CMainCtrl::is_circle_interset(double x1, double y1, double x2, double y2, double r1, double r2)
 {
@@ -876,6 +879,7 @@ void CMainCtrl::SaveSiteInfo()
     cfg.WriteFloat("device","leftdown_x",wksp[1][0]);
     cfg.WriteFloat("device","leftdown_y",wksp[1][1]);
     cfg.WriteFloat("device","rightup_x",wksp[2][0]);
+
     cfg.WriteFloat("device","rightup_y",wksp[2][1]);
     cfg.WriteFloat("device","rightdown_x",wksp[3][0]);
     cfg.WriteFloat("device","rightdown_y",wksp[3][1]);
@@ -883,17 +887,21 @@ void CMainCtrl::SaveSiteInfo()
 
     cfg.WriteFloat("device","cz_x0",czwzb[0][0]);
     cfg.WriteFloat("device","cz_y0",czwzb[0][1]);
+
     cfg.WriteFloat("device","cz_x1",czwzb[1][0]);
     cfg.WriteFloat("device","cz_y1",czwzb[1][1]);
 
     cfg.WriteFloat("device","YNAngle",YNAngle);
     cfg.WriteFloat("device","BrakeDis",BrakeDis);
     cfg.WriteFloat("device","DangerDis",DangerDis);
+
     cfg.WriteFloat("device","WarnDis",WarnDis);
     cfg.WriteFloat("device","VStopDis",VStopDis);
     cfg.WriteFloat("device","VWarnDis",VWarnDis);
     cfg.WriteFloat("device","AddAngle",AddAngle);
 
+    cfg.WriteInteger("device","FDTime",FDTime);
+    cfg.WriteInteger("device","BrakeTime",BrakeTime);
 }
 void CMainCtrl::SaveDivideInfo()
 {

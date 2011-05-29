@@ -326,7 +326,7 @@ void    CTCParam::OnButtonClick(skin_item_t* item)
 
     if(item->id == btn_mdy->GetId())
     {
-
+       //CTajiDbMgr::Get().AddAlarmInfo(1,2,3,4,5,6);
     }
     else if(item->id == btn_save->GetId())
     {
