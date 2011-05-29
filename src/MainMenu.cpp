@@ -19,7 +19,7 @@
 #include <math.h>
 #include <Poco/Format.h>
 
-#define E_W  85
+#define E_W  170
 #define E_H  30
 #define L_S  55
 #define L_S_V 110
@@ -28,19 +28,19 @@
 #define L_S2   695
 #define L_S_V2 195
 
-#define EDIT_ANGLE    {L_S,L_S_V+0*V_S, E_W,E_H,"20.8"}
-#define EDIT_DIST     {L_S,L_S_V+1*V_S, E_W,E_H,"12.4"}
-#define EDIT_MAX_W    {L_S,L_S_V+2*V_S, E_W,E_H,"12.4"}
-#define EDIT_WEIGHT   {L_S,L_S_V+3*V_S, E_W,E_H,"12.4"}
-#define EDIT_HEIGHT   {L_S,L_S_V+4*V_S, E_W,E_H,"12.4"}
-#define EDIT_UP_ANGL  {L_S,L_S_V+5*V_S, E_W,E_H,"12.4"}
-#define EDIT_BEILV    {150,350, 30,30,"4"}
-#define STATIC_LIJU    {150,84,40,150,"0"}
+#define EDIT_ANGLE    {L_S,L_S_V+0*V_S, E_W,E_H,""}
+#define EDIT_DIST     {L_S,L_S_V+1*V_S, E_W,E_H,""}
+#define EDIT_MAX_W    {L_S,L_S_V+2*V_S, E_W,E_H,""}
+#define EDIT_WEIGHT   {L_S,L_S_V+3*V_S, E_W,E_H,""}
+#define EDIT_HEIGHT   {L_S,L_S_V+4*V_S, E_W,E_H,""}
+#define EDIT_UP_ANGL  {L_S,L_S_V+5*V_S, E_W,E_H,""}
+#define EDIT_BEILV    {150,350, 30,30,""}
+#define STATIC_LIJU    {150,84,40,150,""}
 
-#define EDIT_T_H      {L_S2,L_S_V2+0*V_S, E_W,E_H,"12.4"}
-#define EDIT_L_ARM    {L_S2,L_S_V2+1*V_S, E_W,E_H,"12.4"}
-#define EDIT_S_ARM    {L_S2,L_S_V2+2*V_S, E_W,E_H,"12.4"}
-#define EDIT_SPEED    {L_S2-5,L_S_V2+3*V_S+5, E_W,E_H,"12.4"}
+#define EDIT_T_H      {L_S2,L_S_V2+0*V_S, E_W,E_H,""}
+#define EDIT_L_ARM    {L_S2,L_S_V2+1*V_S, E_W,E_H,""}
+#define EDIT_S_ARM    {L_S2,L_S_V2+2*V_S, E_W,E_H,""}
+#define EDIT_SPEED    {L_S2-5,L_S_V2+3*V_S+5, E_W,E_H,""}
 
 #define Client_Height 72
 
@@ -272,24 +272,14 @@ void CMainMenu::OnCreate()
         //statusIcon[i] = new CStatusIcon(this,20+i*20,100,8);
     }
 
+    if(!skt)
+        skt = new SoftKeyboard();
     SetTimer(m_hWnd,100,10);
 
 }
 
-int paintcircle(int x,int r)
-{
-    int y = (int)sqrt(r*r -x*x);
-    //fprintf(stderr,"x=%d y=%d r=%d\n",x,y,r);
-    return y;
-
-}
-
-
-
 void CMainMenu::OnShow()
 {
-
-
     fast_angle->Attach(edt_angle);
     fast_dist->Attach(edt_dist);
     fast_weight->Attach(edt_weight);
@@ -302,13 +292,24 @@ void CMainMenu::OnShow()
     fast_max_weight->Attach(edt_max_weight);
     fast_fengsu->Attach(edt_fengsu);
 
+    HDC hdc = GetClientDC(m_hWnd);
+
+    CreateStatusArea(hdc ,m_status_rect);
+    DrawDevSerial(hdc,m_dev_serail_rect,"No.C8001");
+    CreateInfoArea(hdc);
+    for(int i = 0; i < 20 ; i++)
+        statusIcon[i]->SetStatus(hdc,g_status[i]);
+
+    ReleaseDC(hdc);
 
     m_worksite->init(m_hWnd);
     m_per.Init(this,m_liju,commctrls[11].w,commctrls[11].h);
-
-    edt_tower_height->SetText(Poco::format("%0.1fm",g_TC[g_local_id].Height));
-    edt_long_arm_len->SetText(Poco::format("%0.1fm",g_TC[g_local_id].LongArmLength));
-    edt_short_arm_len->SetText(Poco::format("%0.1fm",g_TC[g_local_id].ShortArmLenght));
+//显示塔机高度
+    fast_tower_height->SetText(Poco::format("%0.1fm",g_TC[g_local_id].Height));
+//显示大臂长度
+    fast_long_arm_len->SetText(Poco::format("%0.1fm",g_TC[g_local_id].LongArmLength));
+//显示短臂长度
+    fast_short_arm_len->SetText(Poco::format("%0.1fm",g_TC[g_local_id].ShortArmLenght));
 
     m_hdc = GetDC(m_hWnd);
 
@@ -317,12 +318,6 @@ void CMainMenu::OnPaint(HWND hWnd)
 {
     HDC hdc = BeginPaint(hWnd);
 
-    CreateStatusArea(hdc ,m_status_rect);
-    DrawDevSerial(hdc,m_dev_serail_rect,"No.C8001");
-    CreateInfoArea(hdc);
-
-    for(int i = 0; i < 20 ;i++)
-        statusIcon[i]->SetStatus(hdc,g_status[i]);
 
     EndPaint(hWnd, hdc);
 }
@@ -350,33 +345,41 @@ void CMainMenu::OnTimer(int ID)
 {
 
 
-    EmulateSensor();
+    //EmulateSensor();
 #if 0
     static int j = 0;
     j++;
     for(int i = 0; i < 7; i++)
         MyDrawText(Poco::format("%d",j),&commctrls[i]);
 #endif
-//    fast_dist->SetText(g_car_dist);
-//    fast_angle->SetText(g_angle);
+#if 1
+    //刷新角度
+    fast_angle->SetText(Poco::format("%0.1f",g_angle));
+    //刷新小车幅度
+    fast_dist->SetText(Poco::format("%0.1f",g_car_dist));
+    //是否显示额定重量和当前重量
+    if(m_show_max_weight)
+    {
+        fast_max_weight->SetText(Poco::format("%d",(int)CLijuCtrl::Get().m_max_weight));
+        fast_weight->SetText(Poco::format("%0.1f",g_dg_weight));
+    }
+    //是否显示吊钩高度
+    if(m_show_dg_height)
+    {
+       fast_height->SetText(Poco::format("%0.1f",g_dg_height));
+    }
+    //是否显示仰角
+    if(m_show_up_angle)
+    {
+        fast_up_angle->SetText(Poco::format("%0.1f",g_up_angle));
+    }
+    //是否显示风速
+    if(m_show_speed)
+    {
+        fast_fengsu->SetText(Poco::format("%0.1f",g_speed));
+    }
+#endif
 
-//    if(m_show_up_angle)
-//    {
-//        fast_up_angle->SetText(g_up_angle);
-//    }
-//    if(m_show_speed)
-//    {
-//        fast_fengsu->SetText(g_speed);
-//    }
-//    if(m_show_dg_height)
-//    {
-//       fast_height->SetText(g_dg_weight);
-//    }
-//    if(m_show_max_weight)
-//    {
-//        edt_max_weight->SetText(Poco::format("%d",(int)CLijuCtrl::Get().m_max_weight));
-
-//    }
 
 
     m_per.Show(CLijuCtrl::Get().m_percent);
@@ -387,6 +390,7 @@ void CMainMenu::OnTimer(int ID)
 //up down left right
 
 
+#if 1
     if(CMainCtrl::Get().m_control_state.b1)
     {
         m_dir_mgr->Show(m_hdc,"right",EALARM);
@@ -443,7 +447,7 @@ void CMainMenu::OnTimer(int ID)
     }else{
         m_dir_mgr->Show(m_hdc,"down",EOK);
     }
-
+#endif
 
 }
 void CMainMenu::OnLButtonUp(int x, int y)
@@ -459,8 +463,10 @@ void CMainMenu::OnLButtonUp(int x, int y)
 void CMainMenu::OnButtonClick(skin_item_t* item)
 {
     if(item->id == _skinBtns[0]->GetId()){
+        KillTimer(m_hWnd,100);
         CSysSet ss;
         ss.CreateForm(m_hWnd);
+        SetTimer(m_hWnd,100,10);
     }else if(item->id == _skinBtns[1]->GetId()){
 
 

@@ -1405,7 +1405,7 @@ bool CMainCtrl::Start()
         fprintf(stderr,"DianTai Start Failed\n");
         return false;
     }
-
+    blockRtSignal();
 //³õÊ¼»¯gpioÄ£¿é
     m_gpio.CreateVirtualFiles();
     m_gpio.Init();

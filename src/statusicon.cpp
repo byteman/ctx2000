@@ -42,8 +42,6 @@ CStatusIcon::CStatusIcon(CSkinForm* parent,int x, int y, int r):
 
 bool CStatusIcon::SetStatus(HDC hdc,EDevStatus status)
 {
-    int index = m_islocal?1:0;
-
 
     SetBkMode(hdc,BM_TRANSPARENT);
     //gal_pixel oldcolor = SetBrushColor(hdc,DevBkColorMaps[index]);
@@ -60,6 +58,6 @@ bool CStatusIcon::SetStatus(HDC hdc,EDevStatus status)
     SetRect(&fontrect,x,m_rect.top,m_rect.right,m_rect.bottom);
 
     m_parent->DrawMyText(hdc,font,&fontrect,m_num_str);
-    //SetBrushColor(hdc,oldcolor);
+
 
 }

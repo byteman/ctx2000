@@ -1,8 +1,8 @@
 #include "formworksite.h"
 #include "tajidbmgr.h"
 #include "comdata.h"
-static WNDPROC old_static_proc;
-static HWND    old_hwnd;
+
+
 static CFormWorksite  *myptr = NULL;
 
 void   CFormWorksite::calc_map_point(double x1, double y1,double r1,double s1,double &x2, double &y2,double &r2,double &s2)
@@ -45,9 +45,10 @@ CFormWorksite::CFormWorksite(CStatic* area,int w,int h):
         m_tajis[i] = new CTaji(x,y,r,s,idx,m_zoom);
     }
     calc_map_point(g_TC[g_local_id].x,g_TC[g_local_id].y,g_TC[g_local_id].LongArmLength,g_TC[g_local_id].ShortArmLenght,x,y,r,s);
-    m_tajis[i] = new CTaji(x,y,r,s,g_local_id,m_zoom);
-    m_tj_num   = g_conflict_tj_list.size()+1;
-    myptr    = this;
+    m_tajis[i]      = new CTaji(x,y,r,s,g_local_id,m_zoom);
+    m_tj_num        = g_conflict_tj_list.size()+1;
+    old_hwnd        = HWND_INVALID;
+    old_static_proc = NULL;
 }
 CFormWorksite::~CFormWorksite()
 {
@@ -115,16 +116,20 @@ int  CFormWorksite::worksite_proc(HWND hwnd, int message, WPARAM w, LPARAM l)
         //draw_zhangai(hdc);
         //draw_flag=true;
     }
+
     EndPaint(hwnd,hdc);
+    return 1;
 }
 int static_proc(HWND hwnd, int message, WPARAM w, LPARAM l)
 {
-    if( (message == MSG_PAINT) && (hwnd == old_hwnd))
+    CFormWorksite* myptr = (CFormWorksite*)GetWindowAdditionalData2(hwnd);
+    if(myptr)
     {
-        if(myptr)
+        if(message == MSG_PAINT)
             return myptr->worksite_proc(hwnd,message,w,l);
-    }else{
-        return old_static_proc(hwnd,message,w,l);
+        else{
+            return myptr->old_static_proc(hwnd,message,w,l);
+        }
     }
 
 }
@@ -132,7 +137,10 @@ void CFormWorksite::init(HWND parent)
 {
     old_hwnd = GetDlgItem(parent,m_area->GetId());
     if(old_hwnd != HWND_INVALID)
+    {
+        SetWindowAdditionalData2(old_hwnd,(DWORD)this);
         old_static_proc = SetWindowCallbackProc(old_hwnd,static_proc);
+    }
     else{
         fprintf(stderr,"can't get hwnd\n");
     }
@@ -144,17 +152,5 @@ bool CFormWorksite::addTaji(QtzParam* tzPar)
 //更新某个编号的塔机区域，如果0的话，就是更新所有塔机状态
 void CFormWorksite::update(int taji)
 {
-    if(taji == -1)
-    {
-        for( int i = 0 ; i < m_tj_num; i++)
-        {
-            //m_tajis[i]->Update(old_hwnd);
-        }
-    }else{
-        //m_tajis[taji]->Update(old_hwnd);
-    }
-    //UpdateWindow(old_hwnd,TRUE);
     UpdateWindow(old_hwnd,FALSE);
-    //if(m_area)
-    //    m_area->SetText("");
 }

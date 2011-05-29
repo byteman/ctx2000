@@ -52,8 +52,9 @@ bool CFastStatic::Attach(CCommCtrl* ctrl)
 
     if(m_hwnd != HWND_INVALID)
     {
-        SetWindowAdditionalData2(m_hwnd,(DWORD)this);
-        old_wnd_proc = SetWindowCallbackProc(m_hwnd,m_ctrl_proc);
+        //SetWindowAdditionalData2(m_hwnd,(DWORD)this);
+        //old_wnd_proc = SetWindowCallbackProc(m_hwnd,m_ctrl_proc);
+
     }
     else{
         fprintf(stderr,"can't attch hwnd\n");
@@ -68,7 +69,14 @@ CFastStatic::~CFastStatic()
 
 void CFastStatic::SetText(std::string value)
 {
+    m_hdc = GetClientDC(m_hwnd);
 
+    SelectFont(m_hdc,GetSystemFont(SYSLOGFONT_FIXED));
+    //SetBkMode(m_hdc,BM_TRANSPARENT);
+    SetBkColor(m_hdc,RGB2Pixel(HDC_SCREEN,150,208,209));
+    DrawText(m_hdc,  value.c_str(),value.length (),&m_rect,DT_LEFT|DT_TOP);
+
+    ReleaseDC(m_hdc);
 }
 void CFastStatic::SetText(double value)
 {
@@ -79,6 +87,7 @@ void CFastStatic::SetText(double value)
         return ;
     }
     m_prev_vlaue = m_value;
+
     UpdateWindow(m_hwnd,FALSE);
 
 }

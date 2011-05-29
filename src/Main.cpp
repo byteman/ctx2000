@@ -96,6 +96,7 @@ int MiniGUIMain (int argc, const char* argv[])
         fprintf(stderr,"MainCtrl Start Failed\n");
        // return 3;
     }
+
     //启动主界面模块
     InitMainUI ();
 	
