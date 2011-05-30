@@ -56,9 +56,9 @@ static COMM_CTRL_DESC CommCtrlsDesc[] =
 static const char *icon_path[] =
 {
     PPRESET_SITE_ICON,
-    PPRESET_SITE_LABEL,
-    PCOMM_LINE_ICON,
-    PPRESET_ADMIN_TEXT
+    PPRESET_SITE_LABEL
+    //PCOMM_LINE_ICON,
+    //PPRESET_ADMIN_TEXT
 };
 
 static POS BmpsPos[] =
