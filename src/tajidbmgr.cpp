@@ -789,10 +789,15 @@ bool  CTajiDbMgr::ListAlaramInfo(THistoyRst &rst )
         while(!qry.eof())
         {
             THistoy item;
-            item.date = qry.getStringField("dt");
-            item.serial = qry.getStringField("tjid");
+            item.type    = qry.getIntField("type");
+            item.date    = qry.getStringField("dt");
+            item.serial  = qry.getStringField("tjid");
             item.slewing = qry.getIntField("dist");
             item.trolley = qry.getIntField("angle");
+            item.fudu    = qry.getIntField("fudu");
+            item.wet     = qry.getIntField("wet");
+            item.jiaodu  = qry.getIntField("jiaodu");
+            item.beilv   = qry.getIntField("beilv");
             rst.push_back(item);
             qry.nextRow();
             bExist  = true;
@@ -805,15 +810,15 @@ bool  CTajiDbMgr::ListAlaramInfo(THistoyRst &rst )
     }
     return bExist;
 }
-bool CTajiDbMgr::AddAlarmInfo(int slewing, int trolley)
+bool CTajiDbMgr::AddAlarmInfo(int type,int slewing, int trolley,int fudu,int wet,int jiaodu,int beilv)
 {
     try{
         CppSQLite3Buffer  strInst;
         LocalDateTime now;
         std::string dt = DateTimeFormatter::format(now,"%Y-%m-%d %h:%M:%S");
 
-        const char* tmp = strInst.format("Insert into %Q values('%s',%d,%d,'%s');", \
-                        "tbalarm", m_local_serial.c_str(),slewing, trolley,dt.c_str());
+        const char* tmp = strInst.format("Insert into %Q values(%d,'%s',%d,%d,'%s',%d,%d,%d,%d);", \
+                        "tbalarm", type,m_local_serial.c_str(),slewing, trolley,dt.c_str(),fudu,wet,jiaodu,beilv);
         DBG("-=-=WetObjs.cpp=-=- %s \n", tmp);
         int rows = pDB->execDML(tmp);
         if (rows) {

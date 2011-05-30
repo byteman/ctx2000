@@ -5,7 +5,7 @@
 
 static char* alarminfolist_caption[] =
 {
-	"编号",
+        "类型",
 	"时间",
         "塔吊编号",
         "小车指令",
@@ -121,7 +121,7 @@ void    CAlarmInfoManForm::OnButtonClick(skin_item_t* item)
 void
 CAlarmInfoManForm::InitListCol()
 {
-        int width[COL_NR] = {50, 200, 80, 110,50,50,50,50,LIST_ALARMINFO_W-240};
+        int width[COL_NR] = {55, 200, 105, 110,50,50,50,50,LIST_ALARMINFO_W-240};
         for (int i = 0; i < COL_NR; i++) {
                  _lvAlarmInfo->AddColumn(i,alarminfolist_caption[i],width[i]);
         }
@@ -158,7 +158,8 @@ void CAlarmInfoManForm::add_alarminfo_item (StringList &alarminfoItems,THistoy& 
         switch(j)
         {
             case 0:
-                   alarminfoItems.push_back("0");
+                   sprintf (buff, "%d", AlarmInfo.type);
+                   alarminfoItems.push_back(buff);
                    break;
             case 1:
                     alarminfoItems.push_back(AlarmInfo.date);
@@ -174,6 +175,22 @@ void CAlarmInfoManForm::add_alarminfo_item (StringList &alarminfoItems,THistoy& 
                     break;
             case 4:
                     sprintf (buff, "%d", AlarmInfo.trolley);
+                    alarminfoItems.push_back(buff);
+                    break;
+            case 5:
+                    sprintf (buff, "%d", AlarmInfo.fudu);
+                    alarminfoItems.push_back(buff);
+                    break;
+            case 6:
+                    sprintf (buff, "%d", AlarmInfo.wet);
+                    alarminfoItems.push_back(buff);
+                    break;
+            case 7:
+                    sprintf (buff, "%d", AlarmInfo.jiaodu);
+                    alarminfoItems.push_back(buff);
+                    break;
+            case 8:
+                    sprintf (buff, "%d", AlarmInfo.beilv);
                     alarminfoItems.push_back(buff);
                     break;
             default:

@@ -6,10 +6,15 @@
 #include "ctx2000.h"
 #include "CppSQLite3.h"
 struct THistoy{
+    int type;
     std::string serial;
     std::string date;
     int slewing;
     int trolley;
+    int fudu;
+    int wet;
+    int jiaodu;
+    int beilv;
 };
 struct TLiju{
     std::string armlen;
@@ -61,7 +66,7 @@ public:
                 1 :转低速指令
                 2 :停车指令
     */
-    bool AddAlarmInfo(int slewing, int trolley);
+    bool AddAlarmInfo(int type,int slewing, int trolley,int fudu,int wet,int jiaodu,int beilv);
     /*
       param:
         start : 起始序号

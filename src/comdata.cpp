@@ -14,6 +14,7 @@ std::string StrTCArmLen, StrTCBeilv;
 double wksp[4][2];
 double czwzb[2][2];
 double YNAngle,VStopDis,VWarnDis,BrakeDis,DangerDis,WarnDis,AddAngle;
+int    FDTime,BrakeTime;
 Twb    wba[11];
 TDividePoint DividePoint[21];
 int TcNum,wbNum,DividePointNum,TCTotalNum,fd_time,brake_time;
