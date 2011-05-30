@@ -265,7 +265,6 @@ void CMainMenu::OnCreate()
             statusIcon[i] = new CStatusIcon(this,i+1,rt,true);
         else
             statusIcon[i] = new CStatusIcon(this,i+1,rt);
-
     }
     for(int i = 0; i < 10 ;i++)
     {
@@ -409,7 +408,8 @@ void CMainMenu::OnTimer(int ID)
 
 
 #if 1
-    if(CMainCtrl::Get().m_control_state.b1)
+    int status = CLijuCtrl::Get().m_cur_state;
+    if(CMainCtrl::Get().m_control_state.b1 || status > 0)
     {
         m_dir_mgr->Show(m_hdc,"right",EALARM);
     }else{

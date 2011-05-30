@@ -17,6 +17,7 @@
 #include "dataacquire.h"
 #include "mainctrl.h"
 #include "MainMenu.h"
+#include "SingleTaji1.h"
 using Poco::Thread;
 using Poco::Event;
 using Poco::SingletonHolder;
@@ -56,7 +57,8 @@ void GUIAPI InitMainUI()
 {
 
     try{
-        CMainMenu login;
+        //CMainMenu login;
+        CSingleTaji1 login;
         login.CreateForm( HWND_DESKTOP );
     }catch(Poco::Exception& e){
         std::cerr << "Sys Exception: " <<e.displayText () << std::endl;

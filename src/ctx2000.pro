@@ -59,7 +59,8 @@ SOURCES += \
     percent.cpp \
     filter.cpp \
     extdev/gpio.cpp \
-    FastStatic.cpp
+    FastStatic.cpp \
+    SingleTaji1.cpp
 LIBS+=-lPocoFoundation
 
 DEPENDPATH=../include
@@ -126,4 +127,6 @@ HEADERS += \
     percent.h \
     filter.h \
     extdev/gpio.h \
-    FastStatic.h
+    FastStatic.h \
+    SingleTaji1Item.h \
+    SingleTaji1.h

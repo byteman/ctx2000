@@ -27,6 +27,7 @@ public:
     std::string m_curBeilv;
     double m_percent;
     double m_max_weight;
+    int  m_cur_state; /*0 Õý³£ 1: 90 2 : 95  3 :100*/
 private:
     int m_curBeilvIndex;
     TStringList m_BeilvList;
@@ -38,7 +39,7 @@ private:
     std::string m_tbl_name;
     bool m_load_ok;
 
-    int  m_cur_state;
+
 };
 
 #endif // LIJUCTRL_H
