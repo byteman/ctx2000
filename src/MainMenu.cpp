@@ -35,7 +35,7 @@
 #define EDIT_HEIGHT   {L_S,L_S_V+4*V_S, E_W,E_H,""}
 #define EDIT_UP_ANGL  {L_S,L_S_V+5*V_S, E_W,E_H,""}
 #define EDIT_BEILV    {150,350, 30,30,""}
-#define STATIC_LIJU    {150,84,30,150,""}
+#define STATIC_LIJU    {150,84, 40,200,""}
 
 #define EDIT_T_H      {L_S2,L_S_V2+0*V_S, E_W,E_H,""}
 #define EDIT_L_ARM    {L_S2,L_S_V2+1*V_S, E_W,E_H,""}

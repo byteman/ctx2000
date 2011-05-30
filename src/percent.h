@@ -19,6 +19,7 @@ private:
     HDC  m_hdc;
     std::string m_text;
     RECT m_rect;
+    bool flag;
 
 };
 
