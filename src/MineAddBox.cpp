@@ -29,10 +29,11 @@ static const char *icon_path[] =
 {
     PPRESET_SITE_ICON,
     PPRESET_SITE_LABEL,
-    PCOMM_LINE_ICON,
-    PPRESET_MINETYPE_TEXT,
-    PPRESET_MINEMAN_MINETYPENAME_LABEL,
-    PPRESET_MINEMAN_MINEPRICE_LABEL,
+    //PCOMM_LINE_ICON,
+    //PPRESET_MINETYPE_TEXT,
+    //PPRESET_MINEMAN_MINETYPENAME_LABEL,
+    //PPRESET_MINEMAN_MINEPRICE_LABEL,
+    PCOMM_EDIT_BKGROUND,
     PCOMM_EDIT_BKGROUND
 };
 
@@ -42,10 +43,12 @@ static POS IconsPos[] =
         SYSMT_X,
         SYSMT_Y
     },
+
     {
         SYSMT_TEXT_X,
         SYSMT_TEXT_Y
     },
+/*
     {
         LINE_X,
         LINE_Y
@@ -62,6 +65,7 @@ static POS IconsPos[] =
         MINEPRICE_X,
         MINEPRICE_Y
     },
+*/
 //	{
 //	MINEDISCOUNT_X,
 //	MINEDISCOUNT_Y
