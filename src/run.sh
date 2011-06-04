@@ -8,5 +8,8 @@ else
 fi
 
 echo $LD_LIBRARY_PATH
-./ctx2000 -m plugin -c . -vvvvv
-
+while :
+do
+	echo "restart"
+	./ctx2000s -m plugin -c . -vvvvv
+done

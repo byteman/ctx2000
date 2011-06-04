@@ -89,7 +89,11 @@ void CFormWorksite::draw_zhangai(HDC hdc)
                 double y = wba[i].Pointxy[j][1];
                 area[j].x =  (x-m_local_x)*m_zoom + m_center_x;
                 area[j].y =  (m_local_y-y)*m_zoom + m_center_y;
-                //fprintf(stderr,"j=%d,x=%d,y=%d\n",j,area[j].x,area[j].y);
+                if(area[j].x < 0)area[j].x=0;
+                if(area[j].y < 0)area[j].y=0;
+
+
+                fprintf(stderr,"j=%d,x=%d,y=%d\n",j,area[j].x,area[j].y);
             }
 
             FillPolygon(hdc,area,wba[i].VertexNum);
@@ -113,8 +117,8 @@ int  CFormWorksite::worksite_proc(HWND hwnd, int message, WPARAM w, LPARAM l)
     }
     if(!draw_flag)
     {
-        //draw_zhangai(hdc);
-        //draw_flag=true;
+        draw_zhangai(hdc);
+        draw_flag=true;
     }
 
     EndPaint(hwnd,hdc);
@@ -138,6 +142,9 @@ void CFormWorksite::init(HWND parent)
     old_hwnd = GetDlgItem(parent,m_area->GetId());
     if(old_hwnd != HWND_INVALID)
     {
+        HDC hdc = GetClientDC(old_hwnd);
+        m_hdcMem = CreateCompatibleDC(hdc);
+        ReleaseDC(hdc);
         //SetWindowAdditionalData2(old_hwnd,(DWORD)this);
         //old_static_proc = SetWindowCallbackProc(old_hwnd,static_proc);
     }
@@ -162,19 +169,21 @@ void CFormWorksite::update(int taji)
     static bool draw_flag=false;
     HDC hdc = GetClientDC(old_hwnd);
 
+    SetBrushColor(m_hdcMem,PIXEL_lightwhite);
+    FillBox(m_hdcMem,0,0,m_width,m_height);
     SetPenColor(hdc,PIXEL_lightgray);
-    Rectangle(hdc,0,0,m_width-1,m_height);
+    Rectangle(m_hdcMem,0,0,m_width-1,m_height);
 
     for( size_t i = 0 ; i < g_conflict_tj_list.size()+1; i++)
     {
-        m_tajis[i]->Draw(hdc);
+        m_tajis[i]->Draw(m_hdcMem);
     }
     if(!draw_flag)
     {
         //draw_zhangai(hdc);
         //draw_flag=true;
     }
-
+    BitBlt (m_hdcMem, 0, 0, m_width, m_height, hdc, 0, 0, 0);
     ReleaseDC(hdc);
     return ;
 }

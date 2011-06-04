@@ -7,6 +7,7 @@
 #include "taji.h"
 #include "percent.h"
 #include "FastStatic.h"
+#include "TajiImage.h"
 #define MM_SKIN_BTN_NUM  3
 
 class CSingleTaji1 : public CSkinForm
@@ -43,6 +44,7 @@ private:
         CStatic* edt_short_arm_len;
         CStatic* edt_height;
         CStatic* edt_up_angle,*edt_max_weight,*edt_fengsu,*edt_dg_height;
+        CStatic* edt_percent;
 
         CFastStatic* fast_angle;
         CFastStatic* fast_dist;
@@ -54,6 +56,7 @@ private:
         CFastStatic* fast_height;
         CFastStatic* fast_up_angle,*fast_max_weight,*fast_fengsu,*fast_dg_height;
 
+        CTajiImage* tj_img[10];
         CPercent m_per;
         HDC m_hdc;
         bool m_show_up_angle,m_show_speed,m_show_dg_height,m_show_max_weight;

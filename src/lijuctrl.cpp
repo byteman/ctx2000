@@ -14,8 +14,8 @@ CLijuCtrl&  CLijuCtrl::Get()
 }
 CLijuCtrl::CLijuCtrl(std::string type, int armlen, int beilv)
 {
-    m_percent=0;
-    m_max_weight=1;
+    m_percent    = 0;
+    m_max_weight = 1;
 }
 bool CLijuCtrl::Load(std::string type, std::string armlen, std::string beilv)
 {
@@ -96,7 +96,7 @@ int CLijuCtrl::Service(double car_pos, double weight)
         {
             if(m_lijuGrp.at(i).car_pos <= prev_pos)
             {
-                prev_pos = m_lijuGrp.at(i).car_pos;
+                prev_pos   = m_lijuGrp.at(i).car_pos;
                 max_weight = m_lijuGrp.at(i).max_weight;
             }
             find       = true;
@@ -112,7 +112,7 @@ int CLijuCtrl::Service(double car_pos, double weight)
     if( max_weight < 0.1 )//得到了异常的重量
         return 0;
     m_max_weight = max_weight;
-    m_percent = weight / max_weight;
+    m_percent    = weight / max_weight;
     if(m_percent >= 1.05)
     {
         m_cur_state = 4;

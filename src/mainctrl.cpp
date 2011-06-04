@@ -438,7 +438,10 @@ void      CMainCtrl::DistillData(std::string &msg,std::string &ID)
         g_TC[senderId].Angle      = angle;
         g_TC[senderId].Position   = position;
         g_TC[senderId].AngleSpeed = AngleSpeed;
-        g_TC[senderId].Dang       = Dang;
+        if(g_TC[senderId].Dyna)
+            g_TC[senderId].Dang       = Dang;
+        else
+            g_TC[senderId].Dang       = 0;
         g_TC[senderId].DLong      = g_TC[id].Position;
         g_TC[senderId].DHeight    = g_TC[id].Height+g_TC[id].L*sin(g_TC[id].Dang);
         //AddNo = token[6];

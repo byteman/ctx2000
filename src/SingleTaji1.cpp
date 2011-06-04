@@ -27,21 +27,24 @@
 #define L_S2   695
 #define L_S_V2 195
 
-#define EDIT_ANGLE    {L_S,L_S_V+0*V_S, E_W,E_H,""}
-#define EDIT_DIST     {L_S,L_S_V+1*V_S, E_W,E_H,""}
+#define EDIT_ANGLE    {60,280,  E_W,E_H,"angle"}
+#define EDIT_DIST     {310,310, 180,60,"dist"}
 
-#define EDIT_WEIGHT   {L_S,L_S_V+3*V_S, E_W,E_H,""}
-#define EDIT_HEIGHT   {L_S,L_S_V+4*V_S, E_W,E_H,""}
-#define EDIT_UP_ANGL  {L_S,L_S_V+5*V_S, E_W,E_H,""}
-#define EDIT_BEILV    {150, 350, 30,30,""}
+#define EDIT_WEIGHT   {520, 225,E_W,E_H,"kg"}
+#define EDIT_HEIGHT   {590, 305,E_W,E_H,"height"}
+#define EDIT_UP_ANGL  {390, 160, 180,60,"upangle"}
+#define EDIT_BEILV    {630, 125, E_W, 30,"5"}
 
-#define STATIC_LIJU    {375,55,  150,60,""}
-#define EDIT_MAX_W     {575,50,  150,80,""}
+#define STATIC_LIJU    {0,0,  200,200,"liju"}
+
+#define EDIT_MAX_W     {100,150,  200,200,"maxw"}
 
 #define EDIT_T_H      {L_S2,L_S_V2+0*V_S, E_W,E_H,""}
 #define EDIT_L_ARM    {L_S2,L_S_V2+1*V_S, E_W,E_H,""}
 #define EDIT_S_ARM    {L_S2,L_S_V2+2*V_S, E_W,E_H,""}
-#define EDIT_SPEED    {L_S2-5,L_S_V2+3*V_S+5, E_W,E_H,""}
+
+#define EDIT_SPEED    {50,350, E_W,E_H,"1"}
+#define EDIT_PERCENT  {385,50, E_W,E_H,"80%"}
 
 #define Client_Height 72
 
@@ -51,7 +54,7 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 static const char* mmenu_bmps[] = {
-    "ctx2000/single_dy.png",
+    "ctx2000/mainbk.png",
     //PMAINCFG,
    // PBYPASS
 };
@@ -83,6 +86,7 @@ static COMM_CTRL_DESC commctrls[] = {
     EDIT_S_ARM,
     EDIT_SPEED,
     STATIC_LIJU, //11
+    EDIT_PERCENT
 };
 
 CSingleTaji1::CSingleTaji1()
@@ -106,7 +110,7 @@ CSingleTaji1::CSingleTaji1()
     {
         //_skinBtns[i] = new CSkinButton(&SkinBtns[i],this);
     }
-#if 1
+
     edt_angle           = new CStatic(&commctrls[0],this);
 
     edt_dist            = new CStatic(&commctrls[1],this);
@@ -116,13 +120,15 @@ CSingleTaji1::CSingleTaji1()
     edt_up_angle        = new CStatic(&commctrls[5],this);
     edt_beilv           = new CStatic(&commctrls[6],this);
 
-    edt_tower_height    = new CStatic(&commctrls[7],this);
+    //edt_tower_height    = new CStatic(&commctrls[7],this);
 
-    edt_long_arm_len    = new CStatic(&commctrls[8],this);
-    edt_short_arm_len   = new CStatic(&commctrls[9],this);
+    //edt_long_arm_len    = new CStatic(&commctrls[8],this);
+    //edt_short_arm_len   = new CStatic(&commctrls[9],this);
+
     edt_fengsu          = new CStatic(&commctrls[10],this);
+    edt_percent         = new CStatic(&commctrls[12],this);
     //m_liju              = new CStatic(&commctrls[11],this);
-#endif
+#if 0
     fast_angle           = new CFastStatic(&commctrls[0],this);
 
     fast_dist            = new CFastStatic(&commctrls[1],this);
@@ -137,7 +143,7 @@ CSingleTaji1::CSingleTaji1()
     fast_long_arm_len    = new CFastStatic(&commctrls[8],this);
     fast_short_arm_len   = new CFastStatic(&commctrls[9],this);
     fast_fengsu          = new CFastStatic(&commctrls[10],this);
-
+#endif
     Font24 = CFontMgr::Get().GetFont("stxinwei",24);
     assert(Font24 != NULL);
     Font24->setFontColor(RGB2Pixel(HDC_SCREEN,0,0,0));
@@ -147,6 +153,11 @@ CSingleTaji1::CSingleTaji1()
 
     SetRect(& m_tc_type_rect,   660,Client_Height+65,800,  Client_Height+115);
     SetRect(&m_liju_rect, 145, 345, 180, 380);
+
+    edt_beilv = new CStatic(&commctrls[11],this);
+    tj_img[0]    = new CTajiImage(&commctrls[11],this);
+    tj_img[1]   = new CTajiImage(&commctrls[2],this);
+
 
     //m_dir_mgr = new CDirStatusMgr(700,Client_Height+5);
 
@@ -159,36 +170,14 @@ CSingleTaji1::~CSingleTaji1()
 }
 void CSingleTaji1::OnCreate()
 {
-
-    RECT rt;
-/*
-    if(!skt)
-    {
-        skt = new SoftKeyboard();
-        skt->T9_Show(false);
-    }
-    */
-    SetTimer(m_hWnd,100,10);
+    SetTimer(m_hWnd,100,1);
 
 }
 
 void CSingleTaji1::OnShow()
 {
-    fast_angle->Attach(edt_angle);
-    fast_dist->Attach(edt_dist);
-    fast_weight->Attach(edt_weight);
-    fast_beilv->Attach(edt_beilv);
-    fast_tower_height->Attach(edt_tower_height);
-    fast_long_arm_len->Attach(edt_long_arm_len);
-    fast_short_arm_len->Attach(edt_short_arm_len);
-    fast_height->Attach(edt_height);
-    fast_up_angle->Attach(edt_up_angle);
-    fast_max_weight->Attach(edt_max_weight);
-    fast_fengsu->Attach(edt_fengsu);
-
-    //m_per.Init(this,m_liju,commctrls[11].w,commctrls[11].h);
-
-    m_hdc = GetDC(m_hWnd);
+    tj_img[0]->Attach(edt_beilv);
+    tj_img[1]->Attach(edt_max_weight);
 }
 void CSingleTaji1::OnPaint(HWND hWnd)
 {
@@ -199,8 +188,8 @@ void CSingleTaji1::OnPaint(HWND hWnd)
 }
 void CSingleTaji1::EmulateSensor()
 {
-static    double angle = 0;
-static    double dist  = 0;
+    static    double angle = 0;
+    static    double dist  = 0;
     angle += 3.1415/180;
     g_angle = angle;
     dist++;
@@ -212,32 +201,16 @@ static    double dist  = 0;
 
 void CSingleTaji1::OnTimer(int ID)
 {
-
-
-    //刷新角度
-    fast_angle->SetText(Poco::format("%0.1f",g_angle));
-    //刷新小车幅度
-    fast_dist->SetText(Poco::format("%0.1f",g_car_dist));
-    //是否显示额定重量和当前重量
-
+    EmulateSensor();
+    tj_img[0]->UpdateInfo(g_angle,g_car_dist);
+    tj_img[1]->UpdateInfo(g_angle,g_car_dist);
 
 }
 void CSingleTaji1::OnLButtonUp(int x, int y)
 {
-    fprintf(stderr,"x=%d,y=%d\n",x,y);
-    if(PtInRect(&m_liju_rect,x,y))
-    {
-        int ret = CLijuCtrl::Get().ChangeBeilv();
-        edt_beilv->SetText(Poco::format("%d",ret));
-        CLijuCtrl::Get().SaveData();
-    }
+
 }
 void CSingleTaji1::OnButtonClick(skin_item_t* item)
 {
-    if(item->id == _skinBtns[0]->GetId()){
-        KillTimer(m_hWnd,100);
-        CSysSet ss;
-        ss.CreateForm(m_hWnd);
-        SetTimer(m_hWnd,100,10);
-    }
+
 }

@@ -35,7 +35,7 @@ bool CTaji::Draw(HDC hdc)
 {
     //return Draw(hdc,m_tj_num,g_angle,g_car_dist);
     //fprintf(stderr,"draw %d angle=%0.2f,pos=%0.2f\n",m_id,g_TC[m_id].Angle,g_TC[m_id].Position);
-
+/*
     if(( fabs(g_TC[m_id].Angle-old_angle) < 0.005) && (fabs(g_TC[m_id].Position-old_position) < 0.005))
     {
         if(!is_update)
@@ -47,8 +47,8 @@ bool CTaji::Draw(HDC hdc)
             return false;
         }
     }
-
-    is_update = false;
+*/
+    //is_update = false;
 
     return Draw(hdc,m_tj_num,g_TC[m_id].Angle,g_TC[m_id].Position);
 
@@ -85,9 +85,7 @@ bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
 {
      double x ,y;
 
-     //SetBrushColor(hdc,PIXEL_lightwhite);
-     //FillCircle(hdc, m_rt.left + m_r, y, m_r);
-     ErasePrev(hdc);
+     //ErasePrev(hdc);
      SetPenWidth(hdc, 2);
      SetPenColor(hdc,PIXEL_green);
      int w2 = 2*m_r;

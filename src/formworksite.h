@@ -21,6 +21,7 @@ private:
     int m_width,m_height;
     CTaji* m_tajis[20];
     int    m_tj_num;
+    HDC    m_hdcMem;
     int    m_center_x,m_center_y,m_local_x,m_local_y;
     double    m_map_x,m_map_y,m_width_factor, m_height_factor,m_zoom;
     void   init_map_point(int local_x, int local_y,int org_x, int org_y ,int long_arm_len);

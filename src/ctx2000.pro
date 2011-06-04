@@ -6,7 +6,7 @@
 
 QT       -= gui core network
 
-TARGET = ctx2000
+TARGET = ctx2000s
 
 CONFIG   += console debug
 CONFIG   -= app_bundle
@@ -60,7 +60,10 @@ SOURCES += \
     filter.cpp \
     extdev/gpio.cpp \
     FastStatic.cpp \
-    SingleTaji1.cpp
+    SingleTaji1.cpp \
+    SinalTaji2.cpp \
+    Image.cpp \
+    TajiImage.cpp
 LIBS+=-lPocoFoundation
 
 DEPENDPATH=../include
@@ -129,4 +132,7 @@ HEADERS += \
     extdev/gpio.h \
     FastStatic.h \
     SingleTaji1Item.h \
-    SingleTaji1.h
+    SingleTaji1.h \
+    SinalTaji2.h \
+    Image.h \
+    TajiImage.h

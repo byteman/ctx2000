@@ -12,7 +12,7 @@ static COMM_CTRL_DESC commctrls[] =
 
 static const char* mmenu_bmps[] =
 {
-    PCOMM_BACKGROUND,
+    "comm/lijubk.png",
     PCOMM_OK_BTN,
     PCOMM_CANCEL_BTN,
     PCOMM_CLOSE_BTN

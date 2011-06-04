@@ -19,14 +19,14 @@
 #include <math.h>
 #include <Poco/Format.h>
 
-#define E_W  85
-#define E_H  30
-#define L_S  55
-#define L_S_V 110
+#define E_W  82
+#define E_H  27
+#define L_S  52
+#define L_S_V 108
 #define V_S  47
 
-#define L_S2   695
-#define L_S_V2 195
+#define L_S2   688
+#define L_S_V2 192
 
 #define EDIT_ANGLE    {L_S,L_S_V+0*V_S, E_W,E_H,""}
 #define EDIT_DIST     {L_S,L_S_V+1*V_S, E_W,E_H,""}
@@ -40,7 +40,7 @@
 #define EDIT_T_H      {L_S2,L_S_V2+0*V_S, E_W,E_H,""}
 #define EDIT_L_ARM    {L_S2,L_S_V2+1*V_S, E_W,E_H,""}
 #define EDIT_S_ARM    {L_S2,L_S_V2+2*V_S, E_W,E_H,""}
-#define EDIT_SPEED    {L_S2-5,L_S_V2+3*V_S+5, E_W,E_H,""}
+#define EDIT_SPEED    {L_S2,L_S_V2+3*V_S+5, E_W,E_H,""}
 
 #define Client_Height 72
 
@@ -284,7 +284,7 @@ void CMainMenu::OnCreate()
         skt = new SoftKeyboard();
         skt->T9_Show(false);
     }
-    SetTimer(m_hWnd,100,10);
+    SetTimer(m_hWnd,100,1);
 
 }
 void CMainMenu::UpdateTopArea()
@@ -340,8 +340,8 @@ void CMainMenu::OnPaint(HWND hWnd)
 }
 void CMainMenu::EmulateSensor()
 {
-static    double angle = 0;
-static    double dist  = 0;
+    static    double angle = 0;
+    static    double dist  = 0;
     angle += 3.1415/180;
     g_angle = angle;
     dist++;
@@ -360,111 +360,92 @@ void MyDrawText(std::string text,COMM_CTRL_DESC *desc)
 }
 void CMainMenu::OnTimer(int ID)
 {
-
-
     //EmulateSensor();
-#if 0
-    static int j = 0;
-    j++;
-    for(int i = 0; i < 7; i++)
-        MyDrawText(Poco::format("%d",j),&commctrls[i]);
-#endif
 #if 1
     //刷新角度
-    fast_angle->SetText(Poco::format("%0.1f",g_angle));
+    fast_angle->SetText(Poco::format("%0.1f°",g_angle));
     //刷新小车幅度
-    fast_dist->SetText(Poco::format("%0.1f",g_car_dist));
+    fast_dist->SetText(Poco::format("%0.1fm",g_car_dist));
     //是否显示额定重量和当前重量
     if(m_show_max_weight)
     {
-        fast_max_weight->SetText(Poco::format("%d",(int)CLijuCtrl::Get().m_max_weight));
-        fast_weight->SetText(Poco::format("%0.1f",g_dg_weight));
+        fast_max_weight->SetText(Poco::format("%0.1ft",CLijuCtrl::Get().m_max_weight));
+        fast_weight->SetText(Poco::format("%0.1ft",g_dg_weight));
     }
     //是否显示吊钩高度
     if(m_show_dg_height)
     {
-       fast_height->SetText(Poco::format("%0.1f",g_dg_height));
+       fast_height->SetText(Poco::format("%0.1fm",g_dg_height));
     }
     //是否显示仰角
     if(m_show_up_angle)
     {
-        fast_up_angle->SetText(Poco::format("%0.1f",g_up_angle));
+        fast_up_angle->SetText(Poco::format("%0.1f°",g_up_angle));
     }
     //是否显示风速
     if(m_show_speed)
     {
-        fast_fengsu->SetText(Poco::format("%0.1f",g_speed));
+        fast_fengsu->SetText(Poco::format("%0.1fm/s",g_speed));
     }
 #endif
 
 
-
+#if 1
     m_per.Show(CLijuCtrl::Get().m_percent);
-
+#endif
     m_worksite->update();
-
-    //lbl_max_weight->SetText(Poco::format("%d",(int)CLijuCtrl::Get().m_max_weight));
-//up down left right
 
 
 #if 1
     int status = CLijuCtrl::Get().m_cur_state;
-    if(CMainCtrl::Get().m_control_state.b1 || status > 0)
+    if(CMainCtrl::Get().m_control_state.b1)
     {
         m_dir_mgr->Show(m_hdc,"right",EALARM);
     }else{
-        m_dir_mgr->Show(m_hdc,"right",EOK);
+        if(CMainCtrl::Get().m_control_state.b10)
+        {
+            m_dir_mgr->Show(m_hdc,"right",EWARNING);
+        }else{
+            m_dir_mgr->Show(m_hdc,"right",EOK);
+        }
+        //m_dir_mgr->Show(m_hdc,"right",EOK);
     }
     if(CMainCtrl::Get().m_control_state.b3)
     {
         m_dir_mgr->Show(m_hdc,"left",EALARM);
     }else{
-        m_dir_mgr->Show(m_hdc,"left",EOK);
+        if(CMainCtrl::Get().m_control_state.b9)
+        {
+            m_dir_mgr->Show(m_hdc,"left",EWARNING);
+        }else{
+            m_dir_mgr->Show(m_hdc,"left",EOK);
+        }
     }
 
-    if(CMainCtrl::Get().m_control_state.b3)
-    {
-        m_dir_mgr->Show(m_hdc,"left",EALARM);
-    }else{
-        m_dir_mgr->Show(m_hdc,"left",EOK);
-    }
-
-    if(CMainCtrl::Get().m_control_state.b9)
-    {
-        m_dir_mgr->Show(m_hdc,"left",EWARNING);
-    }else{
-        m_dir_mgr->Show(m_hdc,"left",EOK);
-    }
-    if(CMainCtrl::Get().m_control_state.b8)
-    {
-        m_dir_mgr->Show(m_hdc,"right",EWARNING);
-    }else{
-        m_dir_mgr->Show(m_hdc,"right",EOK);
-    }
-    if(CMainCtrl::Get().m_control_state.b4)
-    {
-        m_dir_mgr->Show(m_hdc,"up",EWARNING);
-    }else{
-        m_dir_mgr->Show(m_hdc,"up",EOK);
-    }
     if(CMainCtrl::Get().m_control_state.b5)
     {
-        m_dir_mgr->Show(m_hdc,"up",EWARNING);
+        m_dir_mgr->Show(m_hdc,"up",EALARM);
     }else{
-        m_dir_mgr->Show(m_hdc,"up",EOK);
+        if(CMainCtrl::Get().m_control_state.b4)
+        {
+            m_dir_mgr->Show(m_hdc,"up",EWARNING);
+        }else{
+            m_dir_mgr->Show(m_hdc,"up",EOK);
+        }
     }
+
     if(CMainCtrl::Get().m_control_state.b6)
     {
-        m_dir_mgr->Show(m_hdc,"down",EWARNING);
+        m_dir_mgr->Show(m_hdc,"down",EALARM);
     }else{
-        m_dir_mgr->Show(m_hdc,"down",EOK);
+        if(CMainCtrl::Get().m_control_state.b7)
+        {
+            m_dir_mgr->Show(m_hdc,"down",EWARNING);
+        }else{
+            m_dir_mgr->Show(m_hdc,"down",EOK);
+        }
     }
-    if(CMainCtrl::Get().m_control_state.b7)
-    {
-        m_dir_mgr->Show(m_hdc,"down",EWARNING);
-    }else{
-        m_dir_mgr->Show(m_hdc,"down",EOK);
-    }
+
 #endif
 
 }

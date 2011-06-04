@@ -569,7 +569,7 @@ CSkinForm::event_cb_func(HWND hWnd, skin_item_t * p_item, int event,
 						 void *p_data)
 {
     //EVENT_CB_LOCK;
-    fprintf(stderr,"hwnd=%x,cur=%x\n",hWnd,curHwnd);
+    //fprintf(stderr,"hwnd=%x,cur=%x\n",hWnd,curHwnd);
     if ( (hWnd == HWND_INVALID))
     //if ( (hWnd == HWND_INVALID) || (hWnd != curHwnd))
     {

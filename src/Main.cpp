@@ -57,8 +57,8 @@ void GUIAPI InitMainUI()
 {
 
     try{
-        //CMainMenu login;
-        CSingleTaji1 login;
+        CMainMenu login;
+        //CSingleTaji1 login;
         login.CreateForm( HWND_DESKTOP );
     }catch(Poco::Exception& e){
         std::cerr << "Sys Exception: " <<e.displayText () << std::endl;
@@ -103,6 +103,7 @@ int MiniGUIMain (int argc, const char* argv[])
     InitMainUI ();
 	
     fprintf ( stderr, "guiApp Exit!\n" );
+    exit(0);
     return 0;
 }
 
