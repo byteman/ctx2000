@@ -24,7 +24,7 @@ public:
         virtual void OnLButtonUp(int x, int y);
 
 private:
-        void UpdateTopArea();
+        void UpdateUIArea();
         void CreateStatusArea(HDC hdc,RECT rt);
         void CreateInfoArea(HDC hdc);
         void EmulateSensor();
@@ -37,13 +37,13 @@ private:
         RECT m_status_rect;
         RECT m_dev_serail_rect;
         RECT m_tc_type_rect;
-        RECT m_liju_rect;
+        RECT m_fall_rect,m_quit_rect;
         CDirStatusMgr* m_dir_mgr;
 
         CStatic* edt_angle;
         CStatic* edt_dist;
         CStatic* edt_weight;
-        CStatic* edt_beilv;
+        CStatic* edt_fall;
         CStatic* edt_tower_height;
         CStatic* edt_long_arm_len;
         CStatic* edt_short_arm_len;
@@ -68,8 +68,6 @@ private:
         CStatic* lbl_rights[3];
         CStatic* m_liju;
         CFormWorksite* m_worksite;
-        CIcon m_angle;
-        CIcon m_dist;
 
         CIconGroup m_lables;
         CPercent m_per;

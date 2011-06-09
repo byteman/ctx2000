@@ -28,7 +28,8 @@ SOURCES += \
     src/dt_static.cpp \
     src/SkinForm.cpp \
     src/dt_ipaddr.cpp \
-    src/dt_font.cpp
+    src/dt_font.cpp \
+    src/GuiEng.cpp
 
 INCLUDEPATH += ./include
 CONFIG   += debug

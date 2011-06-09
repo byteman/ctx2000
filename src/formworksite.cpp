@@ -62,7 +62,8 @@ CFormWorksite::~CFormWorksite()
 
 void CFormWorksite::draw_zhangai(HDC hdc)
 {
-    POINT area[6];
+    static POINT area[6];
+
     gal_pixel old = SetBrushColor(hdc,PIXEL_red);
  /*
     int oft_x=-50,oft_y=100;
@@ -76,30 +77,32 @@ void CFormWorksite::draw_zhangai(HDC hdc)
     area[3].y = 200+oft_y;
     gal_pixel old = SetBrushColor(hdc,PIXEL_red);
 */
-    for(size_t i=0; i <wbNum;i++)
-    {
-        //fprintf(stderr,"i=%d num=%d h=%0.2f\n",i,wba[i].VertexNum,wba[i].h);
-        if( (wba[i].VertexNum>0) && (wba[i].VertexNum<6))
+
+        for(size_t i=0; i <wbNum;i++)
         {
-            //fprintf(stderr,"l_x=%d,zom=%0.2f,c_x=%d\n",m_local_x,m_zoom,m_center_x);
-            for(int j =0; j < wba[i].VertexNum;j++)
+            //fprintf(stderr,"i=%d num=%d h=%0.2f\n",i,wba[i].VertexNum,wba[i].h);
+            if( (wba[i].VertexNum>0) && (wba[i].VertexNum<6))
             {
+                //fprintf(stderr,"l_x=%d,zom=%0.2f,c_x=%d\n",m_local_x,m_zoom,m_center_x);
+                for(int j =0; j < wba[i].VertexNum;j++)
+                {
 
-                double x = wba[i].Pointxy[j][0];
-                double y = wba[i].Pointxy[j][1];
-                area[j].x =  (x-m_local_x)*m_zoom + m_center_x;
-                area[j].y =  (m_local_y-y)*m_zoom + m_center_y;
-                if(area[j].x < 0)area[j].x=0;
-                if(area[j].y < 0)area[j].y=0;
+                    double x = wba[i].Pointxy[j][0];
+                    double y = wba[i].Pointxy[j][1];
+                    area[j].x =  (x-m_local_x)*m_zoom + m_center_x;
+                    area[j].y =  (m_local_y-y)*m_zoom + m_center_y;
+                    if(area[j].x < 0)area[j].x=0;
+                    if(area[j].y < 0)area[j].y=0;
+                    //fprintf(stderr,"j=%d,x=%d,y=%d\n",j,area[j].x,area[j].y);
+                }
 
 
-                fprintf(stderr,"j=%d,x=%d,y=%d\n",j,area[j].x,area[j].y);
             }
-
             FillPolygon(hdc,area,wba[i].VertexNum);
         }
-    }
-    //FillPolygon(hdc,area,4);
+
+
+
     SetBrushColor(hdc,old);
 
 }
@@ -180,7 +183,7 @@ void CFormWorksite::update(int taji)
     }
     if(!draw_flag)
     {
-        //draw_zhangai(hdc);
+        draw_zhangai(m_hdcMem);
         //draw_flag=true;
     }
     BitBlt (m_hdcMem, 0, 0, m_width, m_height, hdc, 0, 0, 0);

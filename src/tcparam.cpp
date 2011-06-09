@@ -330,7 +330,6 @@ void    CTCParam::OnButtonClick(skin_item_t* item)
     }
     else if(item->id == btn_save->GetId())
     {
-
         SaveTC(m_tc_id);
         CMainCtrl::Get().SaveTowerCraneInfo();
     }

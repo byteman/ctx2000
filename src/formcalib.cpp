@@ -6,6 +6,8 @@
 #include "lijuConfForm.h"
 #include <math.h>
 #include <Poco/NumberParser.h>
+#include "MsgBox.h"
+
 static const char* mmenu_bmps[] = {
        PCLBACKGROUND,
        PANGLE_A ,
@@ -35,6 +37,27 @@ static COMM_CTRL_DESC StaticCtrls[] =
     STATIC_START_Y,
     STATIC_START_AD,
     STATIC_END_AD,
+};
+static const char* Msg[]={
+    "回转标定,起始点记录成功",
+    "回转标定成功",
+    "回转标定参数异常，请重新标定",
+
+    "仰角标定,最小角度记录成功",
+    "仰角标定成功",
+    "仰角标定参数异常，请重新标定",
+
+    "最小幅度记录成功",
+    "幅度标定成功",
+    "幅度标定参数异常，请重新标定",
+
+    "重量清零成功",
+    "重量标定完成",
+    "重量标定参数异常，请重新标定",
+
+    "高度清零成功",
+    "高度标定完成",
+    "高度标定参数异常，请重新标定",
 };
 /*
 #define BUTTON_CAB_ANGLE_START     {1,400,100}
@@ -155,23 +178,31 @@ void CFormCalib::calibrate_height(int type)
 
         if(!Poco::NumberParser::tryParseFloat(_edits[1]->GetText(),zero_height))
         {
-            MessageBox(m_hWnd,"Please input correct height\n","Error",MB_OK);
+            MsgBox box;
+            box.ShowBox(this,"请输入正确的最小高度\n","输入错误");
+            ///box.ShowBox(this,"Please input correct height\n","Error");
             return;
         }
+
         start = true;
+        MsgBox box;
+        box.ShowBox(this,"最小高度记录成功","提示");
     }else if((type == 1) && (start)){
         start = false;
         end_ad = ad_height;
         double bd_height=0;
         if(!Poco::NumberParser::tryParseFloat(_edits[1]->GetText(),bd_height))
         {
-            MessageBox(m_hWnd,"Please input correct height\n","Error",MB_OK);
+            MsgBox box;
+            box.ShowBox(this,"请输入正确的最大高度\n","输入错误");
+            //box.ShowBox(this,"Please input correct height\n","Error");
             return;
         }
         double k = (end_ad - start_ad) / (bd_height-zero_height);
-        if(k < 0.001)
+        if( (fabs(k) < 0.001) || ( fabs(k) > 10000 ) )
         {
-            MessageBox(m_hWnd,"Calibration ERROR! Please Calibrate again.","Error",MB_OK);
+            MsgBox box;
+            box.ShowBox(this,"高度标定参数错误，请重新标定","错误");
             return;
         }
         g_bd[BD_HEIGHT].bd_k        = k;
@@ -184,8 +215,12 @@ void CFormCalib::calibrate_height(int type)
         cfg.WriteFloat("height_bd","height_k",  g_bd[BD_HEIGHT].bd_k);
         cfg.WriteInteger("height_bd","zero_ad", g_bd[BD_HEIGHT].zero_ad);
         cfg.WriteInteger("height_bd","bd_ad",   g_bd[BD_HEIGHT].bd_ad);
+        MsgBox box;
+        box.ShowBox(this,"高度标定完成","提示");
       }else{
-          MessageBox(m_hWnd,"Please Press start first\n","Error",MB_OK);
+        MsgBox box;
+        box.ShowBox(this,"请先将高度清零","错误");
+
       }
 }
 void CFormCalib::calibrate_car_dist(int type)
@@ -196,6 +231,8 @@ void CFormCalib::calibrate_car_dist(int type)
     if(type == 0){
         start_ad = ad_car_dist;
         start = true;
+        MsgBox box;
+        box.ShowBox(this,"最小幅度记录成功\n","提示");
     }else if((type == 1) && (start)){
         start = false;
         end_ad = ad_car_dist;
@@ -203,9 +240,11 @@ void CFormCalib::calibrate_car_dist(int type)
         double max_dist = g_TC[g_local_id].LongArmLength;
         double k = (end_ad - start_ad) / (max_dist-min_dist);
 
-        if(k < 2)
+        if((fabs(k) < 0.001) || ( fabs(k) > 10000 ) )
         {
-            MessageBox(m_hWnd,"Calibration ERROR! Please Calibrate again.","Dist Error",MB_OK);
+            MsgBox box;
+            box.ShowBox(this,"幅度标定参数错误，请重新标定\n","参数错误");
+            //MessageBox(m_hWnd,"Calibration ERROR! Please Calibrate again.","Dist Error",MB_OK);
             return;
         }
         g_bd[BD_CAR_DIST].bd_k        = k;
@@ -218,8 +257,11 @@ void CFormCalib::calibrate_car_dist(int type)
         cfg.WriteFloat("dist_bd","dist_k",    g_bd[BD_CAR_DIST].bd_k);
         cfg.WriteInteger("dist_bd","zero_ad", g_bd[BD_CAR_DIST].zero_ad);
         cfg.WriteInteger("dist_bd","bd_ad",   g_bd[BD_CAR_DIST].bd_ad);
+        MsgBox box;
+        box.ShowBox(this,"幅度标定完成","提示");
     }else{
-        MessageBox(m_hWnd,"Please Press start first\n","Error",MB_OK);
+        MsgBox box;
+        box.ShowBox(this,"请先将点击最小幅度按钮","错误");
     }
 }
 #include "SoftKeyboard.h"
@@ -237,6 +279,7 @@ void CFormCalib::OnCommCtrlNotify(HWND hwnd, int id, int nc)
         }
     }
 }
+#include <Poco/Format.h>
 void CFormCalib::calibrate_weight(int type)
 {
     static int start_ad = 0;
@@ -245,13 +288,17 @@ void CFormCalib::calibrate_weight(int type)
     if(type == 0){
         start_ad = ad_weight;
         start = true;
+        MsgBox box;
+        box.ShowBox(this,"重量清零成功\n","提示");
     }else if((type == 1) && (start)){
         start = false;
         end_ad = ad_weight;
         double bd_weight=0;
         if(!Poco::NumberParser::tryParseFloat(_edits[0]->GetText(),bd_weight))
         {
-            MessageBox(m_hWnd,"Please input correct weight\n","Error",MB_OK);
+            MsgBox box;
+            box.ShowBox(this,"请输入正确的重量值\n","错误");
+            //MessageBox(m_hWnd,"Please input correct weight\n","Error",MB_OK);
             return;
         }
         /*
@@ -262,9 +309,13 @@ void CFormCalib::calibrate_weight(int type)
         }
         */
         double k = (end_ad - start_ad) / bd_weight;
-        if(k < 0.001)
+
+        if(( fabs(k) < 0.001) || ( fabs(k) > 10000 ) )
         {
-            MessageBox(m_hWnd,"Calibration ERROR! Please Calibrate again.","Error",MB_OK);
+            std::string value = Poco::format("%0.2f",k);
+            MsgBox box;
+            box.ShowBox(this,"重量标定参数错误，请重新标定 k=" + value +"\n","错误");
+           // MessageBox(m_hWnd,"Calibration ERROR! Please Calibrate again.","Error",MB_OK);
             return;
         }
         g_bd[BD_WEIGHT].bd_k        = k;
@@ -277,7 +328,13 @@ void CFormCalib::calibrate_weight(int type)
         cfg.WriteFloat("weight_bd","weight_k",g_bd[BD_WEIGHT].bd_k);
         cfg.WriteInteger("weight_bd","zero_ad", g_bd[BD_WEIGHT].zero_ad);
         cfg.WriteInteger("weight_bd","bd_ad", g_bd[BD_WEIGHT].bd_ad);
-      }
+
+        MsgBox box;
+        box.ShowBox(this,"重量标定完成","提示");
+    }else{
+        MsgBox box;
+        box.ShowBox(this,"请先将重量清零按钮","错误");
+    }
 }
 void CFormCalib::calibrate_angle(int type)
 {
@@ -287,14 +344,18 @@ void CFormCalib::calibrate_angle(int type)
     if(type == 0){
         start_ad = ad_angle;
         start = true;
+        MsgBox box;
+        box.ShowBox(this,"A点记录成功","提示");
     }else if((type == 1) && (start)){
         start = false;
         end_ad = ad_angle;
         double k = (end_ad - start_ad) / g_angle_C;
 
-        if(k < 2)
+        if( (fabs(k) < 0.001) || ( fabs(k) > 10000 ) )
         {
-            MessageBox(m_hWnd,"Calibration ERROR! Please Calibrate again.","Error",MB_OK);
+            MsgBox box;
+            box.ShowBox(this,"回转角度标定参数错误，请重新标定.","错误");
+            //box.ShowBox(this,"Calibration ERROR! Please Calibrate again.","Error");
             return;
         }
         g_bd[BD_ANGLE].bd_k        = k;
@@ -307,6 +368,11 @@ void CFormCalib::calibrate_angle(int type)
         cfg.WriteFloat("angle_bd","angle_k",g_bd[BD_ANGLE].bd_k);
         cfg.WriteInteger("angle_bd","zero_ad", g_bd[BD_ANGLE].zero_ad);
         cfg.WriteInteger("angle_bd","bd_ad", g_bd[BD_ANGLE].bd_ad);
+        MsgBox box;
+        box.ShowBox(this,"回转标定完成.","提示");
+    }else{
+        MsgBox box;
+        box.ShowBox(this,"请先点击标定A点.","错误");
     }
 }
 void CFormCalib::calc_up_angle(int type)
@@ -317,15 +383,19 @@ void CFormCalib::calc_up_angle(int type)
     if(type == 0){
         start_ad = ad_up_angle;
         start = true;
+        MsgBox box;
+        box.ShowBox(this,"最小仰角记录成功","提示");
     }else if(type == 1 && start){
         start = false;
         end_ad = ad_up_angle;
         double min_up_angle = g_TC[g_local_id].L2;
         double max_up_angle = g_TC[g_local_id].L1;
         double k = (end_ad-start_ad)/(max_up_angle-min_up_angle);
-        if(k < 0.001)
+        if( (fabs(k) < 0.001) || ( fabs(k) > 10000 ) )
         {
-            MessageBox(m_hWnd,"Calibration ERROR! Please Calibrate again.","Error",MB_OK);
+            MsgBox box;
+            box.ShowBox(this,"仰角标定参数错误，请重新标定","标定错误");
+            //MessageBox(m_hWnd,"Calibration ERROR! Please Calibrate again.","Error",MB_OK);
             return;
         }
         g_bd[BD_UP_ANGLE].bd_k        = k;
@@ -337,6 +407,11 @@ void CFormCalib::calc_up_angle(int type)
         cfg.WriteFloat("up_angle_bd","up_angle_k",k);
         cfg.WriteInteger("up_angle_bd","zero_ad", start_ad);
         cfg.WriteInteger("up_angle_bd","bd_ad", end_ad);
+        MsgBox box;
+        box.ShowBox(this,"仰角标定完成.","提示");
+    }else{
+        MsgBox box;
+        box.ShowBox(this,"请先点击最小仰角按钮.","错误");
     }
 }
 void CFormCalib::OnButtonClick(skin_item_t* item)

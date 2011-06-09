@@ -7,6 +7,9 @@
 #include "lijuctrl.h"
 #include "iniFile.h"
 #include <Poco/Format.h>
+#include "SoftKeyboard.h"
+#include "MsgBox.h"
+extern SoftKeyboard* skt;
 static char* userlist_caption[] =
 {
     "No.",
@@ -141,23 +144,6 @@ CLiJuManForm::OnButtonClick(skin_item_t * item)
             }else{
                 return;
             }
-/*
-            if(cbx_type->FindItemByText(type)==-1)
-            {
-                cbx_type->AddItem(type);
-                cbx_type->SetText(type);
-            }
-            if(cbx_arm_len->FindItemByText(len)==-1)
-            {
-                cbx_arm_len->AddItem(len);
-                cbx_arm_len->SetText(len);
-            }
-            if(cbx_beilv->FindItemByText(beilv)==-1)
-            {
-                cbx_beilv->AddItem(beilv);
-                cbx_beilv->SetText(beilv);
-            }
- */
             RefreshList(type,len,beilv);
         }
     }
@@ -219,6 +205,8 @@ CLiJuManForm::OnButtonClick(skin_item_t * item)
             cfg.WriteString("device","armlen",armlen);
             cfg.WriteString("device","beilv",beilv);
         }
+        MsgBox msg;
+        msg.ShowBox(this,"力矩信息保存成功","提示信息");
 
     }
 }
@@ -272,56 +260,67 @@ void CLiJuManForm::OnShow()
     InitListCol();
     ReloadLijuItems();
 }
-#include "SoftKeyboard.h"
-extern SoftKeyboard* skt;
+void CLiJuManForm::ReloadArmLen()
+{
+    TStringList rst;
+    rst.clear();
+    cbx_arm_len->Clear();
+    if(CTajiDbMgr::Get().getTjArmLen(cbx_type->GetSelItemText(),rst))
+    {
+        for(size_t i = 0 ; i < rst.size(); i++)
+        {
+            cbx_arm_len->AddItem(rst.at(i));
+        }
+        cbx_arm_len->SetCurSel(-1);
+    }
+}
+void CLiJuManForm::ReloadFall()
+{
+    TStringList rst;
+    rst.clear();
+    cbx_beilv->Clear();
+    if(CTajiDbMgr::Get().getTjBeilv(cbx_type->GetSelItemText(),cbx_arm_len->GetSelItemText(),rst))
+    {
+
+        for(size_t i = 0 ; i < rst.size(); i++)
+        {
+            cbx_beilv->AddItem(rst.at(i));
+        }
+        cbx_beilv->SetCurSel(-1);
+    }
+}
 void CLiJuManForm::OnCommCtrlNotify(HWND hwnd, int id, int nc)
 {
     fprintf(stderr,"nc=%d\n",nc);
     if( (id == cbx_type->GetId()) &&  (nc == CBN_CLOSEUP)){
-        TStringList rst;
-        cbx_arm_len->Clear();
-        if(CTajiDbMgr::Get().getTjArmLen(cbx_type->GetSelItemText(),rst))
-        { 
-            for(size_t i = 0 ; i < rst.size(); i++)
-            {
-                cbx_arm_len->AddItem(rst.at(i));
-            }
-            cbx_arm_len->SetCurSel(-1);
-        }
-        rst.clear();
-        cbx_beilv->Clear();
-        if(CTajiDbMgr::Get().getTjBeilv(cbx_type->GetSelItemText(),cbx_arm_len->GetSelItemText(),rst))
+        ReloadArmLen();
+        ReloadFall();
+        ReloadLijuItems();
+    }else if(id == cbx_arm_len->GetId()){
+        if(nc == CBN_CLOSEUP)
         {
-
-            for(size_t i = 0 ; i < rst.size(); i++)
-            {
-                cbx_beilv->AddItem(rst.at(i));
-            }
-            cbx_beilv->SetCurSel(-1);
-        }
-        ReloadLijuItems();
-    }else if(id == cbx_beilv->GetId() && nc == CBN_CLOSEUP){
-        ReloadLijuItems();
-    }else if(id == cbx_arm_len->GetId() && nc == CBN_CLOSEUP){
-        TStringList rst;
-        cbx_beilv->Clear();
-        if(CTajiDbMgr::Get().getTjBeilv(cbx_type->GetSelItemText(),cbx_arm_len->GetSelItemText(),rst))
+            ReloadFall();
+            ReloadLijuItems();
+        }else if((nc == CBN_DROPDOWN)&&cbx_arm_len->TotalCounts()==0)
         {
-
-            for(size_t i = 0 ; i < rst.size(); i++)
-            {
-                cbx_beilv->AddItem(rst.at(i));
-            }
-            cbx_beilv->SetCurSel(-1);
+            ReloadArmLen();
         }
-        ReloadLijuItems();
+
+    }else if(id == cbx_beilv->GetId()){
+
+        if(nc == CBN_CLOSEUP)
+        {
+            ReloadLijuItems();
+        }else if((nc == CBN_DROPDOWN)&&cbx_beilv->TotalCounts()==0)
+        {
+            ReloadFall();
+        }
     }
     if( (nc==EN_SETFOCUS) || (nc==CBN_SETFOCUS ))
     {
         if(skt)skt->T9_Show(true);
     }
 }
-#include <Poco/Format.h>
 void CLiJuManForm::RefreshList(std::string type, std::string len ,std::string beilv)
 {
     TLijuRst rst;

@@ -66,7 +66,7 @@ bool CPercent::Init(CSkinForm* parent,CStatic* ctrl,int w, int h)
     if(m_hwnd != HWND_INVALID){
        // m_hdc = GetClientDC(m_hwnd);
     }
-    SetRect(&m_rect,0,0,60,30);
+    SetRect(&m_rect,0,0,w,h);
 
     if(m_hwnd != HWND_INVALID)
     {
@@ -100,10 +100,12 @@ void CPercent::Show(double percent)
     {
         char buf[32] = {0,};
         int tmp = m_percent*100.0f+0.5;
-        snprintf(buf,32,"%d%",tmp);
+        tmp = snprintf(buf,32,"%d",tmp);
+        buf[tmp]='%';
         HDC hdc = GetClientDC(m_hwnd);
         //SetBkMode(hdc,BM_TRANSPARENT);
         SelectFont(hdc,GetSystemFont(SYSLOGFONT_FIXED));
+        //SelectFont(hdc,GetSystemFont(SYSLOGFONT_CONTROL));
         DrawText(hdc,buf,strlen(buf),&m_rect,DT_TOP|DT_LEFT);
         ReleaseDC(hdc);
         flag = false;

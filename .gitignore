@@ -1,2 +1,5 @@
 *.o
 Makefile
+*.user
+*.orig
+ctx2000s

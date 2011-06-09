@@ -34,6 +34,8 @@ public:
 private:
     void InitListCol();
     void ReloadLijuItems();
+    void ReloadArmLen();
+    void ReloadFall();
     void RefreshList(std::string type, std::string len ,std::string beilv);
     CListView* _lvLiJu;
     CSkinButton*    _skinBtns[USERMAN_SKIN_BTNS_NUM];

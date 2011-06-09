@@ -18,13 +18,14 @@
 #include "iniFile.h"
 #include "comdata.h"
 #include "lijuctrl.h"
+
 using namespace TelEngine;
 using Poco::SingletonHolder;
 using Poco::StringTokenizer;
 using Poco::TimerCallback;
 //QtzParam  g_qtzs[NUMBER_OF_QTZ];
-#define JDQ_OPEN  IO_HIGH_LEVEL
-#define JDQ_CLOSE IO_LOW_LEVEL
+#define JDQ_OPEN  IO_LOW_LEVEL
+#define JDQ_CLOSE IO_HIGH_LEVEL
 Poco::Timespan g_SubWaitSubTime(3,0);
 TIniFile cfg;
 class CDataHandler{
@@ -68,11 +69,14 @@ CMainCtrl::CMainCtrl()
 {
     m_mode  = mode_slave;
     m_timer = NULL;
+    for(int i = 0; i < 12; i ++)
+        m_control_state.b[i] = false;
 }
 CMainCtrl::~CMainCtrl()
 {
 
 }
+
 void CMainCtrl::init_tj_data()
 {
     TCTotalNum  = 20;
@@ -220,7 +224,7 @@ std::string      CMainCtrl::build_qurey_msg()
 
         int nextId=Poco::NumberParser::parse(Next);
         int maxid = MaxNo() ;
-        fprintf(stderr,"maxid=%d,nextid=%d\n",maxid,nextId);
+        //fprintf(stderr,"maxid=%d,nextid=%d\n",maxid,nextId);
         if(maxid == nextId){//已经呼叫了最后一个有效塔机，申请加入一个新的塔机
             tmpStr=Poco::format("%2s",GetAddID());
 
@@ -320,14 +324,16 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
 
     while( (CurTime-StartTime) < 5000000)
     {
-        fprintf(stderr,"%s Wait RtMsg\n",__FUNCTION__);
+
         if(CDianTai::Get().GetMessage(msg))
         {
                 fprintf(stderr,"%s Recv RtMsg\n",__FUNCTION__);
                 FoundM = true;
                 break;
         }
+
         Poco::Thread::sleep(50);
+
         CurTime.update();
     }
     //fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
@@ -457,9 +463,9 @@ void CMainCtrl::slave_loop()
     CTX_Message msg;
     std::string ID;
     Poco::Timespan span;
-    Poco::Timespan sub_wait_span(60,0);
+    Poco::Timespan sub_wait_span(6,0);
     bool AddState=false;
-
+    fprintf(stderr,"slave_loop\n");
     Poco::Thread::sleep(20);
     while (CDianTai::Get().GetMessage(msg)) {
         fprintf(stderr,"slave_loop1\n");
@@ -471,7 +477,7 @@ void CMainCtrl::slave_loop()
 
         if(span > sub_wait_span){
             fprintf(stderr,"slave receive timeout\n");
-#if 0
+#if 1
             AddState=false;
             while(AddState==false)
                   WatchNetWork(MainMachineID,AddState);
@@ -482,6 +488,7 @@ void CMainCtrl::slave_loop()
             std::string sendInfo = build_qurey_msg();
             CDianTai::Get().SendMessage(sendInfo);
             sendInfoTime.update();
+            fprintf(stderr,"recv my id\n");
         }
         fprintf(stderr,"slave_loop4\n");
     }
@@ -537,12 +544,19 @@ void CMainCtrl::master_loop()
     if(MaxTCNo == RightNo){//如果呼叫完了最后一个塔机 ，并且发送过申请加入一个新的塔机的指令，就等待接收新加入塔机的回应
         fprintf(stderr,"Master wait New Add TC %d slave's ack \n",RightNo);
         //等待200ms，等新加入塔机的响应消息
-        Poco::Thread::sleep(200);
+        //Poco::Thread::sleep(200);
 
-        if(CDianTai::Get().GetMessage(msg)){
+        int repeat = 0;
+        while(!CDianTai::Get().GetMessage(msg)){
+            repeat++;
+            Poco::Thread::sleep(20);
+            if(repeat >= 10) break;
 
+        }
+        if(repeat < 10){
             DistillData(msg.context,ID);
-            //DBG("Master received New Add TC slave's ack id=%s \n",ID.c_str());
+            fprintf(stderr,"Master received New Add TC slave's ack id=%s \n",ID.c_str());
+
             UpdateTCStatus();
         }
     }
@@ -729,7 +743,7 @@ void CMainCtrl::ReadSetting()
         CreateDefaultTjParam();
         std::cerr << "Can not open tc.red" << std::endl;
     }
-    g_TC[1].Height = 120;
+    //g_TC[1].Height = 120;
 
     std::string tmp = CurID;
     m_local_id = Poco::NumberParser::parse(tmp);
@@ -846,10 +860,13 @@ void CMainCtrl::InitAlgoData()
         g_qtzs[i].m_slowdown_dist    = WarnDis;
         g_qtzs[i].m_carrier_slowdown_dist= VWarnDis;
         g_qtzs[i].m_carrier_brake_dist   = VStopDis;
-        g_qtzs[i].m_sarm_cc_len          = g_TC[g_local_id].a0;
+        if(g_TC[g_local_id].Dyna)
+            g_qtzs[i].m_sarm_cc_len      = g_TC[g_local_id].a0;
+        else
+            g_qtzs[i].m_sarm_cc_len      = 0;
 
 //三个实时参数
-        g_qtzs[i].m_sarm_angle = 0; //动臂仰角,实时参数
+        g_qtzs[i].m_sarm_angle       = 0; //动臂仰角,实时参数
         g_qtzs[i].m_carrier_pos      = 0;
         g_qtzs[i].m_long_arm_angle   = 0;
 
@@ -858,8 +875,8 @@ void CMainCtrl::InitAlgoData()
                 g_qtzs[i].m_coord.x,g_qtzs[i].m_coord.y,BrakeDis,DangerDis,WarnDis,VWarnDis,VStopDis);
     }
 
-    int index =  g_local_id - 1;
-    if(index >= 0)
+    int local_tower_id =  g_local_id - 1;
+    if(local_tower_id >= 0)
     {
         for(size_t i = 0; i < g_conflict_tj_list.size();i++)
         {
@@ -867,12 +884,51 @@ void CMainCtrl::InitAlgoData()
             if(id < NUMBER_OF_QTZ)
             {
                 fprintf(stderr,"local %d Detect %d \n ",g_local_id,id);
-                g_qtzs[index].QtzAddDetect(&g_qtzs[id-1]);
+                g_qtzs[local_tower_id].QtzAddDetect(&g_qtzs[id-1]);
 
             }
         }
     }
+    /*
+    初始化区域检测
+*/
+    g_polys.clear();
+    for(size_t i=0; i < wbNum; i++)
+    {
 
+        if( ( wba[i].VertexNum > 0 ) && ( wba[i].VertexNum < 6 ) )
+        {
+            fprintf(stderr,"i=%d num=%d h=%0.2f\n",i,wba[i].VertexNum,wba[i].h);
+            PolyDef poly;
+            poly.clear();
+            poly.height  = wba[i].h;
+            poly.is_wall = false;
+            for(int j =0; j < wba[i].VertexNum;j++)
+            {
+                double x = wba[i].Pointxy[j][0];
+                double y = wba[i].Pointxy[j][1];
+                Coord z;
+                z.x = x;
+                z.y = y;
+                poly.push_back(z);
+
+                fprintf(stderr,"i=%d x=%0.2f y=%0.2f\n",i,x,y);
+            }
+            poly.push_back(poly[0]);
+            g_polys.push_back(poly);
+        }
+    }
+    if(local_tower_id >= 0)
+    {
+        for(size_t i = 0; i < g_polys.size(); i++)
+        {
+            fprintf(stderr,"add diving \n");
+            g_qtzs[local_tower_id].QtzAddDetect( &g_polys[i]);
+            for(size_t j = 0 ; j < g_polys[i].size(); j++)
+                fprintf(stderr,"x=%0.2f y=%0.2f\n",g_polys[i].at(j).x,g_polys[i].at(j).y);
+        }
+
+    }
 
 }
 void CMainCtrl::SaveSiteInfo()
@@ -1111,7 +1167,7 @@ DBG("%s %d DividePointNum=%d\n",__FUNCTION__,__LINE__,DividePointNum);
 bool CMainCtrl::DealWorkSiteInfo()
 {
     CTX_Message msg;
-    DBG("%s %d\n",__FUNCTION__,__LINE__);
+    //fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
     if(CDianTai::Get().GetMessage(msg,3)){
         DBG("%s %d %s\n",__FUNCTION__,__LINE__,msg.context.c_str());
         DiveideSettingInfomation(msg.context);
@@ -1157,72 +1213,85 @@ void CMainCtrl::Gather_AD()
             g_qtzs[id].m_carrier_pos      = g_TC[id+1].Position;
             g_qtzs[id].m_sarm_angle       = g_TC[id+1].Dang;
         }
-        fprintf(stderr,"tj conflict[%d] angle=%0.2f h=%0.2f p=%0.2f\n",id+1,g_qtzs[id].m_long_arm_angle,g_qtzs[id].m_height,g_qtzs[id].m_carrier_pos);
+        //fprintf(stderr,"tj conflict[%d] angle=%0.2f h=%0.2f p=%0.2f\n",id+1,g_qtzs[id].m_long_arm_angle,g_qtzs[id].m_height,g_qtzs[id].m_carrier_pos);
     }
-    fprintf(stderr,"tj local [%d] angle=%0.2f h=%0.2f p=%0.2f\n",index+1,g_qtzs[index].m_long_arm_angle,g_qtzs[index].m_height,g_qtzs[index].m_carrier_pos);
+    //fprintf(stderr,"tj local [%d] angle=%0.2f h=%0.2f p=%0.2f\n",index+1,g_qtzs[index].m_long_arm_angle,g_qtzs[index].m_height,g_qtzs[index].m_carrier_pos);
     QtzCollideDetectOne(&g_qtzs[index]);
     m_control_state = g_qtzs[index].m_controled_status;
 
-    fprintf(stderr,"state=%d%d%d%d%d%d%d%d%d%d%d%d\n",m_control_state.b1,m_control_state.b2,m_control_state.b3,\
-            m_control_state.b4,m_control_state.b5,m_control_state.b6,m_control_state.b7,m_control_state.b8,\
-            m_control_state.b9,m_control_state.b10,m_control_state.b11,m_control_state.b12);
+    //fprintf(stderr,"state=%d%d%d%d%d%d%d%d%d%d%d%d\n",m_control_state.b1,m_control_state.b2,m_control_state.b3,\
+    //        m_control_state.b4,m_control_state.b5,m_control_state.b6,m_control_state.b7,m_control_state.b8,\
+    //        m_control_state.b9,m_control_state.b10,m_control_state.b11,m_control_state.b12);
 
-if(m_control_state.b1 != m_old_ctrl_state.b1){
+    if(m_control_state.b1 != m_old_ctrl_state.b1){
+         fprintf(stderr,"output0\n");
         if(m_control_state.b1)
         {
             m_gpio.Output(0,JDQ_OPEN);
-            m_jdq[0].cur_timer=fd_time;
-            m_jdq[0].set_flag = true;
+            m_gpio.Output(11,JDQ_OPEN); //右回转反顶继电器
+            m_jdq[11].cur_timer=fd_time;
+            m_jdq[11].set_flag = true;
         }
         else
         {
             m_gpio.Output(0,JDQ_CLOSE);
         }
+        m_old_ctrl_state.b1 = m_control_state.b1;
     }
     if(m_control_state.b2 != m_old_ctrl_state.b2){
+         fprintf(stderr,"output1\n");
         if(m_control_state.b2)
         {
             m_gpio.Output(1,JDQ_OPEN);
-            m_jdq[1].cur_timer=brake_time;
+            m_jdq[1].cur_timer= brake_time;
             m_jdq[1].set_flag = true;
+
         }
         else m_gpio.Output(1,JDQ_CLOSE);
     }
     if(m_control_state.b3 != m_old_ctrl_state.b3){
+         fprintf(stderr,"output2\n");
         if(m_control_state.b3)
         {
             m_gpio.Output(2,JDQ_OPEN);
-            m_jdq[2].cur_timer= fd_time;
-            m_jdq[2].set_flag = true;
+            m_gpio.Output(10,JDQ_OPEN);
+            m_jdq[10].cur_timer=fd_time;
+            m_jdq[10].set_flag = true;
         }
         else m_gpio.Output(2,JDQ_CLOSE);
     }
     if(m_control_state.b4 != m_old_ctrl_state.b4){
+         fprintf(stderr,"output3\n");
         if(m_control_state.b4)m_gpio.Output(3,JDQ_OPEN);
         else m_gpio.Output(3,JDQ_CLOSE);
     }
     if(m_control_state.b5 != m_old_ctrl_state.b5){
+         fprintf(stderr,"output4\n");
         if(m_control_state.b5)m_gpio.Output(4,JDQ_OPEN);
         else m_gpio.Output(4,JDQ_CLOSE);
+
+
+        m_old_ctrl_state.b5=m_control_state.b5;
     }
     if(m_control_state.b6 != m_old_ctrl_state.b6){
+         fprintf(stderr,"output6\n");
         if(m_control_state.b6)m_gpio.Output(5,JDQ_OPEN);
         else m_gpio.Output(5,JDQ_CLOSE);
     }
     if(m_control_state.b7 != m_old_ctrl_state.b7){
+         fprintf(stderr,"output7\n");
         if(m_control_state.b7)m_gpio.Output(6,JDQ_OPEN);
         else m_gpio.Output(6,JDQ_CLOSE);
     }
-    if(m_control_state.b8 != m_old_ctrl_state.b8){
-        if(m_control_state.b8)m_gpio.Output(7,JDQ_OPEN);
-        else m_gpio.Output(7,JDQ_CLOSE);
-    }
     if(m_control_state.b9 != m_old_ctrl_state.b9){
+         fprintf(stderr,"output9\n");
         if(m_control_state.b9)m_gpio.Output(8,JDQ_OPEN);
         else m_gpio.Output(8,JDQ_CLOSE);
     }
     if(m_control_state.b10 != m_old_ctrl_state.b10){
-        if(m_control_state.b10)m_gpio.Output(9,JDQ_OPEN);
+        fprintf(stderr,"output10\n");
+        if(m_control_state.b10)
+            m_gpio.Output(9,JDQ_OPEN);
         else m_gpio.Output(9,JDQ_CLOSE);
     }
     /*
@@ -1239,20 +1308,31 @@ if(m_control_state.b1 != m_old_ctrl_state.b1){
 
 
 }
+#include "beeper.h"
 /*
 力矩服务程序
 */
 void    CMainCtrl::LjService()
 {
     int out_state = CLijuCtrl::Get().Service(g_car_dist,g_dg_weight);
+    static bool over_flag = false;
+    //fprintf(stderr,"out_status=%d\n",out_state);
     //根据力矩输出的状态来控制继电器的动作
-    if(out_state == 4) //超过105
+    if(out_state == 4) //力矩超过105%
     {
-        m_gpio.Output(4,JDQ_CLOSE);//限制小车向外
-        m_gpio.Output(7,JDQ_CLOSE);//限制吊钩向上
-    }else if(out_state == 1){ //小于了95
-        m_gpio.Output(4,JDQ_OPEN);//恢复小车向外
-        m_gpio.Output(7,JDQ_OPEN);//恢复吊钩向上
+        m_gpio.Output(4,JDQ_OPEN);//限制 小车向外运行停车
+        m_gpio.Output(7,JDQ_OPEN);//限制吊钩向上
+        over_flag = true;
+        CBeeper::get().BeepMs(1000,100000);
+    }else if(out_state == 1 && over_flag ){ //力矩小于了95%
+        m_gpio.Output(4,JDQ_CLOSE);//恢复小车向外
+        m_gpio.Output(7,JDQ_CLOSE);//恢复吊钩向上
+        over_flag = false;
+    }else if(out_state >= 2 && out_state<4){
+        static int delay=0;
+        delay++;
+        if( (delay%2) == 0)
+            CBeeper::get().BeepMs(100,100000);
     }
 }
 void CMainCtrl::run()
@@ -1266,6 +1346,7 @@ void CMainCtrl::run()
     while (false == AddState) {
         WatchNetWork(MainMachineID,AddState);
     }
+
     fprintf(stderr,"watch ok mode=%d mainID=%s\n",m_mode,MainMachineID.c_str());
     while(!m_quit)
     {
@@ -1426,7 +1507,20 @@ bool CMainCtrl::Start()
 }
 void CMainCtrl::onTimer(Timer& timer)
 {
-    for(int i =0 ;i < 3; i++)
+    for(int i =10 ;i < 12; i++)
+    {
+        if(m_jdq[i].set_flag)
+        {
+            if(m_jdq[i].cur_timer<=0)
+            {
+                m_gpio.Output(i,JDQ_CLOSE);
+                m_jdq[i].set_flag=false;
+            }else{
+                m_jdq[i].cur_timer--;
+            }
+        }
+    }
+    for(int i =1 ;i < 2; i++)
     {
         if(m_jdq[i].set_flag)
         {

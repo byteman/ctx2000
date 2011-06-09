@@ -38,7 +38,7 @@ private:
         CStatic* edt_angle;
         CStatic* edt_dist;
         CStatic* edt_weight;
-        CStatic* edt_beilv;
+        CStatic* edt_fall;
         CStatic* edt_tower_height;
         CStatic* edt_long_arm_len;
         CStatic* edt_short_arm_len;
@@ -57,6 +57,7 @@ private:
         CFastStatic* fast_up_angle,*fast_max_weight,*fast_fengsu,*fast_dg_height;
 
         CTajiImage* tj_img[10];
+        CIconGroup m_lables;
         CPercent m_per;
         HDC m_hdc;
         bool m_show_up_angle,m_show_speed,m_show_dg_height,m_show_max_weight;

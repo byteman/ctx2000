@@ -12,8 +12,10 @@ CONFIG   += console debug
 CONFIG   -= app_bundle
 
 TEMPLATE = app
-DEFINES+=_PC_DBG
+DEFINES+=
+MGIPATH=/media/linuxdata/works/ctx2000/gui/mg1.6/out
 INCLUDEPATH+=/usr/local/include/yate guicore/include ime
+INCLUDEPATH+=$$MGIPATH/include
 SOURCES += \
     Main.cpp \
     MainMenu.cpp \
@@ -63,7 +65,10 @@ SOURCES += \
     SingleTaji1.cpp \
     SinalTaji2.cpp \
     Image.cpp \
-    TajiImage.cpp
+    TajiImage.cpp \
+    MsgBox.cpp \
+    beeper.cpp \
+    guinotifyer.cpp
 LIBS+=-lPocoFoundation
 
 DEPENDPATH=../include
@@ -71,7 +76,8 @@ TMPOBJ=../tmpobj
 linux-arm-g++ {
     message(g++ = linux-arm-g++)
     LIBS+=-L./extlib/arm -L./guicore/lib/libmx27 -lttf \
-             ./extlib/arm/libQtzCollideLib.a -lstdc++  -lts
+             ./extlib/arm/libQtzCollideLib.a -lstdc++  -lts \
+            -L$$MGIPATH/lib
     OBJECTS_DIR = $$TMPOBJ/arm
 }
 linux-g++ {
@@ -135,4 +141,7 @@ HEADERS += \
     SingleTaji1.h \
     SinalTaji2.h \
     Image.h \
-    TajiImage.h
+    TajiImage.h \
+    MsgBox.h \
+    beeper.h \
+    guinotifyer.h

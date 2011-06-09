@@ -97,18 +97,18 @@ bool    CGpio::Init(int num_input, int num_output,bool reset)
 IO_STATUS CGpio::Input(IO_TYPE type, int index)
 {
     int value = 0;
-    std::string regfile = REG_INPUT0;
+    std::string regfile = REG_INPUT1;
     if(type == IO_OUTPUT){
         if(index >=8 )
         {
-            index  -= 8;
-            regfile = REG_OUTPUT1;
-        }else{
             regfile = REG_OUTPUT0;
+        }else{
+            regfile = REG_OUTPUT1;
         }
     }else if(type == IO_INPUT){
 
     }
+    index = 7 - (index%8);
     Poco::FileStream reg(regfile);
     reg.seekg(0, std::ios::beg);
 
@@ -119,14 +119,15 @@ IO_STATUS CGpio::Input(IO_TYPE type, int index)
 }
 IO_STATUS CGpio::Output(int index, IO_STATUS status)
 {
-    std::string regfile = REG_OUTPUT0;
+    std::string regfile = REG_OUTPUT1;
     unsigned int output = 0;
 
     if(index >=8 )
     {
-        index  -= 8;
-        regfile = REG_OUTPUT1;
+        regfile = REG_OUTPUT0;
     }
+    index = 7 - (index%8);
+    fprintf(stderr,"output %d to %d in %s\n",index,status,regfile.c_str());
     Poco::FileStream reg(regfile);
     reg.seekg(0, std::ios::beg);
 

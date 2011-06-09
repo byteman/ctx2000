@@ -25,6 +25,7 @@ public:
     CMainCtrl();
     virtual ~CMainCtrl();
     static CMainCtrl& Get();
+
     bool Start();
     virtual void run();
 
@@ -87,6 +88,7 @@ private:
     CGpio m_gpio;
     Poco::Timer* m_timer;
     TJDQ m_jdq[3];
+
     //bool right_turn_limit,left_turn_limit,turn_brake;
 };
 
