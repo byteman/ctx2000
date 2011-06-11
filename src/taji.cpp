@@ -90,15 +90,13 @@ bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
      SetPenColor(hdc,PIXEL_green);
      if(g_TC[m_id].Dyna)
      {
-        //fprintf(stderr,"r=%0.2f\n",m_r);
         //fprintf(stderr,"Postion=%0.2f\n",g_TC[m_id].Position*m_zoom);
-        m_r = g_TC[m_id].Position*m_zoom; //动臂式塔机的半径，就等于小车的幅度
+        m_r  = (g_TC[m_id].LongArmLength*cos(g_TC[m_id].Dang*3.1415/180)+g_TC[g_local_id].a0)*m_zoom;
+        //m_r = g_TC[m_id].Position*m_zoom; //动臂式塔机的半径，就等于小车的幅度
      }else{
         m_r = m_long_arm_len;
      }
      width = 2*m_r;
-
-
      ArcEx(hdc,x_pt-m_r,y_pt-m_r,width,width,0 ,360*64);
 
 
@@ -116,6 +114,7 @@ bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
      y = m_short_arm * sin(angle);
      x = m_short_arm * cos(angle);
      LineEx(hdc,x_pt,y_pt,x_pt - x,y_pt+y);
+     /*
      width = 2*m_short_arm;
      SetPenType(hdc,PT_ON_OFF_DASH);
      SetPenWidth(hdc, 1);
@@ -123,6 +122,7 @@ bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
      ArcEx(hdc,x_pt-m_short_arm,y_pt-m_short_arm,width,width,0 ,360*64);
      SetPenType(hdc,PT_SOLID);
      SetPenColor(hdc,PIXEL_lightgray);
+     */
 //原点的塔机编号和边框
      RECT rect;
      SetBrushColor(hdc,PIXEL_lightgray);

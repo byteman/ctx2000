@@ -1281,19 +1281,28 @@ void CMainCtrl::Gather_AD()
 //用本机的实时参数，更新本机和算法的实时参数
     //fprintf(stderr,"g_local_id=%d angle=%0.2f\n",g_local_id,g_TC[g_local_id].Angle);
     g_TC[g_local_id].Angle    = g_angle*3.14/180;
-    g_TC[g_local_id].Position = g_car_dist;
-    g_TC[g_local_id].Dang     = g_up_angle;
-    /*
-    if(g_TC[g_local_id].Dyna)
-        g_TC[g_local_id].Dang = g_up_angle;
+
+    if(g_TC[g_local_id].Dyna){
+        g_TC[g_local_id].Dang     = g_up_angle;
+        g_TC[g_local_id].Position = g_TC[g_local_id].LongArmLength;
+    }
     else{
-        g_TC[g_local_id].Dang = 0;
-    }*/
+        g_TC[g_local_id].Dang     = 0;
+        g_TC[g_local_id].Position = g_car_dist;
+    }
     if( ( index >= 0) && (index < NUMBER_OF_QTZ) )
     {
         g_qtzs[index].m_long_arm_angle   = g_angle;
-        g_qtzs[index].m_carrier_pos      = g_car_dist;
-        g_qtzs[index].m_sarm_angle       = g_up_angle;
+        if(g_TC[g_local_id].Dyna){//如果当前是动臂式
+            //给算法模块的幅度就是设定的大臂的长度
+            g_qtzs[index].m_carrier_pos  = g_TC[g_local_id].LongArmLength;
+            g_qtzs[index].m_sarm_angle   = g_up_angle;
+        }
+        else{
+            g_qtzs[index].m_carrier_pos  = g_car_dist;
+            g_qtzs[index].m_sarm_angle   = 0;
+        }
+
     }else{
         return;
     }

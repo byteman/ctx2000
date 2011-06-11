@@ -95,8 +95,9 @@ public:
             //fprintf(stderr,"ad_car=%d up_angle=%0.2f\n",ad_car_dist,g_up_angle);
             if(g_TC[g_local_id].Dyna){ //动臂式的幅度计算
                 ad_up_angle = ad_car_dist;
-                g_up_angle = (ad_up_angle-g_bd[BD_UP_ANGLE].zero_ad)/g_bd[BD_UP_ANGLE].bd_k+g_bd[BD_UP_ANGLE].start_value;
-                g_car_dist = g_TC[g_local_id].LongArmLength*cos(g_up_angle*3.14/180)+g_TC[g_local_id].a0;
+                g_up_angle  = (ad_up_angle-g_bd[BD_UP_ANGLE].zero_ad)/g_bd[BD_UP_ANGLE].bd_k+g_bd[BD_UP_ANGLE].start_value;
+                //g_car_dist  = g_TC[g_local_id].LongArmLength*cos(g_up_angle*3.1415/180)+g_TC[g_local_id].a0;
+                //g_car_dist  = g_TC[g_local_id].LongArmLength+g_TC[g_local_id].a0;
                 //fprintf(stderr,"dist=%0.2f %0.2f %0.2f %0.2f\n",g_car_dist,g_TC[g_local_id].LongArmLength,cos(g_up_angle*3.14/180),g_TC[g_local_id].a0);
             }else{ //平臂式的幅度计算
                 g_car_dist=(ad_car_dist-g_bd[BD_CAR_DIST].zero_ad)/g_bd[BD_CAR_DIST].bd_k+g_bd[BD_CAR_DIST].start_value;
