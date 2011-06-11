@@ -68,7 +68,8 @@ SOURCES += \
     TajiImage.cpp \
     MsgBox.cpp \
     beeper.cpp \
-    guinotifyer.cpp
+    guinotifyer.cpp \
+    Password.cpp
 LIBS+=-lPocoFoundation
 
 DEPENDPATH=../include

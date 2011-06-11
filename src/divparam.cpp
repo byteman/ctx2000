@@ -7,6 +7,7 @@
 #include "comdata.h"
 #include <yatengine.h>
 #include <Poco/String.h>
+#include "MsgBox.h"
 using namespace TelEngine;
 extern TTjRecord g_TC[21];
 static COMM_CTRL_DESC lablectrls[] = {
@@ -270,6 +271,8 @@ void    CDivParam::OnButtonClick(skin_item_t* item)
     {
 
         SaveTC(m_tc_id);
+        MsgBox box;
+        box.ShowBox(this,"参数保存成功","信息提示");
 
     }
     else if(item->id == btn_exit->GetId())

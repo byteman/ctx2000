@@ -22,6 +22,7 @@ public:
         virtual void OnShow();
 	virtual void OnButtonClick(skin_item_t* item);
         virtual void OnLButtonUp(int x, int y);
+        virtual void OnUserMsg(HWND hWnd, int message, WPARAM wParam, LPARAM lParam);
 
 private:
         void UpdateUIArea();

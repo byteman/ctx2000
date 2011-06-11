@@ -9,6 +9,7 @@
 #include <Poco/Format.h>
 #include "SoftKeyboard.h"
 #include "MsgBox.h"
+#include <Poco/String.h>
 extern SoftKeyboard* skt;
 static char* userlist_caption[] =
 {
@@ -51,9 +52,9 @@ static SKIN_BUTTON_DESC SkinBtnsDesc[] =
 static COMM_CTRL_DESC CommCtrlsDesc[] =
 {
     LISTVIEW_USER,
-    {80,250,120,40,"0"},
-    {80,300,120,40,"0"},
-    {80,350,120,40,"0"}
+    {95,250,110,40,"0"},
+    {95,300,110,40,"0"},
+    {95,350,110,40,"0"}
 };
 
 static const char *icon_path[] =
@@ -91,7 +92,7 @@ CLiJuManForm::CLiJuManForm()
         printf("Can't loadres\n");
         exit(0);
     }
-
+    m_change_fall = false;
     for (int i = 0; i < USERMAN_SKIN_BTNS_NUM; i++)
     {
         _skinBtns[i] = new CSkinButton(&SkinBtnsDesc[i],this);
@@ -101,6 +102,17 @@ CLiJuManForm::CLiJuManForm()
     cbx_arm_len=new CComBox(&CommCtrlsDesc[2],this);
     cbx_beilv=new CComBox(&CommCtrlsDesc[3],this);
     _icons.AddIcons(icon_path,ARRAY_SIZE(icon_path,char*));
+
+    Font16 = CFontMgr::Get().GetFont("stxinwei",16);
+    Font16->setFontColor(RGB2Pixel(HDC_SCREEN,0,0,0));
+#define LBL_W  100
+#define LBL_H  30
+#define LBL_X  5
+#define LBL_Y  255
+    for(int i = 0; i < 3; i++)
+    {
+        SetRect(&m_lable[i],        LBL_X,LBL_Y+i*50,  LBL_W+LBL_X,LBL_Y+i*50+LBL_H);
+    }
     InitSkinHeader("CUserManForm");
 
 }
@@ -109,6 +121,11 @@ CLiJuManForm::~CLiJuManForm()
 {
 }
 
+static const char* lables[] = {
+    "塔机类型:",
+    "     臂长:",
+    "     倍率:"
+};
 void
 CLiJuManForm::OnPaint(HWND hWnd)
 {
@@ -116,9 +133,29 @@ CLiJuManForm::OnPaint(HWND hWnd)
 
     for (int i = 0; i < SKIN_BMP_NUM; i++)
         _icons.Show(hdc,BmpsPos[i].x,BmpsPos[i].y,i+1);
+
+    SetPenColor(hdc,PIXEL_black);
+
+    for(int i = 0; i < 3; i ++)
+        DrawMyText(hdc,Font16,&m_lable[i],lables[i]);
+
+
     EndPaint(hWnd, hdc);
 }
+bool CLiJuManForm::checkChange()
+{
+    if(m_change_fall)
+    {
+        MsgBox box;
+        char buf[32]={0,};
+        snprintf(buf,32,"请重新设置当前倍率");
 
+        box.ShowBox(this,buf,"提示");
+        return false;
+        //m_change_fall = false;
+    }
+    return true;
+}
 void
 CLiJuManForm::OnClose()
 {
@@ -157,6 +194,24 @@ CLiJuManForm::OnButtonClick(skin_item_t * item)
 
         fprintf(stderr,"delete len=%s,we=%s\n",len.c_str(),weight.c_str());
         CTajiDbMgr::Get().deleteTjItem(type,armlen,beilv,len,weight);
+        //如果已经将该倍率的数据全部删除掉了
+        if(false == CTajiDbMgr::Get().CheckExistFall(type,armlen,beilv))
+        {
+            if(CTajiDbMgr::Get().DeleteFall(type,armlen,beilv))
+            {
+                fprintf(stderr,"delete fall %s %s %s ok\n",type.c_str(),armlen.c_str(),beilv.c_str());
+                MsgBox box;
+                char buf[32]={0,};
+                snprintf(buf,32,"请重新设置当前倍率");
+                if( (Poco::trim(type)==Poco::trim(TCTypeName)) && \
+                    (Poco::trim(armlen)==Poco::trim(StrTCArmLen)) && \
+                    (Poco::trim(beilv)==Poco::trim(StrTCBeilv)))
+                {
+                    box.ShowBox(this,buf,"提示");
+                    m_change_fall = true;
+                }
+            }
+        }
         ReloadLijuItems();
     }
     else if(item->id == _skinBtns[2]->GetId())
@@ -187,11 +242,13 @@ CLiJuManForm::OnButtonClick(skin_item_t * item)
     }
     else if(item->id == _skinBtns[3]->GetId())
     {
-        Close();
+        if(checkChange())
+            Close();
     }
     else if(item->id == _skinBtns[4]->GetId())
     {
-        Close();
+        if(checkChange())
+            Close();
     }
     else if(item->id == _skinBtns[5]->GetId())
     {
@@ -200,13 +257,24 @@ CLiJuManForm::OnButtonClick(skin_item_t * item)
         std::string beilv   = cbx_beilv->GetSelItemText();
         if( (type.length() > 0 ) && (beilv.length() > 0)&&(armlen.length() > 0) )
         {
-            TIniFile cfg("ctx2000.ini");
-            cfg.WriteString("device","TC_type",type);
-            cfg.WriteString("device","armlen",armlen);
-            cfg.WriteString("device","beilv",beilv);
+            //保存的倍率必须要有数据存在
+            if(CTajiDbMgr::Get().checkExistData(CTajiDbMgr::Get().getTableName(type,armlen,beilv)))
+            {
+                TIniFile cfg("ctx2000.ini");
+                cfg.WriteString("device","TC_type",type);
+                cfg.WriteString("device","armlen", armlen);
+                cfg.WriteString("device","beilv",  beilv);
+                MsgBox msg;
+                msg.ShowBox(this,"力矩信息保存成功","提示信息");
+                m_change_fall = false;
+            }else{
+                MsgBox msg;
+                msg.ShowBox(this,"该倍率没有力距信息","错误提示");
+                //m_change_fall = true;
+            }
+
         }
-        MsgBox msg;
-        msg.ShowBox(this,"力矩信息保存成功","提示信息");
+
 
     }
 }

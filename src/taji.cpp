@@ -21,9 +21,10 @@ CTaji::CTaji(int x, int y, int r,int s, int id,double zoom):
     }else{
         m_is_local = false;
     }
-    old_angle = 1000;
+    old_angle    = 1000;
     old_position = 1000;
-    fprintf(stderr,"taji rect x=%d y=%d r=%d b=%d\n",m_rt.left,m_rt.top,m_rt.right,m_rt.bottom);
+    m_long_arm_len = m_r;
+    //fprintf(stderr,"taji rect x=%d y=%d r=%d b=%d\n",m_rt.left,m_rt.top,m_rt.right,m_rt.bottom);
 
 }
 bool CTaji::Update(HWND hwnd)
@@ -84,61 +85,67 @@ car_dist:小车的幅度
 bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
 {
      double x ,y;
-
-     //ErasePrev(hdc);
+     int width = 0;
      SetPenWidth(hdc, 2);
      SetPenColor(hdc,PIXEL_green);
-     int w2 = 2*m_r;
-     ArcEx(hdc,x_pt-m_r,y_pt-m_r,w2,w2,0 ,360*64);
-     //fprintf(stderr,"angle=%0.2f\n",angle);
-     //angle=angle*3.14/180;
+     if(g_TC[m_id].Dyna)
+     {
+        //fprintf(stderr,"r=%0.2f\n",m_r);
+        //fprintf(stderr,"Postion=%0.2f\n",g_TC[m_id].Position*m_zoom);
+        m_r = g_TC[m_id].Position*m_zoom; //动臂式塔机的半径，就等于小车的幅度
+     }else{
+        m_r = m_long_arm_len;
+     }
+     width = 2*m_r;
+
+
+     ArcEx(hdc,x_pt-m_r,y_pt-m_r,width,width,0 ,360*64);
+
 
  //长臂
+     y = m_r * sin(angle);
+     x = m_r * cos(angle);
+     //fprintf(stderr,"x=%0.2f,y=%0.2f\n",x,y);
+     SetPenColor(hdc,PIXEL_blue);
+     SetPenWidth(hdc, 8);
+     LineEx(hdc,x_pt,y_pt,x_pt + x,y_pt-y);
+     //fprintf(stderr,"angle=%0.2f,x=%0.2f,y=%0.2f\n",angle,sin(angle),cos(angle));
 
-     //if(m_is_local)
-     {
-         y = m_r * sin(angle);
-         x = m_r * cos(angle);
-         //fprintf(stderr,"x=%0.2f,y=%0.2f\n",x,y);
-         SetPenColor(hdc,PIXEL_blue);
-         SetPenWidth(hdc, 8);
-         LineEx(hdc,x_pt,y_pt,x_pt + x,y_pt-y);
-         old_pt_x1 = x_pt + x;
-         old_pt_y1 = y_pt - y;
-         //fprintf(stderr,"angle=%0.2f,x=%0.2f,y=%0.2f\n",angle,sin(angle),cos(angle));
-     //短臂
-         SetPenColor(hdc,PIXEL_darkyellow);
-         y = m_short_arm * sin(angle);
-         x = m_short_arm * cos(angle);
-
-         LineEx(hdc,x_pt,y_pt,x_pt - x,y_pt+y);
-         old_pt_x2 = x_pt - x;
-         old_pt_y2 = y_pt + y;
-     }
-//原点的编号
+//短臂
+     SetPenColor(hdc,PIXEL_darkyellow);
+     y = m_short_arm * sin(angle);
+     x = m_short_arm * cos(angle);
+     LineEx(hdc,x_pt,y_pt,x_pt - x,y_pt+y);
+     width = 2*m_short_arm;
+     SetPenType(hdc,PT_ON_OFF_DASH);
+     SetPenWidth(hdc, 1);
+     SetPenColor(hdc,PIXEL_magenta);
+     ArcEx(hdc,x_pt-m_short_arm,y_pt-m_short_arm,width,width,0 ,360*64);
+     SetPenType(hdc,PT_SOLID);
+     SetPenColor(hdc,PIXEL_lightgray);
+//原点的塔机编号和边框
      RECT rect;
      SetBrushColor(hdc,PIXEL_lightgray);
      SetRect(&rect,x_pt-2*w,y_pt+2*h,x_pt+2*w,y_pt-2*h);
      FillBox(hdc,x_pt-w,y_pt-h,w+h,w+h);
-     //Rectangle(hdc,x_pt-w,y_pt-h,x_pt+w,y_pt+h);
      SetTextColor (hdc,PIXEL_red);
      SetBkMode (hdc,BM_TRANSPARENT);
-     //SetTextColor (hdc,PIXEL_red);
      SelectFont(hdc,GetSystemFont(SYSLOGFONT_DEFAULT));
      DrawText(hdc,m_tj_num.c_str(),m_tj_num.length (),&rect,DT_CENTER|DT_VCENTER|DT_SINGLELINE);
 
 //小车
-     //if(m_is_local)
+     SetBrushColor(hdc,PIXEL_red);
+     if(g_TC[m_id].Dyna)
      {
-         SetBrushColor(hdc,PIXEL_red);
+         x = x_pt + m_r * cos(angle);
+         y = y_pt - m_r * sin(angle)-h/2;
+     }else{
          x = x_pt + car_dist * cos(angle)*m_zoom;
          y = y_pt - car_dist * sin(angle)*m_zoom-h/2;
-         old_pt_x3 = x;
-         old_pt_y3 = y;
-         FillBox(hdc,x,y,10,10);
      }
-      old_angle    = angle;
-      old_position = car_dist;
+
+     FillBox(hdc,x,y,10,10);
+
 }
 
 CTaijiMgr& CTaijiMgr::Get()

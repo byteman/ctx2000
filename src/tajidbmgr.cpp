@@ -45,6 +45,27 @@ std::string CTajiDbMgr::getTableName(std::string  type,  std::string  armlen, st
     fprintf(stderr,"table name %s\n",tblname.c_str());
     return tblname;
 }
+bool CTajiDbMgr::deletelijuItem(std::string  type,  std::string armlen, std::string beilv)
+{
+    CppSQLite3Buffer strSql;
+    const char* tmp = NULL;
+    bool bExist = false;
+    try{
+
+        tmp = strSql.format("delete from tbltjtype where tjtype='%s' and tjarmlen='%s' and tjbeilv='%s'",type.c_str(),armlen.c_str(),beilv.c_str());
+        fprintf(stderr,"tbltjtype %s \r\n", tmp);
+        int rows = pDB->execDML(tmp);
+        fprintf(stderr,"row=%d\n",rows);
+        if (rows) {
+                return true;
+        }
+    }catch (CppSQLite3Exception& e) {
+        cerr << "getTjTypes :" << e.errorCode() << ":" << e.errorMessage() << endl;
+        bExist = false;
+
+    }
+    return false;
+}
 bool CTajiDbMgr::addlijuItem(std::string  type,  std::string  armlen, std::string  beilv,std::string  len,std::string  weight)
 {
     CppSQLite3Buffer strSql;
@@ -107,6 +128,11 @@ bool CTajiDbMgr::addlijuItem(std::string type,  int armlen, int beilv,double len
 {
 
 }
+bool CTajiDbMgr::CheckExistFall(std::string  type,  std::string  armlen, std::string  beilv)
+{
+    std::string name = getTableName(type,armlen,beilv).c_str();
+    return checkExistData(name);
+}
 bool CTajiDbMgr::isLijuExist(std::string type,  std::string armlen, std::string beilv)
 {
     return pDB->tableExists(getTableName(type,armlen,beilv).c_str());
@@ -163,6 +189,29 @@ bool CTajiDbMgr::modifylijuItem(std::string  type,  std::string  armlen, std::st
             int rows = pDB->execDML(tmp);
             if (rows) {
                     return true;
+            }
+        }
+        catch (CppSQLite3Exception& e) {
+            cerr << e.errorCode() << ":" << e.errorMessage() << endl;
+        }
+        return false;
+    }else{
+        return true;
+    }
+}
+bool CTajiDbMgr::DeleteFall(std::string type,  std::string armlen, std::string beilv)
+{
+    std::string tblname = getTableName(type,armlen,beilv);
+    if(isLijuExist(type,armlen,beilv))
+    {
+        try{
+            CppSQLite3Buffer  strInst;
+            const char* tmp = strInst.format("drop table %Q",tblname.c_str());
+            fprintf(stderr,"-=-=WetObjs.cpp=-=- %s \n", tmp);
+            int rows = pDB->execDML(tmp);
+            fprintf(stderr,"row=%d\n",rows);
+            if (rows) {
+                    return deletelijuItem(type,armlen,beilv);
             }
         }
         catch (CppSQLite3Exception& e) {
@@ -773,9 +822,34 @@ void CTajiDbMgr::GetWorkSiteParam(TWorkSiteParam &ws)
     cfg.ReadString("worksite","leftdown","0,0");
 
 }
-int  CTajiDbMgr::ListAlaramInfo(int start, int count, THistoyRst &rst )
+bool  CTajiDbMgr::ListAlaramInfo(int start, int count, THistoyRst &rst )
 {
-    return 0;
+    bool bExist = false;
+
+    try{
+        CppSQLite3Buffer strSql;
+        const char* tmp = strSql.format("Select * from %Q limit %d,%d","tbalarm",start,count);
+        DBG("ListAlaramInfo %s \r\n", tmp);
+        CppSQLite3Query qry =  pDB->execQuery(tmp);
+        while(!qry.eof())
+        {
+            THistoy item;
+            item.id      = qry.getIntField("index");
+            item.date    = qry.getStringField("dt");
+            item.serial  = qry.getStringField("serial");
+            item.slewing = qry.getStringField("dist");
+            item.trolley = qry.getStringField("angle");
+            rst.push_back(item);
+            qry.nextRow();
+            bExist  = true;
+        }
+        qry.finalize();
+    }
+    catch (CppSQLite3Exception& e) {
+            cerr << e.errorCode() << ":" << e.errorMessage() << endl;
+            bExist = false;
+    }
+    return bExist;
 }
 bool  CTajiDbMgr::ListAlaramInfo(THistoyRst &rst )
 {
@@ -789,15 +863,11 @@ bool  CTajiDbMgr::ListAlaramInfo(THistoyRst &rst )
         while(!qry.eof())
         {
             THistoy item;
-            item.type    = qry.getIntField("type");
+            item.id      = qry.getIntField("index");
             item.date    = qry.getStringField("dt");
-            item.serial  = qry.getStringField("tjid");
-            item.slewing = qry.getIntField("dist");
-            item.trolley = qry.getIntField("angle");
-            item.fudu    = qry.getIntField("fudu");
-            item.wet     = qry.getIntField("wet");
-            item.jiaodu  = qry.getIntField("jiaodu");
-            item.beilv   = qry.getIntField("beilv");
+            item.serial  = qry.getStringField("serial");
+            item.slewing = qry.getStringField("dist");
+            item.trolley = qry.getStringField("angle");
             rst.push_back(item);
             qry.nextRow();
             bExist  = true;
@@ -810,15 +880,71 @@ bool  CTajiDbMgr::ListAlaramInfo(THistoyRst &rst )
     }
     return bExist;
 }
-bool CTajiDbMgr::AddAlarmInfo(int type,int slewing, int trolley,int fudu,int wet,int jiaodu,int beilv)
+bool CTajiDbMgr::ListWeightInfo(int start, int count,TWeightHistoyRst &rst)
+{
+    bool bExist = false;
+
+    try{
+        CppSQLite3Buffer strSql;
+        const char* tmp = strSql.format("Select * from %Q limit %d,%d ","tblrecord",start,count);
+        DBG("ListWeightInfo %s \r\n", tmp);
+        CppSQLite3Query qry =  pDB->execQuery(tmp);
+        while(!qry.eof())
+        {
+            TWeightHistoy item;
+            item.id      = qry.getIntField("index");
+            item.date    = qry.getStringField("dt");
+            item.serial  = qry.getStringField("serial");
+            item.dist    = qry.getStringField("dist");
+            item.angle   = qry.getStringField("angle");
+            item.fall    = qry.getStringField("fall");
+            item.weight  = qry.getStringField("weight");
+            item.type    = qry.getIntField("type");
+
+            rst.push_back(item);
+            qry.nextRow();
+            bExist  = true;
+        }
+        qry.finalize();
+    }
+    catch (CppSQLite3Exception& e) {
+            cerr << e.errorCode() << ":" << e.errorMessage() << endl;
+            bExist = false;
+    }
+    return bExist;
+}
+bool CTajiDbMgr::AddAlarmInfo(std::string serial,int slewing, int trolley)
 {
     try{
         CppSQLite3Buffer  strInst;
         LocalDateTime now;
-        std::string dt = DateTimeFormatter::format(now,"%Y-%m-%d %h:%M:%S");
+        std::string dt = DateTimeFormatter::format(now,"%Y-%m-%d %h:%M");
 
-        const char* tmp = strInst.format("Insert into %Q values(%d,'%s',%d,%d,'%s',%d,%d,%d,%d);", \
-                        "tbalarm", type,m_local_serial.c_str(),slewing, trolley,dt.c_str(),fudu,wet,jiaodu,beilv);
+
+        const char* tmp = strInst.format("Insert into %Q values(NULL,'%s',%d,%d,'%s');", \
+                        "tbalarm", serial.c_str(),slewing, trolley,dt.c_str());
+        DBG("-=-=WetObjs.cpp=-=- %s \n", tmp);
+        int rows = pDB->execDML(tmp);
+        if (rows) {
+                return true;
+        }
+    }
+    catch (CppSQLite3Exception& e) {
+        cerr << e.errorCode() << ":" << e.errorMessage() << endl;
+    }
+    return false;
+}
+bool CTajiDbMgr::AddWeightInfo(TWeightHistoy& value)
+{
+    try{
+        CppSQLite3Buffer  strInst;
+        LocalDateTime now;
+        std::string dt = DateTimeFormatter::format(now,"%Y-%m-%d %h:%M");
+
+
+        const char* tmp = strInst.format("Insert into %Q values(NULL,'%s','%s','%s','%s','%s','%s',%d);", \
+                        "tblrecord",     dt.c_str(),value.angle.c_str(),value.dist.c_str(),value.fall.c_str(), \
+                                         value.serial.c_str(),value.weight.c_str(),value.type);
         DBG("-=-=WetObjs.cpp=-=- %s \n", tmp);
         int rows = pDB->execDML(tmp);
         if (rows) {

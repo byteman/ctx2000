@@ -27,6 +27,7 @@ extern TTjRecord g_TC[21];
 extern  std::string MainMachineID,CurID,TCTypeName,CurSerial;
 extern  int     RightNo,AddNo,MaxTCNo,g_local_id;
 extern  int     TCArmLen,TCBeilv;
+extern  int     gMainMenuIndex;
 extern  std::string StrTCArmLen, StrTCBeilv;
 extern  double  wksp[4][2];
 extern  double  czwzb[2][2];

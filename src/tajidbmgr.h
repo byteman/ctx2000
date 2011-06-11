@@ -6,15 +6,22 @@
 #include "ctx2000.h"
 #include "CppSQLite3.h"
 struct THistoy{
-    int type;
+    int         id;
     std::string serial;
     std::string date;
-    int slewing;
-    int trolley;
-    int fudu;
-    int wet;
-    int jiaodu;
-    int beilv;
+    std::string slewing;
+    std::string trolley;
+};
+struct TWeightHistoy{
+    int id;
+    int type; //超载类型
+    std::string serial;
+    std::string date;
+    std::string dist;
+    std::string weight;
+    std::string fall;
+    std::string angle;
+
 };
 struct TLiju{
     std::string armlen;
@@ -22,6 +29,7 @@ struct TLiju{
 };
 typedef std::vector<TLiju>   TLijuRst;
 typedef std::vector<THistoy> THistoyRst;
+typedef std::vector<TWeightHistoy> TWeightHistoyRst;
 typedef std::map<int, int> TDevIdMap;
 typedef std::vector<std::string> TStringList;
 typedef std::vector<double>    TTjLenRst;
@@ -34,9 +42,11 @@ public:
     static CTajiDbMgr& Get();
     //bool addlijuType(std::string type, int armlen, int beilv);
     bool addlijuItem(std::string  type,  int armlen, int beilv,double len=0,double weight=0);
+    bool deletelijuItem(std::string  type,std::string armlen, std::string beilv);
     bool addlijuItem(std::string  type,  std::string  armlen, std::string  beilv,std::string  len,std::string  weight);
     bool getlijuItems(std::string type,  std::string armlen, std::string beilv,TLijuRst& rst);
     bool getlijuItems(std::string type,TLijuRst& rst);
+    bool deleteNoDataFall(std::string type,  std::string armlen, std::string beilv);
     bool isLijuExist(std::string type,  std::string armlen, std::string beilv);
     bool modifylijuItem(std::string type, TLiju& item);
     bool modifylijuItem(std::string  type,  std::string  armlen, std::string  beilv,TLiju& olditem,TLiju& newitem);
@@ -45,6 +55,7 @@ public:
     bool getTjBeilv(std::string type, std::string armlen,TStringList& rst);
     bool deleteTjItem(std::string type,  std::string armlen, std::string beilv,std::string len, std::string weight);
     std::string getTableName(std::string  type,  std::string  armlen, std::string  beilv);
+    bool DeleteFall(std::string type,  std::string armlen, std::string beilv);
     //bool load(std::string dbpath);
     bool load(std::string dbpath);
     //通过远程广播修改，通过本地设置
@@ -66,7 +77,10 @@ public:
                 1 :转低速指令
                 2 :停车指令
     */
-    bool AddAlarmInfo(int type,int slewing, int trolley,int fudu,int wet,int jiaodu,int beilv);
+    bool AddAlarmInfo(std::string serial,int slewing, int trolley);
+
+    bool AddWeightInfo(TWeightHistoy& value);
+
     /*
       param:
         start : 起始序号
@@ -75,13 +89,16 @@ public:
       return:
         实际读取的条数
     */
-    int  ListAlaramInfo(int start, int count, THistoyRst &rst );
-    bool  ListAlaramInfo(THistoyRst &rst );
+
+    bool ListAlaramInfo(int start, int count, THistoyRst &rst );
+    bool ListAlaramInfo(THistoyRst &rst);
+    bool ListWeightInfo(int start, int count,TWeightHistoyRst &rst);
     void GetWorkSiteParam(TWorkSiteParam &ws);
     int  GetLocalId(){return m_local_id;}
     int  GetLocalIndex(){return m_local_num;}
     bool  GetAllTjId(std::vector<int> &devlist);
     bool  GetConflictTjList(std::vector<int> &devlist);
+    bool CheckExistFall(std::string  type,  std::string  armlen, std::string  beilv);
 public:
     bool is_circle_interset(double x1, double y1, double x2, double y2, double r1, double r2);
     int  get_tj_num(){return m_tj_num;}

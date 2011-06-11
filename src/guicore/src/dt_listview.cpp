@@ -188,7 +188,7 @@ GHANDLE CListView::AddRootItem(std::string root)
     temp.push_back(root);
     return AddSubItems(temp,25,0);
 }
-GHANDLE CListView::AddSubItems(StringList subitems,int itemHeight,GHANDLE hRootItem)
+GHANDLE CListView::AddSubItems(StringList subitems,int itemHeight,GHANDLE hRootItem,gal_pixel color)
 {
     LVITEM    item;
     LVSUBITEM subdata;
@@ -197,15 +197,12 @@ GHANDLE CListView::AddSubItems(StringList subitems,int itemHeight,GHANDLE hRootI
     GHANDLE hItem = _AddItem(item,hRootItem,itemHeight);
 
     assert(hItem != HWND_INVALID);
-    static int index = 0;
+
     subdata.flags = 0;
     subdata.image = 0;
-    subdata.nTextColor = RGB2Pixel(HDC_SCREEN,255,0,0);
+    subdata.nTextColor = color;
     subdata.nItem   =  0;
 
-
-    //printf("nItem = %d\n",subdata.nItem);
-    subdata.nTextColor = 0;
     int num = (_colNum>subitems.size())?subitems.size():_colNum;
     for(int  i = 0 ; i < num; i++)
     {
@@ -260,11 +257,25 @@ void CListView::Unlock()
     SendDlgItemMessage (_parent->m_hWnd, _id, MSG_FREEZECTRL, FALSE,(LPARAM)0);
 				
 }	
+void CListView::ClearColumn()
+{
+    if( (_parent) && (_parent->m_hWnd != HWND_INVALID))
+    {
+        while(GetColNum() > 0)
+        {
+            SendDlgItemMessage (_parent->m_hWnd, _id, LVM_DELCOLUMN, (WPARAM)0,0);
+            if(_colNum>0)_colNum--;
+        }
+        _headerStr.clear();
+    }
+}
 void CListView::DelColumn(int index)
 {
     if( (_parent) && (_parent->m_hWnd != HWND_INVALID))
     {
         SendDlgItemMessage (_parent->m_hWnd, _id, LVM_DELCOLUMN, (WPARAM)index,0);
+        if(_colNum>0)_colNum--;
+
     }
 }
  /*LVM_DELITEM

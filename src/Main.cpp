@@ -18,11 +18,23 @@
 #include "mainctrl.h"
 #include "MainMenu.h"
 #include "SingleTaji1.h"
+#include "comdata.h"
+//#include "SingleTaji2.h"
 using Poco::Thread;
 using Poco::Event;
 using Poco::SingletonHolder;
 using namespace TelEngine;
 static std::string gAppName="";
+/*
+CIconGroup grp;
+
+static const char* preLoadBmp[] =
+{
+    "ctx2000/A.png",
+    "ctx2000/angle.jpg",
+
+};
+*/
 class CtxEngine:public Poco::Runnable{
 public:
     static CtxEngine& Get()
@@ -58,8 +70,35 @@ void GUIAPI InitMainUI()
 
     try{
 
-        CMainMenu login;
-        login.CreateForm( HWND_DESKTOP );
+        switch(gMainMenuIndex)
+        {
+            case 1:
+            {
+                CMainMenu mainmenu;
+                mainmenu.CreateForm( HWND_DESKTOP );
+                break;
+            }
+            case 2:
+            {
+                CSingleTaji1 mainmenu;
+                mainmenu.CreateForm( HWND_DESKTOP );
+                break;
+            }
+            case 3:
+            {
+                CSingleTaji1 mainmenu;
+                mainmenu.CreateForm( HWND_DESKTOP );
+                break;
+            }
+            default:
+            {
+                CMainMenu mainmenu;
+                mainmenu.CreateForm( HWND_DESKTOP );
+                break;
+            }
+        }
+
+
     }catch(Poco::Exception& e){
         std::cerr << "Sys Exception: " <<e.displayText () << std::endl;
     }catch(...)

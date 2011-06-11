@@ -1,35 +1,49 @@
 #include "AlarmInfoManFormItem.h"
 #include "AlarmInfoManForm.h"
-
 #include "BmpRes.h"
-
-static char* alarminfolist_caption[] =
+#include <Poco/Format.h>
+typedef struct tag_ListColum{
+    const char* caption;
+    int         colum_width;
+}TListColum;
+static TListColum alarminfolist[] =
 {
-        "类型",
-	"时间",
-        "塔吊编号",
-        "小车指令",
-        "回转指令",
-        "幅度",
-        "宽度",
-        "高度",
-        "速度"
+        {"编号",      50},
+        {"时间",      150},
+        {"塔吊编号",  100},
+        {"小车指令",  50},
+        {"回转指令",  50}
 };
-#define COL_NR	TABLESIZE(alarminfolist_caption)
+
+static TListColum weightinfolist[] =
+{
+        //{"类型",    55},
+        {"时间",    150},
+        {"塔吊编号",100},
+        {"幅度",    50},
+        {"重量",    50},
+        {"倍率",    50},
+        {"角度",    50},
+};
 
 static const char *mmenu_bmps[] = {
     PCOMM_LIST_BKGROUND,
     PCOMM_PREVPAGE_BTN,
     PCOMM_NEXTPAGE_BTN,
     PCOMM_RET_BTN,
-    PCOMM_CLOSE_BTN
+    PCOMM_CLOSE_BTN,
+    "ctx2000/btn_alarm.png",
+    "ctx2000/btn_weight.png",
 };
 
 static SKIN_BUTTON_DESC SkinBtnsDesc[] = {
-	 SKIN_BUTTON_PRE,
-	 SKIN_BUTTON_NEXT,
-	 SKIN_BUTTON_QUIT,
-	 SKIN_BUTTON_EXIT
+     SKIN_BUTTON_PRE,
+     SKIN_BUTTON_NEXT,
+     SKIN_BUTTON_QUIT,
+     SKIN_BUTTON_EXIT,
+     SKIN_BUTTON_ALARM,
+     SKIN_BUTTON_WEIGHT
+
 };
 static COMM_CTRL_DESC CommCtrlsDesc[] = {
     LISTVIEW_ALARMINFO
@@ -43,24 +57,14 @@ static const char *icon_path[] = {
 };
 
 static POS BmpsPos[] = {
-	{
-	 QUERY_X,
-	 QUERY_Y
-	 },
-	{
-	 QUERY_TEXT_X,
-	 QUERY_TEXT_Y
-	 },
-	{
-	 LINE_X,
-	 LINE_Y
-	 },
-	{
-	 QUERY_ALARMINFO_X,
-	 QUERY_ALARMINFO_Y
-	 }
+    {QUERY_X,QUERY_Y},
+    {QUERY_TEXT_X,QUERY_TEXT_Y},
+    {LINE_X,LINE_Y},
+    {QUERY_ALARMINFO_X,QUERY_ALARMINFO_Y}
 };
-static int start = 0;
+
+
+
 CAlarmInfoManForm::CAlarmInfoManForm()
 {
     if (!LoadRes(&mmenu_bmps[0], ARRAY_SIZE(mmenu_bmps, char *)))
@@ -69,15 +73,16 @@ CAlarmInfoManForm::CAlarmInfoManForm()
             exit(0);
     }
 
-	m_tailindex = 0;
-
     for (int i = 0; i < ALARMINFO_SKIN_BTNS_NUM; i++)
     {
         _skinBtns[i] = new CSkinButton(&SkinBtnsDesc[i],this);
     }
     _lvAlarmInfo = new CListView(&CommCtrlsDesc[0],this);
     _icons.AddIcons(icon_path,ARRAY_SIZE(icon_path,char*));
-
+    m_tailindex = 0;
+    m_type      = 0;
+    m_colum_num = 0;
+    start       = 0;
     InitSkinHeader("CAlarmInfoManForm");
 
 }
@@ -86,7 +91,18 @@ CAlarmInfoManForm::~CAlarmInfoManForm()
 {
 
 }
+void   CAlarmInfoManForm::ChangeType(int type)
+{
+    _lvAlarmInfo->ClearColumn();
+    if(type==0){
+        m_colum_num = TABLESIZE(alarminfolist);
+    }else if(type == 1){
+        m_colum_num = TABLESIZE(weightinfolist);
+    }
+    m_type = type;
+    InitListCol();
 
+}
 void    CAlarmInfoManForm::OnPaint(HWND hWnd)
 {
 	HDC hdc = BeginPaint(hWnd);
@@ -95,12 +111,6 @@ void    CAlarmInfoManForm::OnPaint(HWND hWnd)
             _icons.Show(hdc,BmpsPos[i].x,BmpsPos[i].y,i+1);
 	EndPaint(hWnd, hdc);
 }
-
-void    CAlarmInfoManForm::OnClose()
-{
-
-}
-
 void    CAlarmInfoManForm::OnButtonClick(skin_item_t* item)
 {
         if(item->id == _skinBtns[0]->GetId())
@@ -108,12 +118,20 @@ void    CAlarmInfoManForm::OnButtonClick(skin_item_t* item)
             start = ( (start-10)>0) ? (start-10):0;
             RefreshList(start);
         }else if(item->id == _skinBtns[1]->GetId()){
-            start = (start+10);
+            start = (start + 10);
             RefreshList(start);
         }else if(item->id == _skinBtns[2]->GetId()){
             Close();
         }else if(item->id == _skinBtns[3]->GetId()){
             Close();
+        }else if(item->id == _skinBtns[4]->GetId()){
+            ChangeType(0);
+            start = 0;
+            RefreshList(start);
+        }else if(item->id == _skinBtns[5]->GetId()){
+            ChangeType(1);
+            start = 0;
+            RefreshList(start);
         }
 
 }
@@ -121,81 +139,134 @@ void    CAlarmInfoManForm::OnButtonClick(skin_item_t* item)
 void
 CAlarmInfoManForm::InitListCol()
 {
-        int width[COL_NR] = {55, 200, 105, 110,50,50,50,50,LIST_ALARMINFO_W-240};
-        for (int i = 0; i < COL_NR; i++) {
-                 _lvAlarmInfo->AddColumn(i,alarminfolist_caption[i],width[i]);
-        }
+   if(m_type==0)
+   {
+       for (int i = 0; i < m_colum_num; i++)
+       {
+           _lvAlarmInfo->AddColumn(i,alarminfolist[i].caption,alarminfolist[i].colum_width);
+       }
+   }else if(m_type==1)
+   {
+       for (int i = 0; i < m_colum_num; i++)
+       {
+           _lvAlarmInfo->AddColumn(i,weightinfolist[i].caption,weightinfolist[i].colum_width);
+       }
+   }
 
 }
 
 void   CAlarmInfoManForm::OnShow()
 {
     _lvAlarmInfo->EnableSkinStyle(true);
-    InitListCol();   
-RefreshList(0);
+    ChangeType(m_type);
+    RefreshList(start);
 }
 
 void CAlarmInfoManForm::RefreshList(int start_index)
 {
-
-    THistoyRst rst;
-    CTajiDbMgr::Get().ListAlaramInfo(rst);
     _lvAlarmInfo->Clear();
-    for(size_t i = 0 ; i < rst.size(); i++)
+    if(m_type == 0)
     {
-        StringList list;
-        add_alarminfo_item(list,rst.at(i));
-        _lvAlarmInfo->AddSubItems(list);
+        THistoyRst rst;
+        CTajiDbMgr::Get().ListAlaramInfo(start_index,10,rst);
+
+        for(size_t i = 0 ; i < rst.size(); i++)
+        {
+            StringList list;
+            add_alarminfo_item(list,rst.at(i));
+            _lvAlarmInfo->AddSubItems(list);
+        }
+    }else if(m_type == 1){
+        TWeightHistoyRst rst;
+        CTajiDbMgr::Get().ListWeightInfo(start_index,10,rst);
+
+        for(size_t i = 0 ; i < rst.size(); i++)
+        {
+            StringList list;
+            add_weightinfo_item(list,rst.at(i));
+            if(rst.at(i).type == 1)
+            {
+                _lvAlarmInfo->AddSubItems(list,25,0,PIXEL_red);
+            }
+            else
+                _lvAlarmInfo->AddSubItems(list);
+        }
     }
+
 }
 
-void CAlarmInfoManForm::add_alarminfo_item (StringList &alarminfoItems,THistoy& AlarmInfo)
+void CAlarmInfoManForm::add_weightinfo_item (StringList &weightinfoItems,TWeightHistoy& WeightInfo)
 {
     char buff[20];
-
-    for (int j = 0; j < COL_NR; j++)
+#if 1
+    for (int j = 0; j < m_colum_num; j++)
     {
         switch(j)
         {
+            //case 0:
+            //       sprintf (buff, "%d", WeightInfo.type);
+            //       weightinfoItems.push_back(buff);
+            //       break;
             case 0:
-                   sprintf (buff, "%d", AlarmInfo.type);
-                   alarminfoItems.push_back(buff);
-                   break;
-            case 1:
-                    alarminfoItems.push_back(AlarmInfo.date);
+                    weightinfoItems.push_back(WeightInfo.date);
                     break;
-
+            case 1:
+                weightinfoItems.push_back(WeightInfo.serial);
+                break;
             case 2:
-                    alarminfoItems.push_back(AlarmInfo.serial);
+                    weightinfoItems.push_back(WeightInfo.dist);
                     break;
 
             case 3:
-                    sprintf (buff, "%d", AlarmInfo.slewing);
-                    alarminfoItems.push_back(buff);
+                    weightinfoItems.push_back(WeightInfo.weight);
                     break;
             case 4:
-                    sprintf (buff, "%d", AlarmInfo.trolley);
-                    alarminfoItems.push_back(buff);
+                    weightinfoItems.push_back(WeightInfo.fall);
                     break;
             case 5:
-                    sprintf (buff, "%d", AlarmInfo.fudu);
-                    alarminfoItems.push_back(buff);
+                    weightinfoItems.push_back(WeightInfo.angle);
                     break;
-            case 6:
-                    sprintf (buff, "%d", AlarmInfo.wet);
-                    alarminfoItems.push_back(buff);
-                    break;
-            case 7:
-                    sprintf (buff, "%d", AlarmInfo.jiaodu);
-                    alarminfoItems.push_back(buff);
-                    break;
-            case 8:
-                    sprintf (buff, "%d", AlarmInfo.beilv);
-                    alarminfoItems.push_back(buff);
-                    break;
+
             default:
                     break;
         }
     }
+#endif
+}
+void CAlarmInfoManForm::add_alarminfo_item (StringList &alarminfoItems,THistoy& AlarmInfo)
+{
+    char buff[20];
+    int index = 1;
+#if 1
+    for (int j = 0; j < m_colum_num; j++)
+    {
+        switch(j)
+        {
+
+            case 0:
+                sprintf(buff,"%d",index++);
+                alarminfoItems.push_back(buff);
+                break;
+            case 2:
+                alarminfoItems.push_back(AlarmInfo.serial);
+                break;
+            case 1:
+                    alarminfoItems.push_back(AlarmInfo.date);
+                    break;
+
+            case 3:
+                    alarminfoItems.push_back(AlarmInfo.slewing);
+                    break;
+
+            case 4:
+                    alarminfoItems.push_back(AlarmInfo.trolley);
+                    break;
+
+
+            default:
+                    break;
+        }
+    }
+#endif
 }
 

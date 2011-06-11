@@ -89,9 +89,10 @@ int CLijuCtrl::Service(double car_pos, double weight)
     double max_weight = 0;
     double prev_pos=99999;
     bool   find       = false;
+    fprintf(stderr,"Service\n");
     for(size_t i = 0; i < m_lijuGrp.size(); i++)
     {
-        //fprintf(stderr,"car_pos=%0.2f cur=%0.2f\n",car_pos , m_lijuGrp.at(i).car_pos);
+        fprintf(stderr,"car_pos=%0.2f cur=%0.2f\n",car_pos , m_lijuGrp.at(i).car_pos);
         if(car_pos <= m_lijuGrp.at(i).car_pos)
         {
             if(m_lijuGrp.at(i).car_pos <= prev_pos)

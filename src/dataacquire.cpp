@@ -15,6 +15,7 @@
 #include <Poco/NumberParser.h>
 #include "tajidbmgr.h"
 #include "comdata.h"
+#include "common.h"
 #define DEBUG 1
 using Poco::Runnable;
 using Poco::SingletonHolder;
@@ -87,25 +88,30 @@ public:
 #endif
         if( (data.at(0) == 0xaa) && (data.at(14) == 0x55) )
         {
-            ad_up_angle =  m_filter[3].Filter((data.at(7)<<8)+data.at(8));
-            g_up_angle=(ad_up_angle-g_bd[BD_UP_ANGLE].zero_ad)/g_bd[BD_UP_ANGLE].bd_k+g_bd[BD_UP_ANGLE].start_value;
+            //ad_up_angle =  m_filter[3].Filter((data.at(7)<<8)+data.at(8));
+
             ad_car_dist = m_filter[0].Filter((data.at(1)<<8)+data.at(2));
+
             //fprintf(stderr,"ad_car=%d up_angle=%0.2f\n",ad_car_dist,g_up_angle);
             if(g_TC[g_local_id].Dyna){ //动臂式的幅度计算
-                g_car_dist =g_TC[g_local_id].LongArmLength*cos(g_up_angle*3.14/180)+g_TC[g_local_id].a0;
+                ad_up_angle = ad_car_dist;
+                g_up_angle = (ad_up_angle-g_bd[BD_UP_ANGLE].zero_ad)/g_bd[BD_UP_ANGLE].bd_k+g_bd[BD_UP_ANGLE].start_value;
+                g_car_dist = g_TC[g_local_id].LongArmLength*cos(g_up_angle*3.14/180)+g_TC[g_local_id].a0;
                 //fprintf(stderr,"dist=%0.2f %0.2f %0.2f %0.2f\n",g_car_dist,g_TC[g_local_id].LongArmLength,cos(g_up_angle*3.14/180),g_TC[g_local_id].a0);
             }else{ //平臂式的幅度计算
                 g_car_dist=(ad_car_dist-g_bd[BD_CAR_DIST].zero_ad)/g_bd[BD_CAR_DIST].bd_k+g_bd[BD_CAR_DIST].start_value;
                 //fprintf(stderr,"dist=%0.2f\n",g_car_dist);
             }
-
+            //PostMessage(GetActiveWindow(),0x804,0,0);
             ad_height =  m_filter[1].Filter((data.at(3)<<8)+data.at(4));
             g_dg_height=(ad_height-g_bd[BD_HEIGHT].zero_ad)/g_bd[BD_HEIGHT].bd_k+g_bd[BD_HEIGHT].start_value;
             ad_weight =  m_filter[2].Filter((data.at(5)<<8)+data.at(6));
             g_dg_weight=(ad_weight-g_bd[BD_WEIGHT].zero_ad)/g_bd[BD_WEIGHT].bd_k+g_bd[BD_WEIGHT].start_value;
 
             ad_fengsu =  m_filter[4].Filter((data.at(9)<<8)+data.at(10));
-            g_speed = ad_fengsu;
+
+            g_speed   = (double)(50*ad_fengsu)/(4096*3);
+
         }
 
         //g_speed=(ad_car_dist-g_bd[BD_CAR_DIST].zero_ad)/g_bd[BD_CAR_DIST].bd_k+g_bd[BD_CAR_DIST].start_value;
@@ -178,7 +184,7 @@ public:
         if (crane_angle<0)
             crane_angle=crane_angle+360;
         g_angle = crane_angle;
-
+        //PostMessage(GetActiveWindow(),0x805,0,0);
     }
     virtual void run()
     {

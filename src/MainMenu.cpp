@@ -380,9 +380,9 @@ void CMainMenu::OnTimer(int ID)
 #if 1
     //刷新角度
 
-    fast_angle->SetText(Poco::format("%0.1f°",g_angle));
+    //fast_angle->SetText(Poco::format("%0.1f°",g_angle));
     //刷新小车幅度
-    fast_dist->SetText(Poco::format("%0.1fm",g_car_dist));
+    //fast_dist->SetText(Poco::format("%0.1fm",g_car_dist));
     //是否显示额定重量和当前重量
 
     fast_max_weight->SetText(Poco::format("%0.1ft",CLijuCtrl::Get().m_max_weight));
@@ -404,9 +404,12 @@ void CMainMenu::OnTimer(int ID)
         fast_fengsu->SetText(Poco::format("%0.1fm/s",g_speed));
     }
 
-
-    m_per.Show(CLijuCtrl::Get().m_percent);
+    fast_dist->SetText(Poco::format("%0.1fm",g_car_dist));
+    fast_angle->SetText(Poco::format("%0.1f°",g_angle));
+    //刷新小车幅度
     m_worksite->update();
+    m_per.Show(CLijuCtrl::Get().m_percent);
+
 
     int status = CLijuCtrl::Get().m_cur_state;
     if(CMainCtrl::Get().m_control_state.b1)
@@ -455,7 +458,16 @@ void CMainMenu::OnTimer(int ID)
             m_dir_mgr->Show(m_hdc,"down",EOK);
         }
     }
-
+    /*
+    TWeightHistoy v;
+    v.angle = "12";
+    v.dist  = "32";
+    v.fall  = "4";
+    v.serial = CurSerial;
+    v.weight = "1000";
+    v.type  = 1;
+    CTajiDbMgr::Get().AddWeightInfo(v);
+    */
 #endif
 
 }
@@ -489,4 +501,13 @@ void CMainMenu::OnButtonClick(skin_item_t* item)
 
     }
 
+}
+void CMainMenu::OnUserMsg(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
+{
+    if(message == 0x804 || message == 0x805){
+        fast_dist->SetText(Poco::format("%0.1fm",g_car_dist));
+        fast_angle->SetText(Poco::format("%0.1f°",g_angle));
+        //刷新小车幅度
+        m_worksite->update();
+    }
 }

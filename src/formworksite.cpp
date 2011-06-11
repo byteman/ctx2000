@@ -64,7 +64,7 @@ void CFormWorksite::draw_zhangai(HDC hdc)
 {
     static POINT area[6];
 
-    gal_pixel old = SetBrushColor(hdc,PIXEL_red);
+    gal_pixel old = SetBrushColor(hdc,RGB2Pixel(HDC_SCREEN,50,26,45));
  /*
     int oft_x=-50,oft_y=100;
     area[0].x = 100+oft_x;

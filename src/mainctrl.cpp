@@ -5,6 +5,7 @@
 #include <Poco/Timestamp.h>
 #include <Poco/Timespan.h>
 #include <Poco/StringTokenizer.h>
+#include <Poco/NotificationQueue.h>
 #include <Poco/String.h>
 #include <yatengine.h>
 #include <yateclass.h>
@@ -18,11 +19,12 @@
 #include "iniFile.h"
 #include "comdata.h"
 #include "lijuctrl.h"
-
+#include "beeper.h"
 using namespace TelEngine;
 using Poco::SingletonHolder;
 using Poco::StringTokenizer;
 using Poco::TimerCallback;
+using Poco::NotificationQueue;
 //QtzParam  g_qtzs[NUMBER_OF_QTZ];
 #define JDQ_OPEN  IO_LOW_LEVEL
 #define JDQ_CLOSE IO_HIGH_LEVEL
@@ -65,10 +67,82 @@ public:
 private:
     CMainCtrl* m_ctrl;
 };
+
+class CDBAdmin:public Poco::Runnable
+{
+public:
+
+    CDBAdmin()
+    {
+
+    }
+
+    bool start()
+    {
+        m_quit = false;
+        m_thread.start(*this);
+        return m_rdyEvt.tryWait(1000);
+    }
+    bool stop()
+    {
+        m_quit = true;
+        return m_quitEvt.tryWait(1000);
+    }
+    virtual void run()
+    {
+        m_rdyEvt.set();
+        m_quitEvt.reset();
+        m_quit = false;
+        while(!m_quit)
+        {
+            try
+            {
+                fprintf(stderr,"Wait QCollisionNotification Msg\n");
+                Poco::AutoPtr<Poco::Notification> pNf(Poco::NotificationQueue::defaultQueue().waitDequeueNotification());
+                if (pNf)
+                {
+
+                        Poco::AutoPtr<QCollisionNotification> pMsgNf = pNf.cast<QCollisionNotification>();
+                        if(pMsgNf->m_code == 0)
+                        {
+                             CTajiDbMgr::Get().AddAlarmInfo(CurSerial,pMsgNf->m_coll.m_slewing,pMsgNf->m_coll.m_trolley);
+                        }else if(pMsgNf->m_code == 1){
+                            TWeightHistoy value;
+                            value.angle = Poco::format("%0.2f",pMsgNf->m_fall.m_angle);
+                            value.dist  = Poco::format("%0.2f",pMsgNf->m_fall.m_dist);
+                            value.fall  = Poco::format("%d",   pMsgNf->m_fall.m_fall);
+                            value.weight = Poco::format("%0.2f",pMsgNf->m_fall.m_weight);
+                            value.serial = CurSerial;
+                            value.type  = pMsgNf->m_fall.m_type;
+
+                            CTajiDbMgr::Get().AddWeightInfo(value);
+                        }
+
+                }
+            }
+            catch (Poco::Exception& e)
+            {
+                std::cerr << "CDataParseWorker: " << e.displayText() << std::endl;
+                    // parsing exception, what should we do?
+            }
+            catch (...)
+            {
+            }
+        }
+        m_quitEvt.set();
+    }
+private:
+    Poco::Thread  m_thread;
+    Poco::Event   m_rdyEvt;
+    Poco::Event   m_quitEvt;
+    //Poco::NotificationQueue &m_nq;
+    volatile bool m_quit;
+};
 CMainCtrl::CMainCtrl()
 {
     m_mode  = mode_slave;
     m_timer = NULL;
+    m_dbadmin = NULL;
     for(int i = 0; i < 12; i ++)
         m_control_state.b[i] = false;
 }
@@ -98,11 +172,15 @@ int       CMainCtrl::ValideTCNum()
 
     return result;
 }
+/*
+1.如果只有本机在线，就返回本机id
+2.如果有从机在线，就返回最大一个有效的在线从机编号
+*/
  int       CMainCtrl::MaxNo()
  {
     int result = 0;
     int valid_num = ValideTCNum();
-    //fprintf(stderr,"valid=%d\n",valid_num);
+    fprintf(stderr,"valid=%d\n",valid_num);
     if(valid_num == 1){
         result =  m_local_id;
         //fprintf(stderr,"m_local_id=%d\n",m_local_id);
@@ -325,6 +403,7 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
     while( (CurTime-StartTime) < 5000000)
     {
 
+
         if(CDianTai::Get().GetMessage(msg))
         {
                 fprintf(stderr,"%s Recv RtMsg\n",__FUNCTION__);
@@ -465,13 +544,13 @@ void CMainCtrl::slave_loop()
     Poco::Timespan span;
     Poco::Timespan sub_wait_span(6,0);
     bool AddState=false;
-    fprintf(stderr,"slave_loop\n");
+    //fprintf(stderr,"slave_loop\n");
     Poco::Thread::sleep(20);
     while (CDianTai::Get().GetMessage(msg)) {
-        fprintf(stderr,"slave_loop1\n");
+        //fprintf(stderr,"slave_loop1\n");
         lastDateTime.update();
         DistillData(msg.context,ID);
-        fprintf(stderr,"slave_loop2\n");
+        //fprintf(stderr,"slave_loop2\n");
         span = lastDateTime-sendInfoTime; //计算多长时间没有收到主机发来的请求包了，超时后重新申请加入网络
         //fprintf(stderr,"span=%d\n",span.seconds());
 
@@ -483,14 +562,14 @@ void CMainCtrl::slave_loop()
                   WatchNetWork(MainMachineID,AddState);
 #endif
         }
-        fprintf(stderr,"slave_loop3\n");
+        //fprintf(stderr,"slave_loop3\n");
         if(ID==CurID){ //收到了主机发给本机的查询消息
             std::string sendInfo = build_qurey_msg();
             CDianTai::Get().SendMessage(sendInfo);
             sendInfoTime.update();
-            fprintf(stderr,"recv my id\n");
+            fprintf(stderr,"slave %s %s\n",ID.c_str(),sendInfo.c_str());
         }
-        fprintf(stderr,"slave_loop4\n");
+        //fprintf(stderr,"slave_loop4\n");
     }
 }
 void CMainCtrl::master_loop()
@@ -520,7 +599,7 @@ void CMainCtrl::master_loop()
         //fprintf(stderr,"Master Wait Recv RtMsg\n");
         while (CDianTai::Get().GetMessage(msg)) {
                 msg_count++;
-                //fprintf(stderr,"Master recv RtMsg %d,context=%s\n",msg.wType,msg.context.c_str());
+                fprintf(stderr,"Master recv RtMsg %d,context=%s\n",msg.wType,msg.context.c_str());
                 DistillData(msg.context,ID);
                 RecieveValidData=true;
         }
@@ -690,11 +769,19 @@ void      CMainCtrl::CreateDefaultTjParam()
 void CMainCtrl::ReadSetting()
 {
     cfg.Open("ctx2000.ini");
+
+    gMainMenuIndex = cfg.ReadInteger("display","mainmenu",1);
     TCTypeName   = Poco::trim(cfg.ReadString("device","TC_type","def_typename"));
     CurID        = Poco::trim(cfg.ReadString("device","CurID","0"));
     CurSerial    = Poco::trim(cfg.ReadString("device","Serial","def_serial"));
     StrTCArmLen  = Poco::trim(cfg.ReadString("device","armlen","70"));
     StrTCBeilv   = Poco::trim(cfg.ReadString("device","beilv","1"));
+    if(!Poco::NumberParser::tryParse(StrTCBeilv,TCBeilv))
+    {
+        fprintf(stderr,"Error Fall %s\n",StrTCBeilv.c_str());
+        StrTCBeilv = "1";
+        TCBeilv    = 1;
+    }
     encoder_addr = cfg.ReadInteger("device","encoder_addr",0);
     g_diantai_com= Poco::trim(cfg.ReadString("serial","diantai_com","/dev/ttymxc0"));
     g_ad_com1    = Poco::trim(cfg.ReadString("serial","ad_com1","/dev/ttymxc1"));
@@ -731,7 +818,9 @@ void CMainCtrl::ReadSetting()
             g_TC[TcNum].Angle      = 0;
             g_TC[TcNum].AngleSpeed = 0;
             g_TC[TcNum].Dang       = 0;
-            g_TC[TcNum].Position   = 0;
+
+            if(g_TC[TcNum].Dyna)
+                g_TC[TcNum].Position   = g_TC[TcNum].LongArmLength;
             if(g_TC[TcNum].Serial == CurSerial){
                 CurID = Poco::format("%d",TcNum);
                 DBG("Find CurID:%s\n",CurID.c_str());
@@ -893,7 +982,7 @@ void CMainCtrl::InitAlgoData()
     初始化区域检测
 */
     g_polys.clear();
-    for(size_t i=0; i < wbNum; i++)
+    for(int i=0; i < wbNum; i++)
     {
 
         if( ( wba[i].VertexNum > 0 ) && ( wba[i].VertexNum < 6 ) )
@@ -1194,6 +1283,12 @@ void CMainCtrl::Gather_AD()
     g_TC[g_local_id].Angle    = g_angle*3.14/180;
     g_TC[g_local_id].Position = g_car_dist;
     g_TC[g_local_id].Dang     = g_up_angle;
+    /*
+    if(g_TC[g_local_id].Dyna)
+        g_TC[g_local_id].Dang = g_up_angle;
+    else{
+        g_TC[g_local_id].Dang = 0;
+    }*/
     if( ( index >= 0) && (index < NUMBER_OF_QTZ) )
     {
         g_qtzs[index].m_long_arm_angle   = g_angle;
@@ -1213,9 +1308,9 @@ void CMainCtrl::Gather_AD()
             g_qtzs[id].m_carrier_pos      = g_TC[id+1].Position;
             g_qtzs[id].m_sarm_angle       = g_TC[id+1].Dang;
         }
-        //fprintf(stderr,"tj conflict[%d] angle=%0.2f h=%0.2f p=%0.2f\n",id+1,g_qtzs[id].m_long_arm_angle,g_qtzs[id].m_height,g_qtzs[id].m_carrier_pos);
+        fprintf(stderr,"tj conflict[%d] angle=%0.2f h=%0.2f p=%0.2f\n",id+1,g_qtzs[id].m_long_arm_angle,g_qtzs[id].m_height,g_qtzs[id].m_carrier_pos);
     }
-    //fprintf(stderr,"tj local [%d] angle=%0.2f h=%0.2f p=%0.2f\n",index+1,g_qtzs[index].m_long_arm_angle,g_qtzs[index].m_height,g_qtzs[index].m_carrier_pos);
+    fprintf(stderr,"tj local [%d] angle=%0.2f h=%0.2f p=%0.2f\n",index+1,g_qtzs[index].m_long_arm_angle,g_qtzs[index].m_height,g_qtzs[index].m_carrier_pos);
     QtzCollideDetectOne(&g_qtzs[index]);
     m_control_state = g_qtzs[index].m_controled_status;
 
@@ -1223,14 +1318,16 @@ void CMainCtrl::Gather_AD()
     //        m_control_state.b4,m_control_state.b5,m_control_state.b6,m_control_state.b7,m_control_state.b8,\
     //        m_control_state.b9,m_control_state.b10,m_control_state.b11,m_control_state.b12);
 
+    int slewing = 0, trolley=0;
     if(m_control_state.b1 != m_old_ctrl_state.b1){
-         fprintf(stderr,"output0\n");
-        if(m_control_state.b1)
+
+        if(m_control_state.b1) //右回转限制
         {
             m_gpio.Output(0,JDQ_OPEN);
             m_gpio.Output(11,JDQ_OPEN); //右回转反顶继电器
             m_jdq[11].cur_timer=fd_time;
             m_jdq[11].set_flag = true;
+            trolley |= 0x1;
         }
         else
         {
@@ -1239,83 +1336,101 @@ void CMainCtrl::Gather_AD()
         m_old_ctrl_state.b1 = m_control_state.b1;
     }
     if(m_control_state.b2 != m_old_ctrl_state.b2){
-         fprintf(stderr,"output1\n");
-        if(m_control_state.b2)
+
+        if(m_control_state.b2) //回转制动
         {
             m_gpio.Output(1,JDQ_OPEN);
             m_jdq[1].cur_timer= brake_time;
             m_jdq[1].set_flag = true;
-
+            trolley |= 0x2;
         }
         else m_gpio.Output(1,JDQ_CLOSE);
     }
     if(m_control_state.b3 != m_old_ctrl_state.b3){
-         fprintf(stderr,"output2\n");
-        if(m_control_state.b3)
+
+        if(m_control_state.b3)//左回转限制
         {
             m_gpio.Output(2,JDQ_OPEN);
-            m_gpio.Output(10,JDQ_OPEN);
+            m_gpio.Output(10,JDQ_OPEN); //左回转限制反顶继电器
             m_jdq[10].cur_timer=fd_time;
             m_jdq[10].set_flag = true;
+            trolley |= 0x4;
         }
         else m_gpio.Output(2,JDQ_CLOSE);
     }
     if(m_control_state.b4 != m_old_ctrl_state.b4){
-         fprintf(stderr,"output3\n");
-        if(m_control_state.b4)m_gpio.Output(3,JDQ_OPEN);
+
+        if(m_control_state.b4) //小车向外高速限制
+        {
+            m_gpio.Output(3,JDQ_OPEN);
+            slewing |= 0x1;
+         }
         else m_gpio.Output(3,JDQ_CLOSE);
     }
     if(m_control_state.b5 != m_old_ctrl_state.b5){
-         fprintf(stderr,"output4\n");
-        if(m_control_state.b5)m_gpio.Output(4,JDQ_OPEN);
+
+        if(m_control_state.b5) //小车向外运行停车
+        {
+            m_gpio.Output(4,JDQ_OPEN);
+             slewing |= 0x2;
+        }
         else m_gpio.Output(4,JDQ_CLOSE);
 
 
         m_old_ctrl_state.b5=m_control_state.b5;
     }
     if(m_control_state.b6 != m_old_ctrl_state.b6){
-         fprintf(stderr,"output6\n");
-        if(m_control_state.b6)m_gpio.Output(5,JDQ_OPEN);
+
+        if(m_control_state.b6){ //小车向内运行停车
+            m_gpio.Output(5,JDQ_OPEN);
+            slewing |= 0x4;
+        }
         else m_gpio.Output(5,JDQ_CLOSE);
     }
     if(m_control_state.b7 != m_old_ctrl_state.b7){
-         fprintf(stderr,"output7\n");
-        if(m_control_state.b7)m_gpio.Output(6,JDQ_OPEN);
+
+        if(m_control_state.b7){ //小车向内高速限制
+            m_gpio.Output(6,JDQ_OPEN);
+            slewing |= 0x8;
+        }
         else m_gpio.Output(6,JDQ_CLOSE);
     }
     if(m_control_state.b9 != m_old_ctrl_state.b9){
-         fprintf(stderr,"output9\n");
-        if(m_control_state.b9)m_gpio.Output(8,JDQ_OPEN);
+
+        if(m_control_state.b9){ //左回转高速限制
+            m_gpio.Output(8,JDQ_OPEN);
+            trolley |= 0x8;
+        }
         else m_gpio.Output(8,JDQ_CLOSE);
     }
     if(m_control_state.b10 != m_old_ctrl_state.b10){
-        fprintf(stderr,"output10\n");
-        if(m_control_state.b10)
+
+        if(m_control_state.b10){//右回转高速限制
             m_gpio.Output(9,JDQ_OPEN);
+            trolley |= 0x16;
+        }
         else m_gpio.Output(9,JDQ_CLOSE);
     }
-    /*
-    if(m_control_state.b11 != m_old_ctrl_state.b11){
-        if(m_control_state.b11)m_gpio.Output(10,JDQ_OPEN);
-        else m_gpio.Output(10,JDQ_CLOSE);
-    }
-    if(m_control_state.b12 != m_old_ctrl_state.b12){
-        if(m_control_state.b12)m_gpio.Output(11,JDQ_OPEN);
-        else m_gpio.Output(11,JDQ_CLOSE);
-    }*/
 
     m_old_ctrl_state=m_control_state ;
 
+    if( (trolley !=0 ) || (slewing != 0))
+    {
+
+        Poco::NotificationQueue::defaultQueue().enqueueNotification(new QCollisionNotification(0,slewing,trolley));
+    }
 
 }
-#include "beeper.h"
+#include <Poco/NumberParser.h>
 /*
 力矩服务程序
 */
 void    CMainCtrl::LjService()
 {
-    int out_state = CLijuCtrl::Get().Service(g_car_dist,g_dg_weight);
+    int out_state         = CLijuCtrl::Get().Service(g_car_dist,g_dg_weight);
     static bool over_flag = false;
+    static bool up_flag   = false;
+    static int  type      = 0;
     //fprintf(stderr,"out_status=%d\n",out_state);
     //根据力矩输出的状态来控制继电器的动作
     if(out_state == 4) //力矩超过105%
@@ -1333,6 +1448,22 @@ void    CMainCtrl::LjService()
         delay++;
         if( (delay%2) == 0)
             CBeeper::get().BeepMs(100,100000);
+    }
+
+    static double max_weight = 0;
+    if( (g_dg_weight > 0.5) )
+    {
+            up_flag = true;
+            max_weight = (g_dg_weight>max_weight)?g_dg_weight:max_weight;
+            if(out_state >=3 ){ //百分比超过了100%
+                type = 1;
+            }
+    }else if( (g_dg_weight < 0.3) && (up_flag))
+    {
+            Poco::NotificationQueue::defaultQueue().enqueueNotification(new QCollisionNotification(1,g_car_dist,max_weight,TCBeilv,g_angle,type));
+            up_flag = false;
+            type    = 0;
+
     }
 }
 void CMainCtrl::run()
@@ -1480,6 +1611,14 @@ bool CMainCtrl::Start()
         m_timer = new Timer(1000,1000);
         TimerCallback<CMainCtrl> tc(*this, &CMainCtrl::onTimer);
         m_timer->start(tc);
+    }
+    if(m_dbadmin == NULL)
+    {
+        m_dbadmin = new CDBAdmin();
+        if(!m_dbadmin->start())
+        {
+            fprintf(stderr,"DB service module start failed\n");
+        }
     }
     init_tj_data();
 

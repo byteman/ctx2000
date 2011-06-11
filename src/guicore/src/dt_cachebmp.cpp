@@ -100,7 +100,7 @@ CacheBitmap* CacheBitmapPool::getBitmap(std::string name,bool cache)
 		if (CacheList.at(i)->GetName() == name)
 		{
 			CacheList.at(i)->AddRef();
-                        //std::cout << "find cache file" << name << std::endl;
+                        std::cout << "find cache file" << name << std::endl;
 			return CacheList.at(i);				
 		}
 	}

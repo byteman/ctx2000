@@ -7,6 +7,7 @@
 #include <math.h>
 #include <Poco/NumberParser.h>
 #include "MsgBox.h"
+#include "Password.h"
 
 static const char* mmenu_bmps[] = {
        PCLBACKGROUND,
@@ -163,7 +164,17 @@ void CFormCalib::OnPaint(HWND hWnd)
 }
 void CFormCalib::OnShow()
 {
-
+    if(g_TC[g_local_id].Dyna){
+        EnableSkinButton(_btns[2]->GetId(),false);
+        EnableSkinButton(_btns[3]->GetId(),false);
+        EnableSkinButton(_btns[4]->GetId(),true);
+        EnableSkinButton(_btns[5]->GetId(),true);
+    }else{
+        EnableSkinButton(_btns[2]->GetId(),true);
+        EnableSkinButton(_btns[3]->GetId(),true);
+        EnableSkinButton(_btns[4]->GetId(),false);
+        EnableSkinButton(_btns[5]->GetId(),false);
+    }
 }
 //a === bd[0][0..1]
 //b === bd[1][0..1]
@@ -450,8 +461,15 @@ void CFormCalib::OnButtonClick(skin_item_t* item)
         //吊钩高度标定结束
         Close();
     }else if(item->id == _btns[11]->GetId()){
-        CLiJuManForm lj;
-        lj.CreateForm(m_hWnd);
+
+        PassWord pwd;
+        if(pwd.ShowBox(this,"密码:","请输入密码","1020"))
+        {
+            CLiJuManForm lj;
+            lj.CreateForm(m_hWnd);
+        }
+
+
     }
     else if(item->id == btn_ret->GetId())
     {

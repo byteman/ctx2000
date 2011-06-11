@@ -3,6 +3,7 @@
 #include <Poco/Runnable.h>
 #include <Poco/Event.h>
 #include <Poco/Thread.h>
+#include <Poco/Notification.h>
 #include <Poco/Timer.h>
 #include "tajidbmgr.h"
 #include "dataacquire.h"
@@ -12,13 +13,50 @@ using Poco::Event;
 using Poco::Runnable;
 using Poco::Thread;
 using Poco::Timer;
-
+using Poco::Notification;
 typedef std::vector<int> TIDList;
 typedef struct tag_JDQ{
     bool set_flag;
     int  set_timer;
     int  cur_timer;
 }TJDQ;
+struct TCollisonData{
+    int m_slewing;
+    int m_trolley;
+};
+struct TFallData{
+    double m_dist, m_weight,m_angle;
+    int    m_fall, m_type;
+};
+class CDBAdmin;
+class QCollisionNotification: public Notification
+{
+public:
+        QCollisionNotification(){};
+        QCollisionNotification(int code , int slewing, int trolley)
+        {
+            m_code = code;
+            m_coll.m_slewing = slewing;
+            m_coll.m_trolley = trolley;
+        }
+        QCollisionNotification(int code,double dist,double weight, int fall, double angle,int type)
+        {
+            m_code         = code;
+            m_fall.m_angle = angle;
+            m_fall.m_dist  = dist;
+            m_fall.m_fall  = fall;
+            m_fall.m_type  = type;
+            m_fall.m_weight= weight;
+        }
+        ~QCollisionNotification()
+        {
+        }
+public:
+        int           m_code;
+        TFallData     m_fall;
+        TCollisonData m_coll;
+
+};
 class CMainCtrl:public Poco::Runnable
 {
 public:
@@ -88,6 +126,7 @@ private:
     CGpio m_gpio;
     Poco::Timer* m_timer;
     TJDQ m_jdq[3];
+    CDBAdmin* m_dbadmin;
 
     //bool right_turn_limit,left_turn_limit,turn_brake;
 };

@@ -7,6 +7,7 @@
 #include "comdata.h"
 #include <yatengine.h>
 #include "mainctrl.h"
+#include "MsgBox.h"
 using namespace TelEngine;
 extern TTjRecord g_TC[21];
 static COMM_CTRL_DESC lablectrls[] = {
@@ -209,6 +210,8 @@ void    CWorkSite::OnButtonClick(skin_item_t* item)
         edits[20]->SetText(Poco::format("%d",BrakeTime));
 
         CMainCtrl::Get().SaveSiteInfo();
+        MsgBox box;
+        box.ShowBox(this,"参数保存成功","信息提示");
     }
     else if(item->id == btn_exit->GetId())
     {

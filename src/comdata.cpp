@@ -10,6 +10,7 @@ TID g_conflict_tj_list;
 std::string MainMachineID,CurID,TCTypeName,CurSerial;
 int    RightNo,AddNo,MaxTCNo,g_local_id;
 int    TCArmLen,TCBeilv;
+int    gMainMenuIndex=1;
 std::string StrTCArmLen, StrTCBeilv;
 double wksp[4][2];
 double czwzb[2][2];

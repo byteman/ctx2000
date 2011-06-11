@@ -18,7 +18,7 @@
 #include "SkinForm.h"
 #include "dt_core.h"
 #include "tajidbmgr.h"
-#define ALARMINFO_SKIN_BTNS_NUM    4
+#define ALARMINFO_SKIN_BTNS_NUM    6
 class CAlarmInfoManForm : public CSkinForm  
 {
 public: 
@@ -27,18 +27,22 @@ public:
 	virtual ~CAlarmInfoManForm();
         virtual void   OnShow();
 	virtual void   OnPaint(HWND hWnd);
-	virtual void   OnClose();
 	virtual void   OnButtonClick(skin_item_t* item);
 private:
 	void InitListCol();
 	void RefreshList(int tailindex);
-        void add_alarminfo_item (StringList &alarminfoItems,THistoy& AlarmInfo);
+        void add_alarminfo_item (StringList  &alarminfoItems, THistoy& AlarmInfo);
+        void add_weightinfo_item (StringList &weightinfoItems,TWeightHistoy& WeightInfo);
         //void add_alarminfo_item (StringList &alarminfoItems, TAlarmInfo* p_AlarmInfo);
 private:
  	int m_tailindex;
         CListView*      _lvAlarmInfo;
         CSkinButton*    _skinBtns[ALARMINFO_SKIN_BTNS_NUM];
         CIconGroup      _icons;
+        int             m_colum_num;
+        int             start;
+        int             m_type; // 0:报警信息  1:起吊记录
+        void            ChangeType(int type);
 };
 
 #endif

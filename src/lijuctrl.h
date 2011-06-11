@@ -25,6 +25,7 @@ public:
     //设置新的倍率，
     int ChangeBeilv(int newBeilv=0);
     std::string m_curBeilv;
+    int  m_cur_fall;
     double m_percent;
     double m_max_weight;
     int  m_cur_state; /*0 正常 1: 90 2 : 95  3 :100*/

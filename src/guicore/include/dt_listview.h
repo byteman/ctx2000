@@ -23,6 +23,7 @@ public:
     virtual ~CListView();
     int AddColumn(int index=0,std::string itemText="null",int width=50);
     void DelColumn(int index);
+    void ClearColumn();
     void SetColWidth(int index, int width);
     void SetColHeight(int height);
     void SetColHeadText(int index, std::string itemText);
@@ -34,7 +35,7 @@ public:
 
     //GHANDLE AddItems(StringList items,int itemHeight=25);
     GHANDLE AddRootItem(std::string root);
-    GHANDLE AddSubItems(StringList subitems,int itemHeight=25,GHANDLE hRootItem=0);
+    GHANDLE AddSubItems(StringList subitems,int itemHeight=25,GHANDLE hRootItem=0,gal_pixel color=PIXEL_black);
     void Lock();
     void Unlock();
     void DelItem(int index);

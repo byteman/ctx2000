@@ -30,7 +30,7 @@ CFontMgr::CFontMgr()
 
         f->size=size;
 
-        fprintf(stderr,"create font %s size=%d handle = %x\n",f->name.c_str(),size,f->pfont);
+        //fprintf(stderr,"create font %s size=%d handle = %x\n",f->name.c_str(),size,f->pfont);
 
         fonts.push_back(f);
     }
@@ -48,7 +48,7 @@ CFontMgr::CFontMgr()
                                 size, 0);
         f->size=size;
 
-        fprintf(stderr,"create font %s size=%d handle = %x\n",f->name.c_str(),size,f->pfont);
+        //fprintf(stderr,"create font %s size=%d handle = %x\n",f->name.c_str(),size,f->pfont);
 
         fonts.push_back(f);
     }
@@ -65,7 +65,7 @@ CFont* CFontMgr::GetFont(std::string fontname,int size)
     {
         if (size == fontmaps[fontname].at(i)->size)
         {
-            fprintf(stderr,"find font  %s size=%d\n",fontname.c_str(),size);
+            //fprintf(stderr,"find font  %s size=%d\n",fontname.c_str(),size);
             return fontmaps[fontname].at(i);
         }
     }
