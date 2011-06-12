@@ -5,7 +5,7 @@
 class CPercent
 {
 public:
-    CPercent();
+    CPercent(int direction=0);
     ~CPercent();
     bool Init(CSkinForm* parent,CStatic* ctrl,int w, int h);
     int  worksite_proc(HWND hwnd, int message, WPARAM w, LPARAM l);
@@ -14,7 +14,8 @@ private:
     CStatic* m_ctrl;
     CSkinForm* m_parent;
     int      m_w,m_h,old_height;
-    double m_percent;
+    double   m_percent;
+    int      m_direction;
     HWND m_hwnd;
     HDC  m_hdc;
     std::string m_text;

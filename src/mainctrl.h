@@ -65,6 +65,7 @@ public:
     static CMainCtrl& Get();
 
     bool Start();
+    bool Stop();
     virtual void run();
 
     //处理接收到的AD,

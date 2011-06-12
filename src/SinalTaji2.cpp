@@ -18,6 +18,9 @@
 #include <math.h>
 #include <Poco/Format.h>
 
+#define SKIN_BUTTON_MAINCFG     {1,22,410}
+#define SKIN_BUTTON_BYPASS      {2,92,410}
+
 #define E_W  85
 #define E_H  30
 #define L_S  55
@@ -28,38 +31,38 @@
 #define L_S_V2 195
 
 #define EDIT_ANGLE    {60,280,  E_W,E_H,"angle"}
-#define EDIT_DIST     {310,310, 180,60,"dist"}
+#define EDIT_DIST     {315,305, 180,60,"dist"}
 
-#define EDIT_WEIGHT   {520, 225,E_W,E_H,"kg"}
-#define EDIT_HEIGHT   {590, 305,E_W,E_H,"height"}
-#define EDIT_UP_ANGL  {390, 160, 180,60,"upangle"}
-#define EDIT_BEILV    {630, 125, E_W, 30,"5"}
+#define EDIT_WEIGHT   {530, 225,E_W,E_H+10,"kg"}
+#define EDIT_HEIGHT   {630, 305,150,E_H+10,"height"}
+#define EDIT_UP_ANGL  {380, 170, 180,60,"upangle"}
+#define EDIT_BEILV    {665, 125, E_W, 30,"5"}
 
 #define STATIC_LIJU    {375,55,  150,60,"liju"}
-#define EDIT_MAX_W     {575,50,  150,80,"maxw"}
+#define EDIT_MAX_W     {575,40,  150,E_H+10,"maxw"}
 
 #define EDIT_T_H      {L_S2,L_S_V2+0*V_S, E_W,E_H,""}
 #define EDIT_L_ARM    {L_S2,L_S_V2+1*V_S, E_W,E_H,""}
 #define EDIT_S_ARM    {L_S2,L_S_V2+2*V_S, E_W,E_H,""}
 
-#define EDIT_SPEED    {50,350, E_W,E_H,"1"}
-#define EDIT_PERCENT  {385,50, E_W,E_H,"80%"}
+#define EDIT_SPEED    {45,350, E_W+15,E_H,"1"}
+#define EDIT_PERCENT  {385,55, E_W,E_H,"80%"}
 
 #define Client_Height 72
 
 
-//SoftKeyboard *skt=NULL;
+extern SoftKeyboard *skt;
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 static const char* mmenu_bmps[] = {
     "ctx2000/single_dy.png",
-    //PMAINCFG,
-   // PBYPASS
+     PMAINCFG,
+     PBYPASS
 };
 static SKIN_BUTTON_DESC SkinBtns[] = {
-    //SKIN_BUTTON_MAINCFG,
-    //SKIN_BUTTON_BYPASS
+    SKIN_BUTTON_MAINCFG,
+    SKIN_BUTTON_BYPASS
 };
 static EDevStatus g_status[20];
 
@@ -85,7 +88,8 @@ static COMM_CTRL_DESC commctrls[] = {
     EDIT_S_ARM,
     EDIT_SPEED,
     STATIC_LIJU, //11
-    EDIT_PERCENT
+    EDIT_PERCENT,
+    {65,55,344-65,75-60,"10"},
 };
 
 CSingleTaji2::CSingleTaji2()
@@ -98,63 +102,61 @@ CSingleTaji2::CSingleTaji2()
         exit(0);
     }
     TIniFile cfg("ctx2000.ini");
+    m_show_up_angle=true;
 
-    m_show_up_angle  =  cfg.ReadBool("display","up_angle",false);
-    m_show_speed     =  cfg.ReadBool("display","speed",   false);
-    m_show_dg_height =  cfg.ReadBool("display","height",  false);
-    m_show_max_weight = cfg.ReadBool("display","max_weight",  false);
-
+    m_show_speed      = cfg.ReadBool("display","speed",   false);
+    m_show_dg_height  = cfg.ReadBool("display","height",  false);
 
     for (int i = 0; i < 2; i++)
     {
-        //_skinBtns[i] = new CSkinButton(&SkinBtns[i],this);
+        _skinBtns[i] = new CSkinButton(&SkinBtns[i],this);
     }
+
 #if 1
     edt_angle           = new CStatic(&commctrls[0],this);
-
     edt_dist            = new CStatic(&commctrls[1],this);
     edt_max_weight      = new CStatic(&commctrls[2],this);
     edt_weight          = new CStatic(&commctrls[3],this);
-    edt_height          = new CStatic(&commctrls[4],this);
     edt_up_angle        = new CStatic(&commctrls[5],this);
     edt_beilv           = new CStatic(&commctrls[6],this);
 
-    //edt_tower_height    = new CStatic(&commctrls[7],this);
-
-    //edt_long_arm_len    = new CStatic(&commctrls[8],this);
-    //edt_short_arm_len   = new CStatic(&commctrls[9],this);
-
-    edt_fengsu          = new CStatic(&commctrls[10],this);
     edt_percent         = new CStatic(&commctrls[12],this);
-    //m_liju              = new CStatic(&commctrls[11],this);
+
 #endif
     fast_angle           = new CFastStatic(&commctrls[0],this);
-
     fast_dist            = new CFastStatic(&commctrls[1],this);
     fast_max_weight      = new CFastStatic(&commctrls[2],this);
     fast_weight          = new CFastStatic(&commctrls[3],this);
-    fast_height          = new CFastStatic(&commctrls[4],this);
     fast_up_angle        = new CFastStatic(&commctrls[5],this);
     fast_beilv           = new CFastStatic(&commctrls[6],this);
+    fast_percent         = new CFastStatic(&commctrls[12],this);
+    m_fall_fact          = new DT_Percent(&commctrls[13],this);
 
-    fast_tower_height    = new CFastStatic(&commctrls[7],this);
+    if(m_show_speed)
+    {
+        edt_fengsu          = new CStatic(&commctrls[10],    this);
+        fast_fengsu         = new CFastStatic(&commctrls[10],this);
+    }
 
-    fast_long_arm_len    = new CFastStatic(&commctrls[8],this);
-    fast_short_arm_len   = new CFastStatic(&commctrls[9],this);
-    fast_fengsu          = new CFastStatic(&commctrls[10],this);
+    if(m_show_dg_height){
+        edt_height          = new CStatic(&commctrls[4],this);
+        fast_height         = new CFastStatic(&commctrls[4],this);
+    }
 
     Font24 = CFontMgr::Get().GetFont("stxinwei",24);
-    assert(Font24 != NULL);
-    Font24->setFontColor(RGB2Pixel(HDC_SCREEN,0,0,0));
+    Font40 = CFontMgr::Get().GetFont("stxinwei",40);
+
+    color_black = RGB2Pixel(HDC_SCREEN,0,0,0);
+    Font24->setFontColor(color_black);
+    Font40->setFontColor(color_black);
 
     SetRect(&m_status_rect,    200,0,800,Client_Height);
     SetRect(&m_dev_serail_rect,0,0,200,  Client_Height);
 
     SetRect(& m_tc_type_rect,   660,Client_Height+65,800,  Client_Height+115);
-    SetRect(&m_liju_rect, 145, 345, 180, 380);
+    SetRect(&m_liju_rect, 617, 117, 700, 155);
 
-    //m_dir_mgr = new CDirStatusMgr(700,Client_Height+5);
-
+    color_black  = RGB2Pixel(HDC_SCREEN,255,255,255);
     InitSkinHeader("SingleTaji1");
 }
 
@@ -165,40 +167,53 @@ CSingleTaji2::~CSingleTaji2()
 void CSingleTaji2::OnCreate()
 {
 
-    RECT rt;
-/*
     if(!skt)
     {
         skt = new SoftKeyboard();
         skt->T9_Show(false);
     }
-    */
+
     SetTimer(m_hWnd,100,10);
 
 }
 
 void CSingleTaji2::OnShow()
 {
-    /*
+
+    m_fall_fact->Create();
+    TColorSet rst;
+    TColorPercent color;
+
+    color.value = 0;
+    color.color = PIXEL_green;
+    rst.push_back(color);
+
+    color.value = 0.9;
+    color.color = PIXEL_yellow;
+    rst.push_back(color);
+
+    color.value = 1;
+    color.color = PIXEL_red;
+    rst.push_back(color);
+
+    m_fall_fact->SetColorPercent(rst);
+
     fast_angle->Attach(edt_angle);
     fast_dist->Attach(edt_dist);
     fast_weight->Attach(edt_weight);
     fast_beilv->Attach(edt_beilv);
-    fast_tower_height->Attach(edt_tower_height);
-    fast_long_arm_len->Attach(edt_long_arm_len);
-    fast_short_arm_len->Attach(edt_short_arm_len);
-    fast_height->Attach(edt_height);
-    fast_up_angle->Attach(edt_up_angle);
+    fast_percent->Attach(edt_percent);
     fast_max_weight->Attach(edt_max_weight);
-    fast_fengsu->Attach(edt_fengsu);
-*/
-    //m_per.Init(this,m_liju,commctrls[11].w,commctrls[11].h);
+    fast_up_angle->Attach(edt_up_angle);
+    if(m_show_speed)
+    {
+       fast_fengsu->Attach(edt_fengsu);
+    }
+    if(m_show_dg_height){
+       fast_height->Attach(edt_height);
+    }
+    fast_beilv->SetText(StrTCBeilv,color_black,Font24);
 
-    //edt_tower_height->SetText(Poco::format("%0.1f",g_TC[g_local_id].Height));
-    //edt_long_arm_len->SetText(Poco::format("%0.1f",g_TC[g_local_id].LongArmLength));
-    //edt_short_arm_len->SetText(Poco::format("%0.1f",g_TC[g_local_id].ShortArmLenght));
-
-    m_hdc = GetDC(m_hWnd);
 }
 void CSingleTaji2::OnPaint(HWND hWnd)
 {
@@ -222,18 +237,33 @@ static    double dist  = 0;
 
 void CSingleTaji2::OnTimer(int ID)
 {
-    //刷新角度
-    edt_angle->SetText(Poco::format("%0.1f",g_angle));
+    fast_angle->SetText(Poco::format("%0.1f°",g_angle),color_black,Font24);
     //刷新小车幅度
-    edt_dist->SetText(Poco::format("%0.1f",g_car_dist));
+    fast_dist->SetText(Poco::format("%0.1fm",g_car_dist),color_black,Font40);
+
     //是否显示额定重量和当前重量
-    edt_max_weight->SetText(Poco::format("%d",(int)CLijuCtrl::Get().m_max_weight));
-    edt_weight->SetText(Poco::format("%0.1f",g_dg_weight));
-    edt_beilv->SetText(CLijuCtrl::Get().m_curBeilv);
-    edt_height->SetText(Poco::format("%0.1f",g_dg_height));
-    edt_up_angle->SetText(Poco::format("%0.1f",g_up_angle));
-    edt_fengsu->SetText(Poco::format("%0.1f",g_speed));
-    edt_percent->SetText(Poco::format("%0.1f",CLijuCtrl::Get().m_percent));
+    fast_up_angle->SetText(Poco::format("%0.1f°",g_up_angle),color_black,Font40);
+    fast_max_weight->SetText(Poco::format("%0.1ft",CLijuCtrl::Get().m_max_weight),color_black,Font40);
+    fast_weight->SetText(Poco::format("%0.1ft",g_dg_weight),color_black,Font40);
+    char buf[32] = {0,};
+    int tmp = CLijuCtrl::Get().m_percent*100.0f+0.5;
+    snprintf(buf,32,"%d%",tmp);
+    //fprintf(stderr,"len = %d\n",tmp);
+    buf[strlen(buf)]='%';
+    m_fall_fact->Show(CLijuCtrl::Get().m_percent);
+
+    fast_percent->SetText(buf,color_black,Font24);
+    //是否显示吊钩高度
+
+    if(m_show_dg_height)
+    {
+       fast_height->SetText(Poco::format("%0.1fm",g_dg_height),color_black,Font40);
+    }
+
+
+    fast_max_weight->SetText(Poco::format("%0.1ft",CLijuCtrl::Get().m_max_weight),color_black,Font40);
+    if(m_show_speed)
+        fast_fengsu->SetText(Poco::format("F=%0.1fm/s",g_speed),color_black,Font24);
 
 
 }
@@ -242,8 +272,9 @@ void CSingleTaji2::OnLButtonUp(int x, int y)
     fprintf(stderr,"x=%d,y=%d\n",x,y);
     if(PtInRect(&m_liju_rect,x,y))
     {
-        int ret = CLijuCtrl::Get().ChangeBeilv();
-        edt_beilv->SetText(Poco::format("%d",ret));
+        StrTCBeilv = Poco::format("%d",CLijuCtrl::Get().ChangeBeilv());
+        fast_beilv->SetText(StrTCBeilv,color_black,Font24);
+
         CLijuCtrl::Get().SaveData();
     }
 }
@@ -254,5 +285,7 @@ void CSingleTaji2::OnButtonClick(skin_item_t* item)
         CSysSet ss;
         ss.CreateForm(m_hWnd);
         SetTimer(m_hWnd,100,10);
+    }else if(item->id == _skinBtns[1]->GetId()){
+        Close();
     }
 }

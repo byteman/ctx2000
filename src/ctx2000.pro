@@ -69,7 +69,8 @@ SOURCES += \
     MsgBox.cpp \
     beeper.cpp \
     guinotifyer.cpp \
-    Password.cpp
+    Password.cpp \
+    dt_percent.cpp
 LIBS+=-lPocoFoundation
 
 DEPENDPATH=../include
@@ -145,4 +146,5 @@ HEADERS += \
     TajiImage.h \
     MsgBox.h \
     beeper.h \
-    guinotifyer.h
+    guinotifyer.h \
+    dt_percent.h

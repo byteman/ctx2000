@@ -16,6 +16,7 @@ typedef enum{
     BD_CAR_DIST,
     BD_HEIGHT
 }BD_TYPE;
+#define DBG_POS fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
 //标定数据结构
 extern TBD g_bd[6];
 //有效塔机id列表

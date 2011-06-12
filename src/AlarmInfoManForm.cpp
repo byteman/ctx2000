@@ -9,17 +9,17 @@ typedef struct tag_ListColum{
 static TListColum alarminfolist[] =
 {
         {"编号",      50},
-        {"时间",      150},
-        {"塔吊编号",  100},
-        {"小车指令",  50},
-        {"回转指令",  50}
+        {"时间",      200},
+        //{"塔吊编号",  100},
+        {"小车指令",  100},
+        {"回转指令",  100}
 };
 
 static TListColum weightinfolist[] =
 {
         //{"类型",    55},
+        {"编号",    100},
         {"时间",    150},
-        {"塔吊编号",100},
         {"幅度",    50},
         {"重量",    50},
         {"倍率",    50},
@@ -195,6 +195,7 @@ void CAlarmInfoManForm::RefreshList(int start_index)
 
 }
 
+
 void CAlarmInfoManForm::add_weightinfo_item (StringList &weightinfoItems,TWeightHistoy& WeightInfo)
 {
     char buff[20];
@@ -203,16 +204,14 @@ void CAlarmInfoManForm::add_weightinfo_item (StringList &weightinfoItems,TWeight
     {
         switch(j)
         {
-            //case 0:
-            //       sprintf (buff, "%d", WeightInfo.type);
-            //       weightinfoItems.push_back(buff);
-            //       break;
             case 0:
+                   sprintf (buff, "%d", WeightInfo.id);
+                   weightinfoItems.push_back(buff);
+                   break;
+            case 1:
                     weightinfoItems.push_back(WeightInfo.date);
                     break;
-            case 1:
-                weightinfoItems.push_back(WeightInfo.serial);
-                break;
+
             case 2:
                     weightinfoItems.push_back(WeightInfo.dist);
                     break;
@@ -233,10 +232,10 @@ void CAlarmInfoManForm::add_weightinfo_item (StringList &weightinfoItems,TWeight
     }
 #endif
 }
+
 void CAlarmInfoManForm::add_alarminfo_item (StringList &alarminfoItems,THistoy& AlarmInfo)
 {
     char buff[20];
-    int index = 1;
 #if 1
     for (int j = 0; j < m_colum_num; j++)
     {
@@ -244,23 +243,18 @@ void CAlarmInfoManForm::add_alarminfo_item (StringList &alarminfoItems,THistoy& 
         {
 
             case 0:
-                sprintf(buff,"%d",index++);
+                sprintf(buff,"%d",AlarmInfo.id);
                 alarminfoItems.push_back(buff);
                 break;
-            case 2:
-                alarminfoItems.push_back(AlarmInfo.serial);
-                break;
             case 1:
-                    alarminfoItems.push_back(AlarmInfo.date);
-                    break;
-
+                alarminfoItems.push_back(AlarmInfo.date);
+                break;
+            case 2:
+                alarminfoItems.push_back(AlarmInfo.slewing);
+                break;
             case 3:
-                    alarminfoItems.push_back(AlarmInfo.slewing);
-                    break;
-
-            case 4:
-                    alarminfoItems.push_back(AlarmInfo.trolley);
-                    break;
+                alarminfoItems.push_back(AlarmInfo.trolley);
+                break;
 
 
             default:

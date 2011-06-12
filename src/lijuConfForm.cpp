@@ -93,18 +93,23 @@ CLiJuManForm::CLiJuManForm()
         exit(0);
     }
     m_change_fall = false;
+
     for (int i = 0; i < USERMAN_SKIN_BTNS_NUM; i++)
     {
         _skinBtns[i] = new CSkinButton(&SkinBtnsDesc[i],this);
     }
+
     _lvLiJu = new CListView(&CommCtrlsDesc[0],this);
+
     cbx_type= new CComBox(&CommCtrlsDesc[1],this);
     cbx_arm_len=new CComBox(&CommCtrlsDesc[2],this);
     cbx_beilv=new CComBox(&CommCtrlsDesc[3],this);
+
     _icons.AddIcons(icon_path,ARRAY_SIZE(icon_path,char*));
 
     Font16 = CFontMgr::Get().GetFont("stxinwei",16);
     Font16->setFontColor(RGB2Pixel(HDC_SCREEN,0,0,0));
+
 #define LBL_W  100
 #define LBL_H  30
 #define LBL_X  5
@@ -323,10 +328,12 @@ void CLiJuManForm::ReloadLijuItems()
 }
 void CLiJuManForm::OnShow()
 {
+
     _lvLiJu->EnableSkinStyle(true);
     _lvLiJu->EnableTreeViewStyle(true);
     InitListCol();
     ReloadLijuItems();
+
 }
 void CLiJuManForm::ReloadArmLen()
 {

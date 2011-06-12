@@ -86,7 +86,7 @@ public:
     bool stop()
     {
         m_quit = true;
-        return m_quitEvt.tryWait(1000);
+        return m_quitEvt.tryWait(2000);
     }
     virtual void run()
     {
@@ -97,8 +97,8 @@ public:
         {
             try
             {
-                fprintf(stderr,"Wait QCollisionNotification Msg\n");
-                Poco::AutoPtr<Poco::Notification> pNf(Poco::NotificationQueue::defaultQueue().waitDequeueNotification());
+                //fprintf(stderr,"Wait QCollisionNotification Msg\n");
+                Poco::AutoPtr<Poco::Notification> pNf(Poco::NotificationQueue::defaultQueue().waitDequeueNotification(1000));
                 if (pNf)
                 {
 
@@ -180,7 +180,7 @@ int       CMainCtrl::ValideTCNum()
  {
     int result = 0;
     int valid_num = ValideTCNum();
-    fprintf(stderr,"valid=%d\n",valid_num);
+    //fprintf(stderr,"valid=%d\n",valid_num);
     if(valid_num == 1){
         result =  m_local_id;
         //fprintf(stderr,"m_local_id=%d\n",m_local_id);
@@ -621,7 +621,7 @@ void CMainCtrl::master_loop()
     DBG("Master MaxTCNo=%d RightNo=%d\n",MaxTCNo,RightNo);
     //判断能否接收到塔机加入的回应信息
     if(MaxTCNo == RightNo){//如果呼叫完了最后一个塔机 ，并且发送过申请加入一个新的塔机的指令，就等待接收新加入塔机的回应
-        fprintf(stderr,"Master wait New Add TC %d slave's ack \n",RightNo);
+        //fprintf(stderr,"Master wait New Add TC %d slave's ack \n",RightNo);
         //等待200ms，等新加入塔机的响应消息
         //Poco::Thread::sleep(200);
 
@@ -642,7 +642,7 @@ void CMainCtrl::master_loop()
 
     std::string sendInfo = build_qurey_msg();
 
-    fprintf(stderr,"Master SendData %s len=%d\n",sendInfo.c_str(),sendInfo.length());
+    //fprintf(stderr,"Master SendData %s len=%d\n",sendInfo.c_str(),sendInfo.length());
     CDianTai::Get().SendMessage(sendInfo);
 
 }
@@ -890,10 +890,10 @@ void CMainCtrl::ReadSetting()
     }
     //在塔机参数已经读取成功后，再获取与本机id冲突的设备id列表
     ret = GetConflictTjList(g_conflict_tj_list);
-    fprintf(stderr,"conflict dev count = %d\n",ret);
+    //fprintf(stderr,"conflict dev count = %d\n",ret);
     for(int i = 0 ; i < ret; i++)
     {
-        fprintf(stderr,"conflict localid[%d] : id[%d] = %d\n",g_local_id,i,g_conflict_tj_list.at(i));
+        //fprintf(stderr,"conflict localid[%d] : id[%d] = %d\n",g_local_id,i,g_conflict_tj_list.at(i));
     }
     //初始化标定系数
     InitBDParam();
@@ -1294,7 +1294,7 @@ void CMainCtrl::Gather_AD()
     {
         g_qtzs[index].m_long_arm_angle   = g_angle;
         if(g_TC[g_local_id].Dyna){//如果当前是动臂式
-            //给算法模块的幅度就是设定的大臂的长度
+            //给算法模块的幅度就是设定的大臂的长度，动臂的支点到臂端的距离
             g_qtzs[index].m_carrier_pos  = g_TC[g_local_id].LongArmLength;
             g_qtzs[index].m_sarm_angle   = g_up_angle;
         }
@@ -1317,9 +1317,9 @@ void CMainCtrl::Gather_AD()
             g_qtzs[id].m_carrier_pos      = g_TC[id+1].Position;
             g_qtzs[id].m_sarm_angle       = g_TC[id+1].Dang;
         }
-        fprintf(stderr,"tj conflict[%d] angle=%0.2f h=%0.2f p=%0.2f\n",id+1,g_qtzs[id].m_long_arm_angle,g_qtzs[id].m_height,g_qtzs[id].m_carrier_pos);
+        //fprintf(stderr,"tj conflict[%d] angle=%0.2f h=%0.2f p=%0.2f\n",id+1,g_qtzs[id].m_long_arm_angle,g_qtzs[id].m_height,g_qtzs[id].m_carrier_pos);
     }
-    fprintf(stderr,"tj local [%d] angle=%0.2f h=%0.2f p=%0.2f\n",index+1,g_qtzs[index].m_long_arm_angle,g_qtzs[index].m_height,g_qtzs[index].m_carrier_pos);
+    //fprintf(stderr,"tj local [%d] angle=%0.2f h=%0.2f p=%0.2f\n",index+1,g_qtzs[index].m_long_arm_angle,g_qtzs[index].m_height,g_qtzs[index].m_carrier_pos);
     QtzCollideDetectOne(&g_qtzs[index]);
     m_control_state = g_qtzs[index].m_controled_status;
 
@@ -1472,6 +1472,7 @@ void    CMainCtrl::LjService()
             Poco::NotificationQueue::defaultQueue().enqueueNotification(new QCollisionNotification(1,g_car_dist,max_weight,TCBeilv,g_angle,type));
             up_flag = false;
             type    = 0;
+            max_weight = 0;
 
     }
 }
@@ -1606,6 +1607,22 @@ void create_dispath_thread()
     pthread_create(&tid,NULL,dispatch_thread,NULL);
     Poco::Thread::sleep(100);
     pthread_detach(tid);
+}
+bool CMainCtrl::Stop()
+{
+    m_quit = true;
+    m_quitEvt.tryWait(1000);
+    if(m_timer){
+        m_timer->stop();
+        delete m_timer;
+    }
+    if(m_dbadmin){
+        m_dbadmin->stop();
+        delete m_dbadmin;
+    }
+    CDataAcquire::Get().Stop();
+    CDianTai::Get().Stop();
+    return true;
 }
 bool CMainCtrl::Start()
 {

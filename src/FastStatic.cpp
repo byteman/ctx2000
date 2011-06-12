@@ -8,6 +8,7 @@ CFastStatic::CFastStatic(COMM_CTRL_DESC* desc,CSkinForm* parent)
     m_hwnd  = HWND_INVALID;
     m_parent= parent;
     SetRect(&m_rect,0,0,m_w,m_h);
+    Font24 = CFontMgr::Get().GetFont("stxinwei",24);
 }
 
 static int m_ctrl_proc(HWND hwnd, int message, WPARAM w, LPARAM l)
@@ -54,7 +55,9 @@ bool CFastStatic::Attach(CCommCtrl* ctrl)
     {
         //SetWindowAdditionalData2(m_hwnd,(DWORD)this);
         //old_wnd_proc = SetWindowCallbackProc(m_hwnd,m_ctrl_proc);
-
+        HDC hdc = GetClientDC(m_hwnd);
+        m_hdcMem = CreateCompatibleDC(hdc);
+        ReleaseDC(hdc);
     }
     else{
         fprintf(stderr,"can't attch hwnd\n");
@@ -66,18 +69,24 @@ CFastStatic::~CFastStatic()
 {
 
 }
-
-void CFastStatic::SetText(std::string value)
+/*
+RGB2Pixel(HDC_SCREEN,150,208,209)
+*/
+void CFastStatic::SetText(std::string value,gal_pixel bkcolor,CFont* font)
 {
     m_hdc = GetClientDC(m_hwnd);
 
-    SelectFont(m_hdc,GetSystemFont(SYSLOGFONT_FIXED));
-    //SetBkMode(m_hdc,BM_TRANSPARENT);
-    SetBkColor(m_hdc,RGB2Pixel(HDC_SCREEN,150,208,209));
-    SetBrushColor(m_hdc,RGB2Pixel(HDC_SCREEN,150,208,209));
-    FillBox(m_hdc,m_rect.left,m_rect.top,RECTW(m_rect),RECTH(m_rect));
-    DrawText(m_hdc,  value.c_str(),value.length (),&m_rect,DT_LEFT|DT_TOP);
-    //InvalidateRect(m_hdc,&m_rect,TRUE);
+    if(font==NULL)
+        SelectFont(m_hdcMem,GetSystemFont(SYSLOGFONT_FIXED));
+    else
+        SelectFont(m_hdcMem,font->pfont);
+    if(bkcolor==0)bkcolor=RGB2Pixel(HDC_SCREEN,150,208,209);
+
+    SetBkColor(m_hdcMem,bkcolor);
+    SetBrushColor(m_hdcMem,bkcolor);
+    FillBox(m_hdcMem,m_rect.left,m_rect.top,RECTW(m_rect),RECTH(m_rect));
+    DrawText(m_hdcMem,  value.c_str(),value.length (),&m_rect,DT_LEFT|DT_TOP);
+    BitBlt(m_hdcMem,0,0,m_w,m_h,m_hdc,0,0,0);
     ReleaseDC(m_hdc);
 }
 void CFastStatic::SetText(double value)

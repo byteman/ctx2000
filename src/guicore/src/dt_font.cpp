@@ -27,10 +27,11 @@ CFontMgr::CFontMgr()
                                 FONT_SPACING_CHARCELL,
                                 FONT_UNDERLINE_NONE, FONT_STRUCKOUT_NONE,
                                 size, 0);
+        fprintf(stderr,"sbc=%s,mbc=%s\n",f->pfont->sbc_devfont->name,f->pfont->mbc_devfont->name);
 
         f->size=size;
 
-        //fprintf(stderr,"create font %s size=%d handle = %x\n",f->name.c_str(),size,f->pfont);
+        fprintf(stderr,"create font %s size=%d handle = %x\n",f->name.c_str(),size,f->pfont);
 
         fonts.push_back(f);
     }

@@ -11,7 +11,7 @@ public:
     int  internal_proc(HWND hwnd, int message, WPARAM w, LPARAM l);
     int  internal_on_paint(HWND hwnd);
     void SetText(double value);
-    void SetText(std::string value);
+    void SetText(std::string value,gal_pixel bkcolor=0,CFont* font=0);
 
 
 private:
@@ -25,6 +25,8 @@ private:
     RECT        m_rect;
     char        buf[32];
     WNDPROC     old_wnd_proc;
+    HDC         m_hdcMem;
+    CFont*      Font24;
 
 };
 

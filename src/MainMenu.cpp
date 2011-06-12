@@ -111,7 +111,7 @@ SoftKeyboard *skt=NULL;
 CMainMenu::CMainMenu()
 {
     m_msg_delay = 0;
-
+    m_quit      = false;
     if (!LoadRes(&mmenu_bmps[0], ARRAY_SIZE(mmenu_bmps, char *)))
     {
         printf("Can't loadres\n");
@@ -184,8 +184,10 @@ CMainMenu::CMainMenu()
 
     Font24 = CFontMgr::Get().GetFont("stxinwei",24);
     Font24->setFontColor(RGB2Pixel(HDC_SCREEN,0,0,0));
-
+    Font40= CFontMgr::Get().GetFont("stxinwei",40);
+    Font40->setFontColor(RGB2Pixel(HDC_SCREEN,0,0,0));
     fprintf(stderr,"sbc=%s,mbc=%s\n",Font24->pfont->sbc_devfont->name,Font24->pfont->mbc_devfont->name);
+
 
 
     SetRect(&m_status_rect,     200,0,800,Client_Height);
@@ -207,9 +209,39 @@ CMainMenu::CMainMenu()
 
 CMainMenu::~CMainMenu()
 {
+    /*
+    for(int i =0 ;i < 20; i++)
+    {
+        if(statusIcon[i])
+            delete statusIcon;
+    }
+    delete fast_angle;
+    delete fast_dist;
+    delete fast_max_weight;
+    delete fast_weight;
+    delete fast_beilv;
+    delete fast_tower_height;
+    delete fast_long_arm_len;
+    delete fast_short_arm_len;
+    if(m_show_speed)
+    {
+        delete fast_fengsu;
+    }
+    if( m_show_up_angle && m_show_dg_height)
+    {
+
+       delete fast_height;
+       delete fast_up_angle;
+    }else if(m_show_up_angle){
+
+       delete fast_up_angle;
+    }else if(m_show_dg_height){
+       delete fast_height;
+    }
     if(m_worksite) delete m_worksite;
     if(m_worksite) delete m_worksite;
     if(m_dir_mgr)  delete m_dir_mgr;
+    */
 }
 /*
 绘制塔机类型
@@ -228,7 +260,7 @@ void CMainMenu::DrawDevSerial(HDC hdc, RECT rt,std::string devserail)
     SetPenColor(hdc,PIXEL_lightgray);
     Rectangle(hdc, rt.left, rt.top, rt.right ,rt.bottom);
 
-    DrawMyText(hdc,Font24,&rt,devserail);
+    DrawMyText(hdc,Font40,&rt,devserail);
 
 }
 /*
@@ -405,6 +437,7 @@ void CMainMenu::OnTimer(int ID)
     }
 
     fast_dist->SetText(Poco::format("%0.1fm",g_car_dist));
+
     fast_angle->SetText(Poco::format("%0.1f°",g_angle));
     //刷新小车幅度
     m_worksite->update();
@@ -469,6 +502,10 @@ void CMainMenu::OnTimer(int ID)
     CTajiDbMgr::Get().AddWeightInfo(v);
     */
 #endif
+    if(m_quit){
+        KillTimer(m_hWnd,100);
+        Close();
+    }
 
 }
 void CMainMenu::OnLButtonUp(int x, int y)
@@ -477,12 +514,14 @@ void CMainMenu::OnLButtonUp(int x, int y)
     fprintf(stderr,"x=%d,y=%d\n",x,y);
     if(PtInRect(&m_fall_rect,x,y))
     {
-        edt_fall->SetText(Poco::format("%d",CLijuCtrl::Get().ChangeBeilv()));
+        StrTCBeilv = Poco::format("%d",CLijuCtrl::Get().ChangeBeilv());
+        edt_fall->SetText(StrTCBeilv);
         CLijuCtrl::Get().SaveData();
     }else if(PtInRect(&m_quit_rect,x,y)){
         cnt++;
         if(cnt > 2){
-            Close();
+            m_quit = true;
+            fprintf(stderr,"Close Mainmenu\n");
         }
     }else{
        cnt = 0;
@@ -498,7 +537,7 @@ void CMainMenu::OnButtonClick(skin_item_t* item)
         UpdateUIArea();
         m_worksite->updateAll();
     }else if(item->id == _skinBtns[1]->GetId()){
-
+        Close();
     }
 
 }

@@ -34,6 +34,7 @@ private:
         CSkinButton* _skinBtns[5];
 	int m_msg_delay;
         CFont* Font24;
+        CFont* Font40;
         CStatusIcon* statusIcon[20];
         RECT m_status_rect;
         RECT m_dev_serail_rect;
@@ -73,6 +74,7 @@ private:
         CIconGroup m_lables;
         CPercent m_per;
         HDC m_hdc;
+        bool m_quit;
         bool m_show_up_angle,m_show_speed,m_show_dg_height,m_show_max_weight;
 };
 

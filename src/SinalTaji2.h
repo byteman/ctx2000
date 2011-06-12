@@ -7,6 +7,7 @@
 #include "taji.h"
 #include "percent.h"
 #include "FastStatic.h"
+#include "dt_percent.h"
 #define MM_SKIN_BTN_NUM  3
 
 class CSingleTaji2 : public CSkinForm
@@ -26,6 +27,7 @@ private:
         CSkinButton* _skinBtns[5];
 	int m_msg_delay;
         CFont* Font24;
+        CFont* Font40;
         //CStatusIcon* statusIcon[20];
 
         RECT m_status_rect;
@@ -52,11 +54,13 @@ private:
         CFastStatic* fast_tower_height;
         CFastStatic* fast_long_arm_len;
         CFastStatic* fast_short_arm_len;
-        CFastStatic* fast_height;
+        CFastStatic* fast_height,*fast_percent;
         CFastStatic* fast_up_angle,*fast_max_weight,*fast_fengsu,*fast_dg_height;
 
         CPercent m_per;
+        DT_Percent* m_fall_fact;
         HDC m_hdc;
+        gal_pixel color_black;
         bool m_show_up_angle,m_show_speed,m_show_dg_height,m_show_max_weight;
 };
 

@@ -462,8 +462,8 @@ void CFormCalib::OnButtonClick(skin_item_t* item)
         Close();
     }else if(item->id == _btns[11]->GetId()){
 
-        PassWord pwd;
-        if(pwd.ShowBox(this,"ÃÜÂë:","ÇëÊäÈëÃÜÂë","1020"))
+        //PassWord pwd;
+        //if(pwd.ShowBox(this,"ÃÜÂë:","ÇëÊäÈëÃÜÂë","1020"))
         {
             CLiJuManForm lj;
             lj.CreateForm(m_hWnd);

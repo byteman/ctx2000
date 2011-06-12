@@ -943,8 +943,8 @@ bool CTajiDbMgr::AddWeightInfo(TWeightHistoy& value)
 
 
         const char* tmp = strInst.format("Insert into %Q values(NULL,'%s','%s','%s','%s','%s','%s',%d);", \
-                        "tblrecord",     dt.c_str(),value.angle.c_str(),value.dist.c_str(),value.fall.c_str(), \
-                                         value.serial.c_str(),value.weight.c_str(),value.type);
+                        "tblrecord",     dt.c_str(),value.dist.c_str(),value.weight.c_str(),value.fall.c_str(), \
+                                         value.angle.c_str(),value.serial.c_str(),value.type);
         DBG("-=-=WetObjs.cpp=-=- %s \n", tmp);
         int rows = pDB->execDML(tmp);
         if (rows) {

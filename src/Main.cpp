@@ -19,7 +19,7 @@
 #include "MainMenu.h"
 #include "SingleTaji1.h"
 #include "comdata.h"
-//#include "SingleTaji2.h"
+#include "SinalTaji2.h""
 using Poco::Thread;
 using Poco::Event;
 using Poco::SingletonHolder;
@@ -80,16 +80,18 @@ void GUIAPI InitMainUI()
             }
             case 2:
             {
-                CSingleTaji1 mainmenu;
-                mainmenu.CreateForm( HWND_DESKTOP );
+                if(g_TC[g_local_id].Dyna)
+                {
+                    CSingleTaji2 mainmenu;
+                    mainmenu.CreateForm( HWND_DESKTOP );
+                }else{
+                    CSingleTaji1 mainmenu;
+                    mainmenu.CreateForm( HWND_DESKTOP );
+                }
+
                 break;
             }
-            case 3:
-            {
-                CSingleTaji1 mainmenu;
-                mainmenu.CreateForm( HWND_DESKTOP );
-                break;
-            }
+
             default:
             {
                 CMainMenu mainmenu;
@@ -105,6 +107,9 @@ void GUIAPI InitMainUI()
     {
         std::cerr << "Unkown Exception\n";
     }
+    fprintf(stderr,"Stop App\n");
+    CMainCtrl::Get().Stop();
+
     MiniGUIExtCleanUp();
 
     std::cerr << "Exit guiApp\n";

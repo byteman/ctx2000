@@ -127,7 +127,7 @@ IO_STATUS CGpio::Output(int index, IO_STATUS status)
         regfile = REG_OUTPUT0;
     }
     index = 7 - (index%8);
-    fprintf(stderr,"output %d to %d in %s\n",index,status,regfile.c_str());
+    //fprintf(stderr,"output %d to %d in %s\n",index,status,regfile.c_str());
     Poco::FileStream reg(regfile);
     reg.seekg(0, std::ios::beg);
 

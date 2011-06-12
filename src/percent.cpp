@@ -4,7 +4,8 @@
 static WNDPROC old_static_proc;
 static HWND    old_hwnd;
 static CPercent  *myptr = NULL;
-CPercent::CPercent()
+CPercent::CPercent(int direction):
+    m_direction(direction)
 {
     m_hwnd=HWND_INVALID;
     myptr    = this;
@@ -30,7 +31,6 @@ int  CPercent::worksite_proc(HWND hwnd, int message, WPARAM w, LPARAM l)
     int tmp = m_percent*100.0f+0.5;
     snprintf(buf,32,"%d%",tmp);
 
-    //fprintf(stderr,"text=%s height=%d\n",buf,height);
     SetBkMode(hdc,BM_TRANSPARENT);
     SelectFont(hdc,GetSystemFont(SYSLOGFONT_FIXED));
     DrawText(hdc,buf,strlen(buf),&m_rect,DT_TOP|DT_LEFT);
