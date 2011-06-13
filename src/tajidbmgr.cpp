@@ -828,13 +828,13 @@ bool  CTajiDbMgr::ListAlaramInfo(int start, int count, THistoyRst &rst )
 
     try{
         CppSQLite3Buffer strSql;
-        const char* tmp = strSql.format("Select * from %Q limit %d,%d","tbalarm",start,count);
+        const char* tmp = strSql.format("Select * from %Q ORDER BY tjindex desc limit %d,%d","tbalarm",start,count);
         DBG("ListAlaramInfo %s \r\n", tmp);
         CppSQLite3Query qry =  pDB->execQuery(tmp);
         while(!qry.eof())
         {
             THistoy item;
-            item.id      = qry.getIntField("index");
+            item.id      = qry.getIntField("tjindex");
             item.date    = qry.getStringField("dt");
             item.serial  = qry.getStringField("serial");
             item.slewing = qry.getStringField("dist");
@@ -863,7 +863,7 @@ bool  CTajiDbMgr::ListAlaramInfo(THistoyRst &rst )
         while(!qry.eof())
         {
             THistoy item;
-            item.id      = qry.getIntField("index");
+            item.id      = qry.getIntField("tjindex");
             item.date    = qry.getStringField("dt");
             item.serial  = qry.getStringField("serial");
             item.slewing = qry.getStringField("dist");
@@ -886,13 +886,13 @@ bool CTajiDbMgr::ListWeightInfo(int start, int count,TWeightHistoyRst &rst)
 
     try{
         CppSQLite3Buffer strSql;
-        const char* tmp = strSql.format("Select * from %Q limit %d,%d ","tblrecord",start,count);
+        const char* tmp = strSql.format("Select * from %Q order by tjindex desc limit %d,%d ","tblrecord",start,count);
         DBG("ListWeightInfo %s \r\n", tmp);
         CppSQLite3Query qry =  pDB->execQuery(tmp);
         while(!qry.eof())
         {
             TWeightHistoy item;
-            item.id      = qry.getIntField("index");
+            item.id      = qry.getIntField("tjindex");
             item.date    = qry.getStringField("dt");
             item.serial  = qry.getStringField("serial");
             item.dist    = qry.getStringField("dist");

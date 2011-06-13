@@ -47,6 +47,9 @@ private:
         CStatic* edt_up_angle,*edt_max_weight,*edt_fengsu,*edt_dg_height;
         CStatic* edt_percent;
 
+        CStatic*     edt_time;
+        CFastStatic* fast_time;
+
         CFastStatic* fast_angle;
         CFastStatic* fast_dist;
         CFastStatic* fast_weight;

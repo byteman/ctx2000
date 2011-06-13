@@ -18,6 +18,9 @@
 #include <math.h>
 #include <Poco/Format.h>
 #include "BmpRes.h"
+#include <Poco/LocalDateTime.h>
+#include <Poco/DateTimeFormatter.h>
+
 
 #define SKIN_BUTTON_MAINCFG     {1,22,410}
 #define SKIN_BUTTON_BYPASS      {2,92,410}
@@ -86,7 +89,8 @@ static COMM_CTRL_DESC commctrls[] = {
     EDIT_PERCENT,
     {93,65,355-91,70-55,"10"},
     {186,358,472-186,366-348,"20"},
-    {710,193,732-710,390-183,"20"},
+    {710,193,732-710,390-187,"20"},
+    {200,410,697-144,423-392,"20"},
 };
 static const char* ICons[] = {
     "ctx2000/height.jpg",
@@ -136,7 +140,8 @@ CSingleTaji1::CSingleTaji1()
     edt_fall            = new CStatic(&commctrls[6],this);
 
     edt_percent         = new CStatic(&commctrls[12],this);
-
+    edt_time            = new CStatic(&commctrls[16],this);
+    fast_time           = new CFastStatic(&commctrls[16],this);
 #if 1
     fast_angle           = new CFastStatic(&commctrls[0],this);
     fast_dist            = new CFastStatic(&commctrls[1],this);
@@ -223,7 +228,7 @@ void CSingleTaji1::OnShow()
     fast_beilv->Attach(edt_fall);
     fast_percent->Attach(edt_percent);
     fast_max_weight->Attach(edt_max_weight);
-
+    fast_time->Attach(edt_time);
     if(m_show_speed)
     {
        fast_fengsu->Attach(edt_fengsu);
@@ -288,6 +293,15 @@ void CSingleTaji1::OnTimer(int ID)
     if(m_show_speed)
         fast_fengsu->SetText(Poco::format("%0.1fm/s",g_speed),color_black,Font24);
 
+    static int cnt = 0;
+    if( (cnt%10) == 0)
+    {
+        Poco::LocalDateTime now;
+        std::string dt = Poco::DateTimeFormatter::format(now,"%d/%m/%Y    %h:%M    %w");
+
+        std::string out = TCTypeName + "    " + dt;
+        fast_time->SetText(out,color_black,Font24);
+    }
 
 }
 

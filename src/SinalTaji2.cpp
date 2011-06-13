@@ -17,6 +17,8 @@
 #include "SoftKeyboard.h"
 #include <math.h>
 #include <Poco/Format.h>
+#include <Poco/LocalDateTime.h>
+#include <Poco/DateTimeFormatter.h>
 
 #define SKIN_BUTTON_MAINCFG     {1,22,410}
 #define SKIN_BUTTON_BYPASS      {2,92,410}
@@ -90,6 +92,8 @@ static COMM_CTRL_DESC commctrls[] = {
     STATIC_LIJU, //11
     EDIT_PERCENT,
     {65,55,344-65,75-60,"10"},
+    {200,410,697-144,423-392,"20"},
+
 };
 
 CSingleTaji2::CSingleTaji2()
@@ -131,7 +135,8 @@ CSingleTaji2::CSingleTaji2()
     fast_beilv           = new CFastStatic(&commctrls[6],this);
     fast_percent         = new CFastStatic(&commctrls[12],this);
     m_fall_fact          = new DT_Percent(&commctrls[13],this);
-
+    edt_time             = new CStatic(&commctrls[14],this);
+    fast_time            = new CFastStatic(&commctrls[14],this);
     if(m_show_speed)
     {
         edt_fengsu          = new CStatic(&commctrls[10],    this);
@@ -197,7 +202,7 @@ void CSingleTaji2::OnShow()
     rst.push_back(color);
 
     m_fall_fact->SetColorPercent(rst);
-
+    fast_time->Attach(edt_time);
     fast_angle->Attach(edt_angle);
     fast_dist->Attach(edt_dist);
     fast_weight->Attach(edt_weight);
@@ -264,7 +269,15 @@ void CSingleTaji2::OnTimer(int ID)
     fast_max_weight->SetText(Poco::format("%0.1ft",CLijuCtrl::Get().m_max_weight),color_black,Font40);
     if(m_show_speed)
         fast_fengsu->SetText(Poco::format("F=%0.1fm/s",g_speed),color_black,Font24);
+    static int cnt = 0;
+    if( (cnt%10) == 0)
+    {
+        Poco::LocalDateTime now;
+        std::string dt = Poco::DateTimeFormatter::format(now,"%d/%m/%Y    %h:%M:%S    %w");
 
+        std::string out = TCTypeName + "    " + dt;
+        fast_time->SetText(out,color_black,Font24);
+    }
 
 }
 void CSingleTaji2::OnLButtonUp(int x, int y)
