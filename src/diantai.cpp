@@ -124,7 +124,7 @@ public:
     {
         static int work_site_count=0;
         int type = 0;
-        //std::cerr << c << std::endl;
+        std::cerr << c << std::endl;
         if( (c == '%') || (c=='(') || (c=='$')){
             m_pos = 0;
             m_start_flag = true;

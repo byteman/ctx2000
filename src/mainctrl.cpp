@@ -783,9 +783,10 @@ void CMainCtrl::ReadSetting()
         TCBeilv    = 1;
     }
     encoder_addr = cfg.ReadInteger("device","encoder_addr",0);
-    g_diantai_com= Poco::trim(cfg.ReadString("serial","diantai_com","/dev/ttymxc0"));
-    g_ad_com1    = Poco::trim(cfg.ReadString("serial","ad_com1","/dev/ttymxc1"));
-    g_ad_com2    = Poco::trim(cfg.ReadString("serial","ad_com2","/dev/ttymxc2"));
+    g_encoder_com = Poco::trim(cfg.ReadString("serial","encoder_com","/dev/ttymxc0"));
+    g_diantai_com = Poco::trim(cfg.ReadString("serial","diantai_com","/dev/ttymxc1"));
+    g_ad_com      = Poco::trim(cfg.ReadString("serial","ad_com","/dev/ttymxc2"));
+
     g_gprs_com   = Poco::trim(cfg.ReadString("serial","gprs_com","/dev/ttymxc3"));
 
 //根据设定的当前塔机类型和倍率还有长度加载载荷曲线表
@@ -821,6 +822,7 @@ void CMainCtrl::ReadSetting()
 
             if(g_TC[TcNum].Dyna)
                 g_TC[TcNum].Position   = g_TC[TcNum].LongArmLength;
+
             if(g_TC[TcNum].Serial == CurSerial){
                 CurID = Poco::format("%d",TcNum);
                 DBG("Find CurID:%s\n",CurID.c_str());
@@ -1650,7 +1652,7 @@ bool CMainCtrl::Start()
 
 #if 1
 //启动编码器采集和6路外部AD采集模块
-    if( ! CDataAcquire::Get().Start(g_ad_com1,g_ad_com2))
+    if( ! CDataAcquire::Get().Start(g_ad_com,g_encoder_com))
     {
         fprintf(stderr,"DataAcquire Start Failed\n");
         return false;
