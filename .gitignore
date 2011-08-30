@@ -1,0 +1,4 @@
+Makefile
+bin/ctx2000
+ctx2000/*
+tmpobj/
