@@ -29,6 +29,7 @@ private:
     void calc_up_angle(int type);
     CSkinButton* _btns[20];
     CSkinButton* btn_ret;
+    CSkinButton* btn_angle_zero;
     CEdit*       _edits[10];
     CStatic*     _lables[10];
     CFastStatic* _edtAD[5];

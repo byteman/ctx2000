@@ -39,7 +39,8 @@ static const char* mmenu_bmps[] = {
        PMAX_HEIGHT ,
        PCOMM_CLOSE_BTN,
        PLIJU,
-       PCOMM_RET_BTN
+       PCOMM_RET_BTN,
+       PCAL_ZERO
 };
 static COMM_CTRL_DESC CommCtrls[] =
 {
@@ -117,6 +118,7 @@ static SKIN_CTRL_DESC SkinCtrls[] = {
 };
 static SKIN_BUTTON_DESC skinctrls[] = {
         {13,BUTTON_RETURN_X,BUTTON_RETURN_Y},
+        {14,200,400}, //for qinxie angle zero
 
 };
 #define MSG_AD MSG_USER+0x100
@@ -144,13 +146,14 @@ CFormCalib::CFormCalib()
         _edtAD[i-2] = new CFastStatic(&CommCtrls[i],this);
     }
 
-    btn_ret    = new CSkinButton(&skinctrls[0],this);;
+    btn_ret    = new CSkinButton(&skinctrls[0],this);
 
     for(int i = 0 ;i < TABLESIZE(LabelCtrls);i++)
     {
         _edtLable[i] = new CFastStatic(&LabelCtrls[i],this);
     }
 
+    btn_angle_zero = new CSkinButton(&skinctrls[1],this);
     InitSkinHeader("formcalib");
 }
 
@@ -582,5 +585,7 @@ void CFormCalib::OnButtonClick(skin_item_t* item)
     else if(item->id == btn_ret->GetId())
     {
         Close();
+    }else if(item->id == btn_angle_zero->GetId ()){
+
     }
 }

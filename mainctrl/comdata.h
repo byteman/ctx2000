@@ -29,7 +29,7 @@ typedef enum{
 #define ctx2000_tc_data "./etc/tc.red"
 #define DBG_POS fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
 //궨ݽṹ
-extern TBD g_bd[12];
+extern TBD g_bd[13];
 //Чidб
 extern TID g_valid_tj_list;
 //ͱͻidб

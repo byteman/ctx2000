@@ -79,11 +79,13 @@ bool CJDQAdmin::Reload()
 void CJDQAdmin::Control(CTX_JDQ jdq, int state)
 {
     FastMutex::ScopedLock lock(_mutex);
+    if(m_bypass) return;
     m_gpio.Output((int)jdq,(IO_STATUS)state);
 }
 void CJDQAdmin::ControlEx(CTX_JDQ jdq, int delayS)
 {
     FastMutex::ScopedLock lock(_mutex);
+    if(m_bypass) return;
     switch(jdq){
         case JDQ_CIRCLE_BREAK:
             m_gpio.Output((int)jdq,JDQ_OPEN);

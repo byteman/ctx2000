@@ -4,7 +4,7 @@
 #include <sys/prctl.h>
 #include <stdarg.h>
 
-TBD g_bd[12];
+TBD g_bd[13];
 TID g_valid_tj_list;
 TID g_conflict_tj_list;
 std::string MainMachineID,CurID,TCTypeName,CurSerial;
