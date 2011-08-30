@@ -122,6 +122,10 @@ void    CAlarmInfoManForm::OnPaint(HWND hWnd)
 
 	for (int i = 0; i < SKIN_BMP_NUM; i++)
             _icons.Show(hdc,BmpsPos[i].x,BmpsPos[i].y,i+1);
+    if(USBStorManager::get ().getUsbStorage (0))
+    {
+        m_usb.Show (hdc, 720,400);
+    }
 	EndPaint(hWnd, hdc);
 }
 bool exportdata(std::string tc_serial, std::string path)

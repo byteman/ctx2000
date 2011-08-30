@@ -95,13 +95,13 @@ linux-arm-g++ {
     DEFINES+= 
     OBJECTS_DIR = ../tmpobj/arm
     LIBS +=  -L../mgcore/lib/arm  -L../cppsqlite3/lib/arm \
-            -L../datacopy/lib/arm -L../bycore/lib/arm  -L../cppsqlite3/lib/arm \
+            -L../datacopy/lib/arm -L../bycore/lib/arm  -L../cppsqlite3/lib/arm -L../gprs/lib/arm\
             -lttf ../extlib/arm/libQtzCollideLib.a
 }
 QMAKE_CXXFLAGS+=-g
 LIBS += -lmgcore -lminigui -lmgext -ljpeg \
         -lpng -lPocoFoundation -lts \
-        -lcppsqlite3 -lusbmount -lserial
+        -lcppsqlite3 -lusbmount -lserial -lgprs
 
 DESTDIR += 
 

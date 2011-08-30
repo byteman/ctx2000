@@ -118,7 +118,7 @@ static SKIN_CTRL_DESC SkinCtrls[] = {
 };
 static SKIN_BUTTON_DESC skinctrls[] = {
         {13,BUTTON_RETURN_X,BUTTON_RETURN_Y},
-        {14,200,400}, //for qinxie angle zero
+        {14,100,400}, //for qinxie angle zero
 
 };
 #define MSG_AD MSG_USER+0x100

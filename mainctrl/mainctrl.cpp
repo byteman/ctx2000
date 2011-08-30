@@ -1847,7 +1847,7 @@ bool CMainCtrl::Start()
         PushErrorMsg("CJDQAdmin Start Failed");
         RET_ERR;
     }
-#if 1
+#if 0
 //启动gprs上传模块
     if( !gprs::get ().start (gprs_remote_ip,gprs_remote_port,gprs_dtu_id))
     {

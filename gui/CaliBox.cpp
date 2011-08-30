@@ -150,6 +150,7 @@ void   CaliBox::OnButtonClick(skin_item_t* item)
         m_ret = 0;
         m_input_value = "";
         printf("cancel\n");
+        Close();
     }
 }
 void CaliBox::OnCommCtrlNotify(HWND hwnd, int id, int nc)
