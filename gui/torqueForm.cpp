@@ -195,7 +195,9 @@ CTorQueForm::OnPaint(HWND hWnd)
     for(int i = 0; i < 3; i ++)
         DrawMyText(hdc,Font16,&m_lable[i],lables[i]);
 
-
+    if(USBStorManager::get ().getUsbStorage (0)){
+        m_usb.Show (hdc, 720,400);
+    }
     EndPaint(hWnd, hdc);
 }
 void
@@ -230,6 +232,14 @@ bool CTorQueForm::DoIt(int type,std::string dist,std::string wet)
         {
              loadDB (strType,strDist,strRate);
         }
+    }else   if(type == _skinBtns[3]->GetId ())
+    {
+        /*
+        TorQueInfo info(dist,wet);
+        if(gDB.modifyTorQueInfo(strType,strDist,strRate,info))
+        {
+             loadDB (strType,strDist,strRate);
+        }*/
     }
 }
 void
@@ -267,7 +277,12 @@ CTorQueForm::OnButtonClick(skin_item_t * item)
 
     }else if(item->id == _skinBtns[3]->GetId ())//edit
     {
-
+        CTorqueInfoBox box;
+        box.CreateForm (m_hWnd);
+        if(box.m_bOk)
+        {
+            DoIt(item->id,box.m_arm_len,box.m_weight);
+        }
     }else if(item->id == _skinBtns[4]->GetId ()) //exit
     {
         Close();

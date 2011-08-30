@@ -40,7 +40,7 @@ static const char* mmenu_bmps[] = {
        PCOMM_CLOSE_BTN,
        PLIJU,
        PCOMM_RET_BTN,
-       PCAL_ZERO
+       "ctx2000/btn_setzero.png"
 };
 static COMM_CTRL_DESC CommCtrls[] =
 {
