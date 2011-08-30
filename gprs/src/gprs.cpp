@@ -76,7 +76,7 @@ gprs::~gprs()
 }
 bool gprs::start(std::string ip, U16 port,std::string dtu_id)
 {
-    printf("gprs connect to %s %d with id=%s\n",ip.c_str (),port,dtu_id.c_str ());
+    GPRS_DBG("gprs connect to %s %d with id=%s\n",ip.c_str (),port,dtu_id.c_str ());
     m_addr=SocketAddress(ip,port);
     m_dtu_id = dtu_id;
     if(m_conn){
@@ -161,7 +161,7 @@ gprs_connect:
              if(!m_conn->is_gprs_conneted()){
                     goto gprs_connect;
              }
-             if( ((count++) % 10) == 0)
+             if( ((count++) % 10) == 0) //5s
              {
                  gprs::tc_data data;
                  data.m_has_alarm = false;
@@ -183,7 +183,7 @@ gprs_connect:
                  {
                      GPRS_DBG("send_tc_data failed\n");
                  }
-             }if( ((count++) % 20) == 0)
+             }if( ((count++) % 20) == 0) //10s
              {
                  std::string gps_info = gps::get ().poll_gprmc_msg ();
                  build_send_gps_data(gps_info);
