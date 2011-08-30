@@ -1,0 +1,11 @@
+cat /proc/cpuinfo | grep "ARM926EJ-S"
+if [ $? == 0 ];then
+	echo "arm platform"
+    export LD_LIBRARY_PATH=../lib/arm
+    compath="/dev/ttymxc0"
+else
+	echo "x86 platform"
+    export LD_LIBRARY_PATH=../lib/x86
+    compath="/dev/ttyUSB0"
+fi
+./test

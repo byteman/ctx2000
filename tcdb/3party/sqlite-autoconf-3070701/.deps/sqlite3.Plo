@@ -1,0 +1,193 @@
+sqlite3.lo sqlite3.o: sqlite3.c \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/stdint.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/features.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/sys/cdefs.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/wordsize.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/gnu/stubs.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/wchar.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/inttypes.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/include/stdarg.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/stdio.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/include/stddef.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/types.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/typesizes.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/libio.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/_G_config.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/wchar.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/gconv.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/stdio_lim.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/sys_errlist.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/stdio.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/stdlib.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/waitflags.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/waitstatus.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/endian.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/endian.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/xlocale.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/sys/types.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/time.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/sys/select.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/select.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/sigset.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/time.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/sys/sysmacros.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/pthreadtypes.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/alloca.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/string.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/string.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/string2.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/assert.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/ctype.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/pthread.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/sched.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/sched.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/signal.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/setjmp.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/sys/stat.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/stat.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/fcntl.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/fcntl.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/unistd.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/posix_opt.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/environments.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/confname.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/getopt.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/sys/time.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/errno.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/errno.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/linux/errno.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/asm/errno.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/asm-generic/errno.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/asm-generic/errno-base.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/sys/mman.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/mman.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/dlfcn.h \
+  /media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/dlfcn.h
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/stdint.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/features.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/sys/cdefs.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/wordsize.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/gnu/stubs.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/wchar.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/inttypes.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/include/stdarg.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/stdio.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/include/stddef.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/types.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/typesizes.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/libio.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/_G_config.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/wchar.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/gconv.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/stdio_lim.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/sys_errlist.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/stdio.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/stdlib.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/waitflags.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/waitstatus.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/endian.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/endian.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/xlocale.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/sys/types.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/time.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/sys/select.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/select.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/sigset.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/time.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/sys/sysmacros.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/pthreadtypes.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/alloca.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/string.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/string.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/string2.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/assert.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/ctype.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/pthread.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/sched.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/sched.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/signal.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/setjmp.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/sys/stat.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/stat.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/fcntl.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/fcntl.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/unistd.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/posix_opt.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/environments.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/confname.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/getopt.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/sys/time.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/errno.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/errno.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/linux/errno.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/asm/errno.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/asm-generic/errno.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/asm-generic/errno-base.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/sys/mman.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/mman.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/dlfcn.h:
+
+/media/linuxdata/home/byteman/works/mx27/arm-926ejs-linux/bin/../lib/gcc/arm-926ejs-linux/4.1.1/../../../../arm-926ejs-linux/sys-include/bits/dlfcn.h:

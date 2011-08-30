@@ -1,0 +1,8 @@
+# Rules for USBmount
+
+KERNEL=="sd*", BUS=="usb", ACTION=="add",    RUN+="/sbin/usbmount add"
+KERNEL=="ub*", BUS=="usb", ACTION=="add",    RUN+="/sbin/usbmount add"
+KERNEL=="mmcblk*", BUS=="mmc", ACTION=="add",    RUN+="/sbin/mmcmount add"
+KERNEL=="sd*",             ACTION=="remove", RUN+="/sbin/usbmount remove"
+KERNEL=="ub*",             ACTION=="remove", RUN+="/sbin/usbmount remove"
+KERNEL=="mmcblk*",             ACTION=="remove", RUN+="/sbin/mmcmount remove"

@@ -1,0 +1,125 @@
+// #define COMMON_CTRL_STYLE   SI_TYPE_CONTROL|SI_TEST_SHAPE_RECT|SI_STATUS_VISIBLE
+// #define SKIN_BUTTON_STYLE   SI_TYPE_CMDBUTTON|SI_TEST_SHAPE_RECT|SI_STATUS_VISIBLE
+
+/*
+skin_item_s					//²Î¿¼CSkinForm::AddSkinItem(DWORD style , int bmpidx, int left, int top)
+	int id						//
+	DWORD style				//=style	//SKIN_BUTTON_STYLE
+	int x							//=left
+	int y							//=top
+	RECT item_rc			//
+	int bmp_index			//=bmpindex
+	char * tip				//
+	DWORD attached		//
+	void * type_data	//
+*/
+#ifndef SYSCFGFORMITEM_H
+#define SYSCFGFORMITEM_H
+#define SKIN_CTRL_STYLE_NUM		7
+
+#define	BUTTON_TIMER_ID					1
+#define	BUTTON_TIMER_STYLE				SI_TYPE_CMDBUTTON|SI_TEST_SHAPE_RECT|SI_STATUS_VISIBLE
+#define	BUTTON_TIMER_X						430
+#define	BUTTON_TIMER_Y						90
+#define	BUTTON_TIMER_ITEMRC			{}
+#define	BUTTON_TIMER_BMPINDEX		1
+#define	BUTTON_TIMER_TIP					NULL
+#define	BUTTON_TIMER_ATTACHED		0
+#define	BUTTON_TIMER_DATA				NULL
+
+#define	BUTTON_IPSET_ID					2
+#define	BUTTON_IPSET_STYLE				SI_TYPE_CMDBUTTON|SI_TEST_SHAPE_RECT|SI_STATUS_VISIBLE
+#define	BUTTON_IPSET_X						430
+#define	BUTTON_IPSET_Y						160
+#define	BUTTON_IPSET_ITEMRC			{}
+#define	BUTTON_IPSET_BMPINDEX		2
+#define	BUTTON_IPSET_TIP					NULL
+#define	BUTTON_IPSET_ATTACHED		0
+#define	BUTTON_IPSET_DATA				NULL
+
+#define	BUTTON_EXTDEVSET_ID					3
+#define	BUTTON_EXTDEVSET_STYLE				SI_TYPE_CMDBUTTON|SI_TEST_SHAPE_RECT|SI_STATUS_VISIBLE
+#define	BUTTON_EXTDEVSET_X						430
+#define	BUTTON_EXTDEVSET_Y						230
+#define	BUTTON_EXTDEVSET_ITEMRC			{}
+#define	BUTTON_EXTDEVSET_BMPINDEX		3
+#define	BUTTON_EXTDEVSET_TIP					NULL
+#define	BUTTON_EXTDEVSET_ATTACHED		0
+#define	BUTTON_EXTDEVSET_DATA				NULL
+
+#define	BUTTON_IOSET_ID					4
+#define	BUTTON_IOSET_STYLE				SI_TYPE_CMDBUTTON|SI_TEST_SHAPE_RECT|SI_STATUS_VISIBLE
+#define	BUTTON_IOSET_X						430
+#define	BUTTON_IOSET_Y						300
+#define	BUTTON_IOSET_ITEMRC			{}
+#define	BUTTON_IOSET_BMPINDEX		4
+#define	BUTTON_IOSET_TIP					NULL
+#define	BUTTON_IOSET_ATTACHED		0
+#define	BUTTON_IOSET_DATA				NULL
+
+#define	BUTTON_SOUND_ID					5
+#define	BUTTON_SOUND_STYLE				SI_TYPE_CMDBUTTON|SI_TEST_SHAPE_RECT|SI_STATUS_VISIBLE
+#define	BUTTON_SOUND_X						430
+#define	BUTTON_SOUND_Y						370
+#define	BUTTON_SOUND_ITEMRC			{}
+#define	BUTTON_SOUND_BMPINDEX		5
+#define	BUTTON_SOUND_TIP					NULL
+#define	BUTTON_SOUND_ATTACHED		0
+#define	BUTTON_SOUND_DATA				NULL
+
+#define	BUTTON_QUIT_ID					6
+#define	BUTTON_QUIT_STYLE				SI_TYPE_CMDBUTTON|SI_TEST_SHAPE_RECT|SI_STATUS_VISIBLE
+#define	BUTTON_QUIT_X						738
+#define	BUTTON_QUIT_Y						8
+#define	BUTTON_QUIT_ITEMRC			{}
+#define	BUTTON_QUIT_BMPINDEX		6
+#define	BUTTON_QUIT_TIP					NULL
+#define	BUTTON_QUIT_ATTACHED		0
+#define	BUTTON_QUIT_DATA				NULL
+
+/*
+typedef struct skin_bmp_s		//Add by Achille 2009/11/27 11:15:55
+{
+  int  x;
+  int  y;
+  int  w;
+  int  h;
+  BITMAP *bmp;
+} skin_bmp_t;
+*/
+#define SKIN_BMP_NUM					7
+
+#define SYSCFG_X						60
+#define SYSCFG_Y						65
+
+#define SYSCFG_TEXT_X						60
+#define SYSCFG_TEXT_Y						185
+
+#define TIMER_X					370
+#define TIMER_Y					80
+
+#define IPSET_X					370
+#define IPSET_Y					150
+
+#define EXTDEVSET_X					370
+#define EXTDEVSET_Y					220
+
+#define IOSET_X					370
+#define IOSET_Y					290
+
+#define SOUND_X					370
+#define SOUND_Y					360
+
+//#define QUIT_X					300
+//#define QUIT_Y					390
+
+/* new style */
+#define SKIN_BUTTON_TIMER   {1,BUTTON_TIMER_X,  BUTTON_TIMER_Y}
+#define SKIN_BUTTON_IPSET	{2,BUTTON_IPSET_X,   BUTTON_IPSET_Y}
+#define SKIN_BUTTON_OPLOG	{3,BUTTON_EXTDEVSET_X,	BUTTON_EXTDEVSET_Y}
+#define SKIN_BUTTON_UISET   {4,BUTTON_IOSET_X,   BUTTON_IOSET_Y}
+#define SKIN_BUTTON_SOUND   {5,BUTTON_SOUND_X,   BUTTON_SOUND_Y}
+#define SKIN_BUTTON_QUIT    {6,BUTTON_QUIT_X,   BUTTON_QUIT_Y}
+
+
+#endif

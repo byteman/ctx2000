@@ -1,0 +1,156 @@
+// #define COMMON_CTRL_STYLE   SI_TYPE_CONTROL|SI_TEST_SHAPE_RECT|SI_STATUS_VISIBLE
+// #define SKIN_BUTTON_STYLE   SI_TYPE_CMDBUTTON|SI_TEST_SHAPE_RECT|SI_STATUS_VISIBLE
+
+/*
+CTRLDATA	//²Î¿¼static CTRLDATA Ctrls[]
+	const char * class_name		//CTRL_STATIC/CTRL_EDIT
+	DWORD dwStyle
+	int x
+	int y
+	int w
+	int h
+	int id
+	const char * caption
+	DWORD dwAddData
+	DWORD dwExStyle
+*/
+#define COMMON_CTRL_STYLE_NUM		2
+
+#define EDIT_MINETYPENAME_CLASS			CTRL_EDIT
+#define EDIT_MINETYPENAME_STYLE			WS_VISIBLE|WS_GROUP
+#define EDIT_MINETYPENAME_X					400
+#define EDIT_MINETYPENAME_Y					122
+#define EDIT_MINETYPENAME_W					210
+#define EDIT_MINETYPENAME_H					36
+#define EDIT_MINETYPENAME_ID				100
+#define EDIT_MINETYPENAME_CAPTION		""
+#define EDIT_MINETYPENAME_ADDDATA		0
+#define EDIT_MINETYPENAME_EXSTYLE		WS_EX_TRANSPARENT
+
+#define EDIT_MINEPRICE_CLASS		CTRL_EDIT
+#define EDIT_MINEPRICE_STYLE		WS_VISIBLE|WS_GROUP|ES_DIGIT_ONLY
+#define EDIT_MINEPRICE_X			400
+#define EDIT_MINEPRICE_Y			172
+#define EDIT_MINEPRICE_W			210
+#define EDIT_MINEPRICE_H					36
+#define EDIT_MINEPRICE_ID				101
+#define EDIT_MINEPRICE_CAPTION		""
+#define EDIT_MINEPRICE_ADDDATA		0
+#define EDIT_MINEPRICE_EXSTYLE		WS_EX_TRANSPARENT
+/*
+#define EDIT_MINEDISCOUNT_CLASS		CTRL_EDIT
+#define EDIT_MINEDISCOUNT_STYLE		WS_VISIBLE|WS_GROUP|ES_DIGIT_ONLY
+#define EDIT_MINEDISCOUNT_X			400
+#define EDIT_MINEDISCOUNT_Y			222
+#define EDIT_MINEDISCOUNT_W			210
+#define EDIT_MINEDISCOUNT_H					36
+#define EDIT_MINEDISCOUNT_ID				102
+#define EDIT_MINEDISCOUNT_CAPTION		""
+#define EDIT_MINEDISCOUNT_ADDDATA		0
+#define EDIT_MINEDISCOUNT_EXSTYLE		WS_EX_TRANSPARENT
+*/
+/*
+skin_item_s					//²Î¿¼CSkinForm::AddSkinItem(DWORD style , int bmpidx, int left, int top)
+	int id						//
+	DWORD style				//=style	//SKIN_BUTTON_STYLE
+	int x							//=left
+	int y							//=top
+	RECT item_rc			//
+	int bmp_index			//=bmpindex
+	char * tip				//
+	DWORD attached		//
+	void * type_data	//
+*/
+#define SKIN_CTRL_STYLE_NUM		3
+
+#define	BUTTON_OK_ID					1
+#define	BUTTON_OK_STYLE				SI_TYPE_CMDBUTTON|SI_TEST_SHAPE_RECT|SI_STATUS_VISIBLE
+#define	BUTTON_OK_X						270
+#define	BUTTON_OK_Y						410
+#define	BUTTON_OK_ITEMRC			{}
+#define	BUTTON_OK_BMPINDEX		1
+#define	BUTTON_OK_TIP					NULL
+#define	BUTTON_OK_ATTACHED		0
+#define	BUTTON_OK_DATA				NULL
+
+#define	BUTTON_CANCEL_ID					2
+#define	BUTTON_CANCEL_STYLE				SI_TYPE_CMDBUTTON|SI_TEST_SHAPE_RECT|SI_STATUS_VISIBLE
+#define	BUTTON_CANCEL_X						630
+#define	BUTTON_CANCEL_Y						410
+#define	BUTTON_CANCEL_ITEMRC			{}
+#define	BUTTON_CANCEL_BMPINDEX		2
+#define	BUTTON_CANCEL_TIP					NULL
+#define	BUTTON_CANCEL_ATTACHED		0
+#define	BUTTON_CANCEL_DATA				NULL
+
+#define	BUTTON_EXIT_ID					3
+#define	BUTTON_EXIT_STYLE				SI_TYPE_CMDBUTTON|SI_TEST_SHAPE_RECT|SI_STATUS_VISIBLE
+#define	BUTTON_EXIT_X						738
+#define	BUTTON_EXIT_Y						8
+#define	BUTTON_EXIT_ITEMRC			{}
+#define	BUTTON_EXIT_BMPINDEX		3
+#define	BUTTON_EXIT_TIP					NULL
+#define	BUTTON_EXIT_ATTACHED		0
+#define	BUTTON_EXIT_DATA				NULL
+
+/*
+typedef struct skin_bmp_s		//Add by Achille 2009/11/27 11:15:55
+{
+  int  x;
+  int  y;
+  int  w;
+  int  h;
+  BITMAP *bmp;
+} skin_bmp_t;
+*/
+#define SKIN_BMP_NUM					8
+
+#define SYSMT_X						60
+#define SYSMT_Y						65
+
+#define SYSMT_TEXT_X						60
+#define SYSMT_TEXT_Y						185
+
+#define LINE_X					60
+#define LINE_Y					220
+
+#define MINE_TYPE_X						85
+#define MINE_TYPE_Y						225
+
+#define MINETYPENAME_X						280
+#define MINETYPENAME_Y						120
+
+#define MINEPRICE_X						280
+#define MINEPRICE_Y						170
+/*
+#define MINEDISCOUNT_X					280
+#define MINEDISCOUNT_Y					220
+*/
+#define BORDER_MINETYPENAME_X						388
+#define BORDER_MINETYPENAME_Y						110
+
+#define BORDER_MINEPRICE_X						388
+#define BORDER_MINEPRICE_Y						160
+/*
+#define BORDER_MINEDISCOUNT_X					388
+#define BORDER_MINEDISCOUNT_Y					210
+*/
+#define SKIN_MSG_NUM					3
+
+#define BLANK_X					340
+#define BLANK_Y					15
+
+#define DUPMINETYPE_X				340
+#define DUPMINETYPE_Y				15
+
+#define MINETYPEMSG_X					340
+#define MINETYPEMSG_Y					15
+
+/* new style */
+#define EDIT_MINETYPENAME      {EDIT_MINETYPENAME_X,EDIT_MINETYPENAME_Y,EDIT_MINETYPENAME_W,EDIT_MINETYPENAME_H,""}
+#define EDIT_MINEPRICE   {EDIT_MINEPRICE_X,EDIT_MINEPRICE_Y,EDIT_MINEPRICE_W,EDIT_MINEPRICE_H,""}
+#define EDIT_MINEDISCOUNT {EDIT_MINEDISCOUNT_X,EDIT_MINEDISCOUNT_Y,EDIT_MINEDISCOUNT_W,EDIT_MINEDISCOUNT_H,""}
+
+#define SKIN_BUTTON_OK        {1,BUTTON_OK_X,       BUTTON_OK_Y}
+#define SKIN_BUTTON_CANCEL    {2,BUTTON_CANCEL_X,   BUTTON_CANCEL_Y}
+#define SKIN_BUTTON_EXIT      {3,BUTTON_EXIT_X,     BUTTON_EXIT_Y}

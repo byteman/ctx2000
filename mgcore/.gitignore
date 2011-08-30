@@ -1,0 +1,4 @@
+Makefile
+*.pro.user
+tmpobj/
+lib/

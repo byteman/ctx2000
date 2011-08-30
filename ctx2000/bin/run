@@ -1,0 +1,14 @@
+#!/bin/sh
+cat /proc/cpuinfo | grep "ARM926EJ-S"
+if [ $? == 0 ];then
+	echo "arm platform"
+    export LD_LIBRARY_PATH=../lib:../mgcore/lib/arm:../cppsqlite3/lib/arm:../datacopy/lib/arm
+else
+	echo "x86 platform"
+    export LD_LIBRARY_PATH=../mgcore/lib/x86:../cppsqlite3/lib/x86:../datacopy/lib/x86
+fi
+while :
+do
+./ctx2000
+sleep 2
+done
