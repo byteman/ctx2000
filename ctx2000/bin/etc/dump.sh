@@ -20,9 +20,12 @@ if [ $# -gt 0 ];then
 	fi
 fi
 #flag=${usbpath:(-1):1} fixme
-usbpath=$usbpath/ctx2000
-alarm_output=$usbpath$alm"_"$serial"_"$postfix
-record_output=$usbpath$rec"_"$serial"_"$postfix
+usbpath="$usbpath"ctx2000
+if [ ! -e $usbpath ];then
+    mkdir -p $usbpath
+fi
+alarm_output=$usbpath/$alm"_"$serial"_"$postfix
+record_output=$usbpath/$rec"_"$serial"_"$postfix
 
 if [ ! -e $usbpath ] && [ ! -d $usbpath ]; then
     echo "incorrect "$usbpath

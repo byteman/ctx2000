@@ -223,24 +223,28 @@ bool CTorQueForm::DoIt(int type,std::string dist,std::string wet)
 
         if(gDB.addTorQueInfo (strType,strDist,strRate,info))
         {
-             loadDB (strType,strDist,strRate);
+             return loadDB (strType,strDist,strRate);
         }
     }else   if(type == _skinBtns[2]->GetId ())
     {
-        TorQueInfo info(dist,wet);
+
         if(gDB.delTorQueInfo(strType,strDist,strRate,info))
         {
-             loadDB (strType,strDist,strRate);
+             return loadDB (strType,strDist,strRate);
         }
     }else   if(type == _skinBtns[3]->GetId ())
     {
-        /*
-        TorQueInfo info(dist,wet);
-        if(gDB.modifyTorQueInfo(strType,strDist,strRate,info))
+
+        TorQueInfo oldinfo;
+        oldinfo.len     = lv->GetSelSubItemText (1);
+        oldinfo.weight  = lv->GetSelSubItemText (2);
+        if(gDB.modifyTorQueInfo(strType,strDist,strRate,info,oldinfo))
         {
-             loadDB (strType,strDist,strRate);
-        }*/
+             return loadDB (strType,strDist,strRate);
+
+        }
     }
+    return false;
 }
 void
 CTorQueForm::OnButtonClick(skin_item_t * item)

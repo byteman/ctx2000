@@ -1654,7 +1654,7 @@ void    CMainCtrl::LjService()
     static int  alarmType = 0;     //起吊重量的报警类型 0：每次起吊过程中的最大重量没有超过额定载荷的95% 1：重量超过95%
     static double max_weight = 0;  //每次起吊过程中的最大重量
     //static double max_speed  = 0; //起吊过程中的最大风速
-    //fprintf(stderr,"out_status=%d\n",out_state);
+    fprintf(stderr,"out_status=%d\n",out_state);
     //根据力矩输出的状态来控制继电器的动作
 
     out_state     = CTorQueMgr::get ().getState(g_car_dist,g_dg_weight);
@@ -1664,7 +1664,7 @@ void    CMainCtrl::LjService()
         CJDQAdmin::Get().Control(JDQ_HOOK_UP_LIMIT,JDQ_OPEN);//限制吊钩向上
         over_flag = true;
         CBeeper::get().BeepMs(1000,100000);
-    }else if(out_state == 1 && over_flag ){ //力矩90% < x <95%
+    }else if(out_state <= 1 && over_flag ){ //力矩 x <95%
         CJDQAdmin::Get().Control(JDQ_CAR_OUTSIDE_BREAK,JDQ_CLOSE);
         CJDQAdmin::Get().Control(JDQ_HOOK_UP_LIMIT,JDQ_CLOSE);//限制吊钩向上
         over_flag = false;
@@ -1847,7 +1847,7 @@ bool CMainCtrl::Start()
         PushErrorMsg("CJDQAdmin Start Failed");
         RET_ERR;
     }
-#if 0
+#if 1
 //启动gprs上传模块
     if( !gprs::get ().start (gprs_remote_ip,gprs_remote_port,gprs_dtu_id))
     {
