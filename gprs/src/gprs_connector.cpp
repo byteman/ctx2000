@@ -150,7 +150,7 @@ U32  gprs_connector::send(U8* data, U32 datalen)
     GPRS_DBG("gprs send data:");
     for(U32 i = 0; i < datalen;i++)
     {
-        GPRS_DBG("%x ",data[i]);
+        GPRS_DBG("%02x ",data[i]);
     }
     GPRS_DBG("\n");
 #endif
