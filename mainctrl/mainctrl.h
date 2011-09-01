@@ -99,6 +99,7 @@ private:
     int       ValideTCNum();
     void      CreateDefaultTjParam();
     void      InitBDParam();
+    void      SendWetRecord();
     void      WatchNetWork(std::string &MainDevID, bool &AddState);
     void      DripMainNoAndAddNo(std::string &MainNo, std::string &RightNo, std::string &AddNo);
     void      UpdateTCStatus();

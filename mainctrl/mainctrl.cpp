@@ -1643,6 +1643,19 @@ void    CMainCtrl::WildService()
         CBeeper::get().BeepMs(1000,100000);
     }
 }
+
+void   CMainCtrl::SendWetRecord(double qd_max_weight)
+{
+    gprs::tc_data data;
+    data.m_angle     = g_angle;
+    data.m_car_speed = 0;
+    data.m_dg_height = g_dg_height;
+    data.m_fall      = CTorQueMgr::get ().m_rate;
+    data.m_dist      = g_car_dist;
+    data.m_weight    = qd_max_weight;
+    data.m_max_weight= CTorQueMgr::get ().m_rated_weight;
+    gprs::get ().send_tc_data (1,data);
+}
 /*
 力矩服务程序
 */
@@ -1693,6 +1706,7 @@ void    CMainCtrl::LjService()
                     fprintf(stderr,"Post Fall  Message to DBAdmin Failed\n");
                 }
             }
+            SendWetRecord (max_weight);
             up_flag     = false;
             alarmType   = 0;
             max_weight  = 0;
