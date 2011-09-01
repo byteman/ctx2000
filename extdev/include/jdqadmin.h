@@ -28,7 +28,7 @@ public:
     void Bypass(bool yes);
     void ControlEx(CTX_JDQ jdq, int delayS);
     void Control(CTX_JDQ jdq,   int state);
-
+    void ResetDevice();
     int  Service(CTX_JDQ type, bool state);
 
 private:

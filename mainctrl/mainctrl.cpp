@@ -1658,6 +1658,7 @@ void    CMainCtrl::LjService()
     //根据力矩输出的状态来控制继电器的动作
 
     out_state     = CTorQueMgr::get ().getState(g_car_dist,g_dg_weight);
+    g_rated_weight= CTorQueMgr::get ().m_rated_weight;
     if(out_state == 4) //力矩超过105% x > 105%
     {
         CJDQAdmin::Get().Control(JDQ_CAR_OUTSIDE_BREAK,JDQ_OPEN);//限制 小车向外运行停车
@@ -1847,6 +1848,7 @@ bool CMainCtrl::Start()
         PushErrorMsg("CJDQAdmin Start Failed");
         RET_ERR;
     }
+    CJDQAdmin::Get ().ResetDevice ();
 #if 1
 //启动gprs上传模块
     if( !gprs::get ().start (gprs_remote_ip,gprs_remote_port,gprs_dtu_id))

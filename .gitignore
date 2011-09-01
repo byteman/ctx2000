@@ -4,3 +4,4 @@ ctx2000/*
 tmpobj/
 lib*.so.*
 *.o
+ctx2000/bin/ctx2000

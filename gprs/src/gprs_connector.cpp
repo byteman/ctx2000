@@ -62,6 +62,10 @@ bool gprs_connector::can_ping(std::string ip)
     return exe_cmd(buf);
 
 }
+bool gprs_connector::fix_route_table()
+{
+
+}
 void gprs_connector::service()
 {
 #ifdef PC_DEBUG
@@ -99,7 +103,7 @@ void gprs_connector::service()
             Poco::Thread::sleep(10000);
         }else{//没能建立成功,有可能在拨号中，等待3次,看是否连接成功
             m_gprs_conn_flag = false;
-            if(m_dial_cnt++ > 3)
+            if(m_dial_cnt++ > 6) //60s
             {
                 //3次后等没有连接成功，可能是模块的问题，复位模块并重启pppd进程
                 if(cutoff_pppd())
@@ -142,6 +146,15 @@ bool gprs_connector::connect(SocketAddress remoteAddr)
 }
 U32  gprs_connector::send(U8* data, U32 datalen)
 {
+#ifdef GPRS_DEBUG
+    GPRS_DBG("gprs send data:");
+    for(U32 i = 0; i < datalen;i++)
+    {
+        GPRS_DBG("%x ",data[i]);
+    }
+    GPRS_DBG("\n");
+#endif
+
     return m_socket.sendBytes(data,datalen);
 }
 size_t gprs_connector::send(TNetBuffer& data)

@@ -23,6 +23,16 @@ CJDQAdmin::~CJDQAdmin()
 {
 
 }
+#define JDQ_RESET_OUT1  13
+#define JDQ_RESET_OUT2  14
+void CJDQAdmin::ResetDevice()
+{
+    Control((CTX_JDQ)JDQ_RESET_OUT1,JDQ_OPEN);
+    Control((CTX_JDQ)JDQ_RESET_OUT2,JDQ_OPEN);
+    Poco::Thread::sleep (100);
+    Control((CTX_JDQ)JDQ_RESET_OUT1,JDQ_CLOSE);
+    Control((CTX_JDQ)JDQ_RESET_OUT2,JDQ_CLOSE);
+}
 CJDQAdmin& CJDQAdmin::Get()
 {
     static Poco::SingletonHolder<CJDQAdmin> sh;
@@ -142,6 +152,8 @@ bool CJDQAdmin::Start()
     LoadParam();
     //m_gpio.CreateVirtualFiles();
     m_gpio.Init();
+    //Control(JDQ_RESET_OUT1,JDQ_CLOSE);
+    //Control(JDQ_RESET_OUT2,JDQ_CLOSE);
     if(m_timer==NULL)
     {
         m_timer = new Poco::Timer(1000,1000);

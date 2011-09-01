@@ -55,7 +55,7 @@ extern  double Trolly_dist_min,Trolly_dist_max,V0;
 extern  int ad_angle, ad_up_angle, ad_car_dist, ad_weight,ad_angle_x,ad_angle_y,ad_wild_speed, ad_height;
 //ֱ С ߶  Ƕ  
 extern  double g_car_dist,g_dg_height,g_dg_weight,g_angle,g_wild_speed,g_up_angle,g_angle_x,g_angle_y;
-
+extern  double g_rated_weight;
 extern double g_angle_A,g_angle_B,g_angle_C;
 extern std::string g_diantai_com,g_ad_com,g_encoder_com,g_gprs_com;
 extern int encoder_addr;

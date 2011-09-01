@@ -3,6 +3,7 @@
 #include <Poco/SingletonHolder.h>
 #include "gprs_connector.h"
 #include "gps.h"
+#include <arpa/inet.h>
 using Poco::Net::SocketAddress;
 
 #ifdef GPRS_DEBUG
@@ -177,8 +178,8 @@ gprs_connect:
                  data.m_speed=g_wild_speed;
                  data.m_tc_height=g_TC[g_local_id].Height;
                  data.m_up_angle=g_up_angle;
-                 data.m_weight=g_dg_weight;
-
+                 data.m_weight  =g_dg_weight;
+                 data.m_max_weight=g_rated_weight;
                  if(!gprs::get().send_tc_data(0,data))
                  {
                      GPRS_DBG("send_tc_data failed\n");
@@ -267,40 +268,57 @@ bool gprs::request_login(std::string dtu_id,int &reason)
 }
 void gprs::buildpacket(tc_data& data)
 {
-    if(data.m_type==0){
+    if(data.m_type==0){ //work info
         tc_msg.vendor  = 0x2; // 0:reserve 2: hitch
         tc_msg.version = 0x1; // version v1.0
         tc_msg.alarm        = data.m_has_alarm?0xAA:0x55;
         tc_msg.angle        = (U16)(data.m_angle*10+0.5);
         tc_msg.car_speed    = 0;
-        tc_msg.count        = tc_send_count++;
+        tc_msg.count        = tc_send_count++;    
         tc_msg.dg_height    = (U16)(data.m_dg_height*100);
-        tc_msg.dg_speed     = 0;
+        tc_msg.dg_speed     = 0; 
         tc_msg.dist         = (U16)(data.m_dist*100+0.5);
-        tc_msg.fall     =   data.m_fall;
+        tc_msg.fall         =   data.m_fall;
         tc_msg.weight     = (U16)(data.m_weight*100+0.5);
         tc_msg.max_weight = (U16)(data.m_max_weight*100);
         tc_msg.speed      = (U16)(data.m_speed*100);
         tc_msg.tc_height  = (U16)(data.m_tc_height*100);
         tc_msg.max_dist   = (U16)(data.m_max_dist*100);
         tc_msg.min_dist   = (U16)(data.m_min_dist*100);
-        tc_msg.header  = 0x8;
-        tc_msg.packet_no = tc_packet_no++;
+        tc_msg.header     = 0x8;
+        tc_msg.packet_no  = tc_packet_no++;
         tc_msg.packet_len = sizeof(TNetMessage);
+
+        tc_msg.min_dist   = htons(tc_msg.min_dist);
+        tc_msg.max_dist   = htons(tc_msg.max_dist);
+        tc_msg.tc_height  = htons(tc_msg.tc_height);
+        tc_msg.speed      = htons(tc_msg.speed);
+        tc_msg.max_weight = htons(tc_msg.max_weight);
+        tc_msg.dist         = htons(tc_msg.dist);
+        tc_msg.dg_speed     = htons(tc_msg.dg_speed);
+        tc_msg.dg_height    = htons(tc_msg.dg_height);
+        tc_msg.count        = htons(tc_msg.count);
+        tc_msg.car_speed    = htons(tc_msg.car_speed);
+        tc_msg.angle        = htons(tc_msg.angle);
+        tc_msg.weight       = htons(tc_msg.weight);
         if(m_conn){
             m_conn->send((U8*)&tc_msg,sizeof(TNetMessage));
         }
     }
-    else if(data.m_type==1){
-        tc_wet_msg.alarm    = data.m_has_alarm?0x24:0x0A;
-        tc_wet_msg.count    = tc_send_count++;
-        tc_wet_msg.dist     = (U16)(data.m_dist*100+0.5);
-        tc_wet_msg.fall     = data.m_fall;
+    else if(data.m_type==1){ //qi diao ji lu
+        tc_wet_msg.alarm        = data.m_has_alarm?0x24:0x0A;
+        tc_wet_msg.count        = tc_send_count++;
+        tc_wet_msg.dist         = (U16)(data.m_dist*100+0.5);
+        tc_wet_msg.fall         = data.m_fall;
         tc_wet_msg.max_weight   = (U16)(data.m_weight*100+0.5);
         tc_wet_msg.rated_weight = (U16)(data.m_max_weight*100);
-        tc_wet_msg.header  = 0x8;
-        tc_wet_msg.packet_no = tc_packet_no++;
-        tc_wet_msg.packet_len = sizeof(TNetMessageWetting);
+        tc_wet_msg.header       = 0x8;
+        tc_wet_msg.packet_no    = tc_packet_no++;
+        tc_wet_msg.packet_len   = sizeof(TNetMessageWetting);
+        tc_wet_msg.count        = htons(tc_wet_msg.count);
+        tc_wet_msg.dist         = htons(tc_wet_msg.dist);
+        tc_wet_msg.max_weight   = htons(tc_wet_msg.max_weight);
+        tc_wet_msg.rated_weight = htons(tc_wet_msg.rated_weight);
         if(m_conn){
             m_conn->send((U8*)&tc_wet_msg,sizeof(TNetMessageWetting));
         }

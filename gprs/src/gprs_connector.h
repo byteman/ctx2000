@@ -30,6 +30,7 @@ private:
     bool call_pppd_dial();
     bool cutoff_pppd();
     bool can_ping(std::string ip);
+    bool fix_route_table();
     Poco::Net::StreamSocket  m_socket;
     SocketAddress m_addr;
     Poco::Thread  m_thread;
