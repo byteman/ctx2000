@@ -403,6 +403,7 @@ void CMainMenu::OnButtonClick(skin_item_t* item)
         }
 
     }else if(item->id == _skinBtns[1]->GetId()){
+#if 0
         PassWord psd;
         if(psd.ShowBox (this,"ÃÜÂë:","BypassÃÜÂë","hitech"))
         {
@@ -411,6 +412,8 @@ void CMainMenu::OnButtonClick(skin_item_t* item)
             box.ShowBox (this,"È¡Ïûbypass","BypassÉèÖÃ");
             CJDQAdmin::Get ().Bypass (false);
         }
+#endif
+        CJDQAdmin::Get ().ResetDevice (1);
     }
 
     UpdateUIArea();

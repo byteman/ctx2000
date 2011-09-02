@@ -1,9 +1,9 @@
 #include "gprs.h"
 #include "comdata.h"
 #include <Poco/SingletonHolder.h>
-#include "gprs_connector.h"
 #include "gps.h"
 #include <arpa/inet.h>
+#include "gprs_connector.h"
 using Poco::Net::SocketAddress;
 
 #ifdef GPRS_DEBUG
@@ -74,6 +74,12 @@ gprs::~gprs()
 {
     if(m_conn)
         delete m_conn;
+}
+void gprs::set_control_func(void *func,void* arg)
+{
+    if(m_conn){
+        m_conn->set_controller((t_dev_control_func)func,arg);
+    }
 }
 bool gprs::start(std::string ip, U16 port,std::string dtu_id)
 {

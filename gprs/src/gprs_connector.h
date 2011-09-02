@@ -8,7 +8,7 @@
 #include "bythread.h"
 using Poco::Net::StreamSocket;
 using Poco::Net::SocketAddress;
-
+typedef bool (*t_dev_control_func)(void* arg,int state);
 class gprs_connector:public ByThread
 {
 public:
@@ -22,10 +22,13 @@ public:
     bool is_socket_connectd();
     bool is_gprs_conneted();
     void checknetwork();
+    void set_controller(t_dev_control_func func,void* arg);
     virtual void service();
 private:
     bool exe_cmd(std::string cmd);
     bool is_pppd_exist();
+    bool is_chat_exist();
+    bool cutoff_chat();
     bool is_dial_ok();
     bool call_pppd_dial();
     bool cutoff_pppd();
@@ -38,6 +41,8 @@ private:
     bool m_gprs_conn_flag;
     int  m_dial_cnt;
     int  m_ping_cnt;
+    t_dev_control_func m_ctrl_func;
+    void* m_ctrl_arg;
 };
 
 #endif // GPRS_IMPL_H

@@ -23,15 +23,19 @@ CJDQAdmin::~CJDQAdmin()
 {
 
 }
-#define JDQ_RESET_OUT1  13
-#define JDQ_RESET_OUT2  14
-void CJDQAdmin::ResetDevice()
+#define JDQ_RESET_OUT1  12
+#define JDQ_RESET_OUT2  13
+void CJDQAdmin::ResetDevice(int dev)
 {
-    Control((CTX_JDQ)JDQ_RESET_OUT1,JDQ_OPEN);
-    Control((CTX_JDQ)JDQ_RESET_OUT2,JDQ_OPEN);
-    Poco::Thread::sleep (100);
-    Control((CTX_JDQ)JDQ_RESET_OUT1,JDQ_CLOSE);
-    Control((CTX_JDQ)JDQ_RESET_OUT2,JDQ_CLOSE);
+    if(dev == 1)
+    {
+        Control((CTX_JDQ)JDQ_RESET_OUT1,JDQ_OPEN);
+        Control((CTX_JDQ)JDQ_RESET_OUT2,JDQ_OPEN);
+        Poco::Thread::sleep (1000);
+        Control((CTX_JDQ)JDQ_RESET_OUT1,JDQ_CLOSE);
+        Control((CTX_JDQ)JDQ_RESET_OUT2,JDQ_CLOSE);
+    }
+
 }
 CJDQAdmin& CJDQAdmin::Get()
 {

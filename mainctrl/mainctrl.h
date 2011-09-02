@@ -65,7 +65,7 @@ public:
     CMainCtrl();
     virtual ~CMainCtrl();
     static CMainCtrl& Get();
-
+    bool mainctrl_dev_ctrl_func(int state);
     bool Start();
     bool Stop();
     virtual void run();
@@ -99,7 +99,8 @@ private:
     int       ValideTCNum();
     void      CreateDefaultTjParam();
     void      InitBDParam();
-    void      SendWetRecord();
+    void      SendWetRecord(double w,bool alarm);
+    void      SendAlarmData();
     void      WatchNetWork(std::string &MainDevID, bool &AddState);
     void      DripMainNoAndAddNo(std::string &MainNo, std::string &RightNo, std::string &AddNo);
     void      UpdateTCStatus();

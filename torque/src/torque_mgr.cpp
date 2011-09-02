@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <functional>
 #include "iniFile.h"
+#include "comdata.h"
 #ifdef TC_DEBUG
 //#define TC_DBG(fmt...) do { } while (0)
 #define TC_DBG
@@ -97,6 +98,12 @@ bool   CTorQueMgr::loadCfg(std::string type, std::string armlen, std::string rat
         m_tcType = type;
         m_armlen = armlen;
         m_rate   = rate;
+        if(Poco::NumberParser::tryParse (rate,g_tc_rate))
+        {
+            m_rate_int = g_tc_rate;
+        }else{
+            TC_DBG ("can not Convert Rate[%s] to int\n",rate);
+        }
         m_torque_item_list.clear ();
         for(size_t i = 0 ; i < m_torque_list.size (); i++)
         {

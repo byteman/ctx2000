@@ -1637,20 +1637,50 @@ void CMainCtrl::CollideDetect()
 
 void    CMainCtrl::WildService()
 {
-
+    static bool over_flag = false;
     if(g_wild_speed >= g_alarm_wild_speed) //风速> 20m/s 也要报警记录
     {
         CBeeper::get().BeepMs(1000,100000);
+        if(!over_flag){
+            SendAlarmData();
+        }
+        over_flag = true;
+    }else{
+        over_flag = false;
     }
 }
-
-void   CMainCtrl::SendWetRecord(double qd_max_weight)
+void      CMainCtrl::SendAlarmData()
 {
     gprs::tc_data data;
+    data.m_has_alarm = true;
     data.m_angle     = g_angle;
     data.m_car_speed = 0;
     data.m_dg_height = g_dg_height;
-    data.m_fall      = CTorQueMgr::get ().m_rate;
+    data.m_dist      = g_car_dist;
+    data.m_fall      = g_tc_rate;
+    data.m_gradient_x= g_angle_x;
+    data.m_gradient_y=g_angle_y;
+    data.m_max_dist  =g_TC[g_local_id].LongArmLength;
+    data.m_min_dist  =g_TC[g_local_id].Rs;
+    data.m_speed     =g_wild_speed;
+    data.m_tc_height =g_TC[g_local_id].Height;
+    data.m_up_angle  =g_up_angle;
+    data.m_weight    =g_dg_weight;
+    data.m_max_weight=g_rated_weight;
+    data.m_dg_speed  =  0;
+    if(!gprs::get().send_tc_data(0,data))
+    {
+        fprintf(stderr,"send_alarm_tc_data failed\n");
+    }
+}
+void   CMainCtrl::SendWetRecord(double qd_max_weight,bool alarm)
+{
+    gprs::tc_data data;
+    data.m_has_alarm = alarm;
+    data.m_angle     = g_angle;
+    data.m_car_speed = 0;
+    data.m_dg_height = g_dg_height;
+    data.m_fall      = CTorQueMgr::get ().m_rate_int;
     data.m_dist      = g_car_dist;
     data.m_weight    = qd_max_weight;
     data.m_max_weight= CTorQueMgr::get ().m_rated_weight;
@@ -1667,7 +1697,7 @@ void    CMainCtrl::LjService()
     static int  alarmType = 0;     //起吊重量的报警类型 0：每次起吊过程中的最大重量没有超过额定载荷的95% 1：重量超过95%
     static double max_weight = 0;  //每次起吊过程中的最大重量
     //static double max_speed  = 0; //起吊过程中的最大风速
-    fprintf(stderr,"out_status=%d\n",out_state);
+    //fprintf(stderr,"out_status=%d\n",out_state);
     //根据力矩输出的状态来控制继电器的动作
 
     out_state     = CTorQueMgr::get ().getState(g_car_dist,g_dg_weight);
@@ -1676,6 +1706,9 @@ void    CMainCtrl::LjService()
     {
         CJDQAdmin::Get().Control(JDQ_CAR_OUTSIDE_BREAK,JDQ_OPEN);//限制 小车向外运行停车
         CJDQAdmin::Get().Control(JDQ_HOOK_UP_LIMIT,JDQ_OPEN);//限制吊钩向上
+        if(!over_flag){
+            SendAlarmData();
+        }
         over_flag = true;
         CBeeper::get().BeepMs(1000,100000);
     }else if(out_state <= 1 && over_flag ){ //力矩 x <95%
@@ -1706,7 +1739,7 @@ void    CMainCtrl::LjService()
                     fprintf(stderr,"Post Fall  Message to DBAdmin Failed\n");
                 }
             }
-            SendWetRecord (max_weight);
+            SendWetRecord (max_weight,alarmType?true:false);
             up_flag     = false;
             alarmType   = 0;
             max_weight  = 0;
@@ -1805,6 +1838,22 @@ bool CMainCtrl::Stop()
     }
     return true;
 }
+bool CMainCtrl::mainctrl_dev_ctrl_func(int state)
+{
+    if(state==1){
+        CJDQAdmin::Get ().ResetDevice (1);
+        fprintf(stderr,"ResetDevice called -----> wait 5s for reset ok\n");
+        Poco::Thread::sleep (5000); //wait 5s for reset ok;
+    }
+}
+bool dev_ctrl_func(void* arg, int state)
+{
+    fprintf(stderr,"***********8reset gprs\n");
+    CMainCtrl* ctrl = (CMainCtrl*)arg;
+    if(ctrl)
+        return ctrl->mainctrl_dev_ctrl_func (state);
+    return false;
+}
 #define RET_ERR   return false
 bool CMainCtrl::Start()
 {
@@ -1862,7 +1911,7 @@ bool CMainCtrl::Start()
         PushErrorMsg("CJDQAdmin Start Failed");
         RET_ERR;
     }
-    CJDQAdmin::Get ().ResetDevice ();
+    CJDQAdmin::Get ().ResetDevice (1);
 #if 1
 //启动gprs上传模块
     if( !gprs::get ().start (gprs_remote_ip,gprs_remote_port,gprs_dtu_id))
@@ -1870,6 +1919,7 @@ bool CMainCtrl::Start()
         PushErrorMsg("gprs Start Failed");
         RET_ERR;
     }
+    gprs::get ().set_control_func ((void*)dev_ctrl_func,(void*)this);
 #endif
 
     blockRtSignal();

@@ -13,20 +13,22 @@ using Poco::Net::Socket;
 using Poco::Exception;
 #define PPPD_DIAL_MS    10000
 #define PPPD_KILL_MS    10000
-#define DNS1 "119.75.218.45"
-#define DNS2 "202.202.96.33"
+#define DNS2 "119.75.218.45"
+#define DNS1 "118.123.17.25"
 bool gprs_connector::exe_cmd(std::string cmd)
 {
 
     std::string cmdout = cmd+" 1>/dev/null 2>&1";
     int ret = system(cmdout.c_str());
-    GPRS_DBG("exe %s ret=%d\n",cmd.c_str(),ret);
+    //GPRS_DBG("exe %s ret=%d\n",cmd.c_str(),ret);
     return (ret!=0)?false:true;
 }
 gprs_connector::gprs_connector()
 {
     m_socket_conn_flag = false;
     m_gprs_conn_flag   = false;
+    m_ctrl_func=NULL;
+    m_ping_cnt = 0;
 }
 bool gprs_connector::is_pppd_exist()
 {
@@ -36,35 +38,75 @@ bool gprs_connector::is_dial_ok()
 {
     return exe_cmd("ifconfig ppp0");
 }
+/*
+  call and wait 60s,wait call ok
+*/
 bool gprs_connector::call_pppd_dial()
 {
     //pppd call gprs 1>/dev/null 2>&1 &
+     GPRS_DBG("call_pppd_dial ----> begin\n");
      exe_cmd("pppd call gprs &");
-     Poco::Thread::sleep(PPPD_DIAL_MS);
-     return true;
+     int cnt = 0;
+     while(!is_dial_ok () && (cnt++ < 6)){
+        GPRS_DBG("call_pppd_dial check dial ok ---> count=%d\n",cnt);
+        Poco::Thread::sleep(PPPD_DIAL_MS);
+     }
+     if(is_dial_ok ())
+     {
+         GPRS_DBG("call_pppd_dial ok -----> wait 5s to init\n");
+         Poco::Thread::sleep(PPPD_DIAL_MS);
+     }else{
+        GPRS_DBG("call_pppd_dial ---> timeout \n");
+     }
+     return cnt<6;
 }
 bool gprs_connector::cutoff_pppd()
 {
     int count = 10;
+    GPRS_DBG("cutoff_pppd ---> begin \n");
     exe_cmd("killall pppd");
+    exe_cmd("killall chat");
     while(count--){
+        GPRS_DBG("cutoff_pppd check state ---> count=%d  \n",count);
         Poco::Thread::sleep(2000);
-        if(!is_pppd_exist())
+        if(!is_pppd_exist() && !is_chat_exist ())
             break;
+        exe_cmd("killall pppd");
+        exe_cmd("killall chat");
+    }
+    if(count==0){
+        GPRS_DBG("cutoff_pppd  ---> timeout\n");
+    }else{
+        GPRS_DBG("cutoff_pppd  ---> ok\n");
     }
     return (count >= 0);
 }
 bool gprs_connector::can_ping(std::string ip)
 {
-    return true;
+    //return true;
     char buf[128] = {0,};
     sprintf(buf,"ping -s 1 -c 2 %s ",ip.c_str());
     return exe_cmd(buf);
 
 }
+
 bool gprs_connector::fix_route_table()
 {
 
+}
+void gprs_connector::set_controller(t_dev_control_func func,void* arg)
+{
+    m_ctrl_func = func;
+    m_ctrl_arg  = arg;
+}
+bool gprs_connector::is_chat_exist()
+{
+     return exe_cmd("pidof chat");
+}
+bool gprs_connector::cutoff_chat()
+{
+    GPRS_DBG("cutoff_chat\n");
+    return exe_cmd("killall chat");
 }
 void gprs_connector::service()
 {
@@ -75,40 +117,72 @@ void gprs_connector::service()
 #endif
     if(!is_pppd_exist()){
         //不存在pppd就拨号
-        GPRS_DBG("pppd dont exist,call pppd\n");
+        m_gprs_conn_flag = false;
+        m_dial_cnt = 0;
+        if(m_ctrl_func)
+            m_ctrl_func(m_ctrl_arg,1);
+        //when return there,the gprs must be reset ok
+
+        if(is_chat_exist()){
+            cutoff_chat ();
+        }
+        GPRS_DBG("reset gprs ok,----> wait 10s for gprs init \n");
+        Poco::Thread::sleep (10000);
+        GPRS_DBG("pppd dont exist,call pppd and max wait 60s \n");
         call_pppd_dial();
     }else{
-        //存在了，但是是否连接成功否，是否建立了pppd
+        //存在了pppd ，但是是否连接成功否，是否建立了pppd
         if(is_dial_ok()){
-            GPRS_DBG("pppd exist,dial_ok\n");
+            //存在了pppd ，dial ok
+            m_dial_cnt = 0;
+            GPRS_DBG("pppd exist and dial_ok,check network by ping %s\n",DNS1);
             if(can_ping(DNS1))
             {
                 GPRS_DBG("ping %s ok\n",DNS1);
                 m_gprs_conn_flag = true;
+                m_ping_cnt = 0;
+                Poco::Thread::sleep(10000);
             }
             else{
                 //两个dns都ping不通，就认为gprs不在线
                 if( !can_ping(DNS2))
                 {
-                    GPRS_DBG("ping %s  %s failed gprs off\n",DNS1,DNS2);
-                    m_gprs_conn_flag = false;
-                    if(cutoff_pppd())
+                    GPRS_DBG("ping %s  %s failed  ---> count=%d\n",DNS1,DNS2,m_ping_cnt);
+
+                    m_ping_cnt++;
+                    if(m_ping_cnt >= 2)
                     {
-                        call_pppd_dial();
+                        GPRS_DBG("ping failed ----> gprs reset pppd and reset gprs\n");
+                        m_gprs_conn_flag = false;
+                        if(cutoff_pppd()) //maybe gprs offline,re dial it
+                        {//after kill, can not immdiely pppd call
+                            //call_pppd_dial();
+                            if(m_ctrl_func)
+                                m_ctrl_func(m_ctrl_arg,1);
+                        }
+                        m_ping_cnt = 0;
                     }
+
                 }else{ //其中一个在线，也可以认为gprs连接成功。只是soccket没有连接成功
                     m_gprs_conn_flag = true;
+                    m_ping_cnt = 0;
+                    Poco::Thread::sleep(10000);
                 }
             }
-            Poco::Thread::sleep(10000);
-        }else{//没能建立成功,有可能在拨号中，等待3次,看是否连接成功
+
+        }else{
+            //没能建立成功ppp0,but exist pppd,有可能在拨号中，等待60s次,看是否连接成功
             m_gprs_conn_flag = false;
-            if(m_dial_cnt++ > 6) //60s
+            GPRS_DBG("pppd exist ,but not dial ok--->wait %ds to restart pppd\n",20-m_dial_cnt*10);
+            if(m_dial_cnt++ >= 2) //60s
             {
                 //3次后等没有连接成功，可能是模块的问题，复位模块并重启pppd进程
+                GPRS_DBG("cutoff_pppd\n");
+                if(m_ctrl_func)
+                    m_ctrl_func(m_ctrl_arg,1);
                 if(cutoff_pppd())
                 {
-                    call_pppd_dial();
+                    //call_pppd_dial();
                 }
 
                 m_dial_cnt = 0;

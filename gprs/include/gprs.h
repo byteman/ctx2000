@@ -8,6 +8,7 @@
 #include "bythread.h"
 
 #define MAX_QUEUE_DATA_COUNT  20
+
 class gprs_connector;
 class gprs:public ByThread
 {
@@ -46,6 +47,7 @@ public:
     bool connect(std::string ip, U16 port);
     bool connect(Poco::Net::SocketAddress addr);
     bool build_send_gps_data(std::string &gps);
+    void set_control_func(void *func,void* arg);
 
     /*
     发送塔机数据
