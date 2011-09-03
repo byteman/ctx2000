@@ -23,6 +23,7 @@ public:
     bool is_gprs_conneted();
     void checknetwork();
     void set_controller(t_dev_control_func func,void* arg);
+    virtual bool before_run ();
     virtual void service();
 private:
     bool exe_cmd(std::string cmd);

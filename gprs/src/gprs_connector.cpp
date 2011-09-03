@@ -53,12 +53,12 @@ bool gprs_connector::call_pppd_dial()
      }
      if(is_dial_ok ())
      {
-         GPRS_DBG("call_pppd_dial ok -----> wait 5s to init\n");
+         GPRS_DBG("call_pppd_dial ok -----> wait 5s to init ppp0 ok\n");
          Poco::Thread::sleep(PPPD_DIAL_MS);
      }else{
         GPRS_DBG("call_pppd_dial ---> timeout \n");
      }
-     return cnt<6;
+     return is_dial_ok ();
 }
 bool gprs_connector::cutoff_pppd()
 {
@@ -79,7 +79,7 @@ bool gprs_connector::cutoff_pppd()
     }else{
         GPRS_DBG("cutoff_pppd  ---> ok\n");
     }
-    return (count >= 0);
+    return (!is_pppd_exist() && !is_chat_exist ());
 }
 bool gprs_connector::can_ping(std::string ip)
 {
@@ -108,6 +108,13 @@ bool gprs_connector::cutoff_chat()
     GPRS_DBG("cutoff_chat\n");
     return exe_cmd("killall chat");
 }
+#include <signal.h>
+bool gprs_connector::before_run ()
+{
+    //ignore child quit, and zombile process
+    signal(SIGCLD, SIG_IGN);
+    return true;
+}
 void gprs_connector::service()
 {
 #ifdef PC_DEBUG
@@ -122,16 +129,18 @@ void gprs_connector::service()
         if(m_ctrl_func)
             m_ctrl_func(m_ctrl_arg,1);
         //when return there,the gprs must be reset ok
-
-        if(is_chat_exist()){
+        int kill_chat_counter = 0;
+        while(is_chat_exist() && (kill_chat_counter++ < 5)){
+            GPRS_DBG("cutoff_chat----> wait %d \n",kill_chat_counter);
             cutoff_chat ();
+            Poco::Thread::sleep (1000);
         }
-        GPRS_DBG("reset gprs ok,----> wait 10s for gprs init \n");
+        GPRS_DBG("reset gprs ok,----> wait 10s for gprs modules init \n");
         Poco::Thread::sleep (10000);
         GPRS_DBG("pppd dont exist,call pppd and max wait 60s \n");
         call_pppd_dial();
     }else{
-        //存在了pppd ，但是是否连接成功否，是否建立了pppd
+        //存在了pppd ，但是是否连接成功否，是否建立了pppd, and is zombile process??
         if(is_dial_ok()){
             //存在了pppd ，dial ok
             m_dial_cnt = 0;
@@ -180,8 +189,16 @@ void gprs_connector::service()
                 GPRS_DBG("cutoff_pppd\n");
                 if(m_ctrl_func)
                     m_ctrl_func(m_ctrl_arg,1);
-                if(cutoff_pppd())
+                if(cutoff_pppd()) //
                 {
+
+                    //call_pppd_dial();
+                }else{
+                    //zobile process
+                    //GPRS_DBG("reset gprs ok,----> wait 10s for gprs init \n");
+                    //Poco::Thread::sleep (10000);
+                    //GPRS_DBG("pppd dont exist,call pppd and max wait 60s \n");
+
                     //call_pppd_dial();
                 }
 
