@@ -89,6 +89,7 @@ private:
     double    m_dist;
     void    LjService();
     void    WildService();
+    void    DiantaiService();
     std::string      build_qurey_msg();
     int       MaxNo();
     bool      is_conflcit(int callto_id);

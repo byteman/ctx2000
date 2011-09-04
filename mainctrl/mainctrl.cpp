@@ -1751,6 +1751,10 @@ EWorkMode CMainCtrl::GetDevMode()
 {
     return m_mode;
 }
+void    CMainCtrl::DiantaiService()
+{
+    CDianTai::Get ().checkUploading ();
+}
 void CMainCtrl::run()
 {
     bool AddState=false;
@@ -1774,6 +1778,7 @@ void CMainCtrl::run()
             LjService();
         if(g_show_speed)
             WildService ();
+        DiantaiService();
         if(m_mode == mode_master)
         {
             master_loop();

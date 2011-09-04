@@ -39,12 +39,14 @@ public:
     int  getSignalDB();
     unsigned int GetReceivedCount();
     void         ResetCount();
+    bool         isUploading();
+    void         checkUploading();
 private:
-
+    CDianTaiDataReceiver*       m_recv_worker;
     bool Init(std::string path);
     NotificationCenter m_nc;
     NotificationQueue  m_nq;
-    CDianTaiDataReceiver*       m_recv_worker;
+
     CDianTaiDataParseWorker*    m_ps_worker;
     CDianTaiDataSender*         m_send_worker;
 

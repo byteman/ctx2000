@@ -27,6 +27,12 @@ const int DataLength   = 39;
 const int WSDataLength = 154;
 #define     MAX_LEN         8192
 Poco::Timespan timeout_span(5,0);
+//#define DT_DEBUG
+#ifdef DT_DEBUG
+#define DT_DBG(fmt...) fprintf(stderr,fmt);
+#else
+#define DT_DBG(fmt...) do { } while (0)
+#endif
 class CDianTaiDataReceiver:public Poco::Runnable{
 public:
 
@@ -67,28 +73,28 @@ public:
     {
         static int work_site_count=0;
         int type = 0;
-        //std::cerr << c << std::endl;
+        DT_DBG("%c\n",c);
         if( (c == '%') || (c=='(') || (c=='$')){
             m_pos = 0;
             m_start_flag = true;
         }else if( m_start_flag && c=='#')
         {
-            //fprintf(stderr,"recv # char m_pos = %d\n",m_pos);
+            DT_DBG("recv # char m_pos = %d\n",m_pos);
             if(m_pos == 38)
             {
                 type = 1;
 
             }
         }else if( m_start_flag && c=='*'){
-            DBG("recv * char m_pos = %d\n",m_pos);
+            DT_DBG("recv * char m_pos = %d\n",m_pos);
             if(m_pos == 11)
             {
                 type = 2;
 
             }
         }else if( m_start_flag && c==')'){
-            DBG("recv ) char m_pos = %d\n",m_pos);
-            DBG("m_pos=%d\n",m_pos);
+            DT_DBG("recv ) char m_pos = %d\n",m_pos);
+            DT_DBG("m_pos=%d\n",m_pos);
 
             type = 3;
 
@@ -99,6 +105,8 @@ public:
             if(work_site_count >= 3)
             {
                 m_allow_send=false;
+                m_upload_stamp.update ();
+                DT_DBG("diantai recev worksite header\n");
             }
         }else{
             work_site_count = 0;
@@ -234,6 +242,7 @@ public:
     int     m_signal;
     int     m_receive_msg_count;
     bool    m_allow_send;
+    Poco::Timestamp             m_upload_stamp;
 private:
     //SerialStream m_port;
     SerialPort  *m_port;
@@ -244,7 +253,7 @@ private:
     Poco::NotificationQueue &m_queue;
     LibSerial::SerialPort::DataBuffer m_buf;
     std::string m_DataString;
-    Poco::Timestamp             m_recv_stamp;
+
 
     char  m_tmp[MAX_LEN];
     int   m_pos;
@@ -325,6 +334,30 @@ CDianTai& CDianTai::Get()
 {
     static SingletonHolder<CDianTai> sh;
     return *sh.get();
+}
+void         CDianTai::checkUploading()
+{
+
+    if(m_recv_worker)
+    {
+        static  Poco::Timestamp now;
+        if(m_recv_worker->m_allow_send)
+        {
+            now.update ();
+            if( (now - m_recv_worker->m_upload_stamp ) > 10000000)
+            {
+                m_recv_worker->m_allow_send = true;
+            }
+        }
+    }
+
+}
+bool         CDianTai::isUploading()
+{
+    if(m_recv_worker){
+        return !m_recv_worker->m_allow_send;
+    }
+    return false;
 }
 bool CDianTai::Start(std::string path)
 {
