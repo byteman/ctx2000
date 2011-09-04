@@ -3,8 +3,10 @@
 #include <Poco/Timespan.h>
 #include <Poco/Net/NetException.h>
 #include <stdlib.h>
+#include <syslog.h>
 #ifdef GPRS_DEBUG
-#define GPRS_DBG(fmt...) fprintf(stderr,fmt);
+//#define GPRS_DBG(fmt...)  fprintf(stderr,fmt)
+#define GPRS_DBG(fmt...)    syslog(LOG_ERR,fmt);
 #else
 #define GPRS_DBG(fmt...) do { } while (0)
 #endif
@@ -19,6 +21,7 @@ bool gprs_connector::exe_cmd(std::string cmd)
 {
 
     std::string cmdout = cmd+" 1>/dev/null 2>&1";
+
     int ret = system(cmdout.c_str());
     //GPRS_DBG("exe %s ret=%d\n",cmd.c_str(),ret);
     return (ret!=0)?false:true;
@@ -36,7 +39,7 @@ bool gprs_connector::is_pppd_exist()
 }
 bool gprs_connector::is_dial_ok()
 {
-    return exe_cmd("ifconfig ppp0");
+    return exe_cmd("/sbin/ifconfig ppp0");
 }
 /*
   call and wait 60s,wait call ok
@@ -45,7 +48,8 @@ bool gprs_connector::call_pppd_dial()
 {
     //pppd call gprs 1>/dev/null 2>&1 &
      GPRS_DBG("call_pppd_dial ----> begin\n");
-     exe_cmd("pppd call gprs &");
+     //exe_cmd("pppd call gprs &");
+     exe_cmd("/usr/bin/run-pppd &");
      int cnt = 0;
      while(!is_dial_ok () && (cnt++ < 6)){
         GPRS_DBG("call_pppd_dial check dial ok ---> count=%d\n",cnt);
@@ -62,17 +66,17 @@ bool gprs_connector::call_pppd_dial()
 }
 bool gprs_connector::cutoff_pppd()
 {
-    int count = 10;
+    int count = 20;
     GPRS_DBG("cutoff_pppd ---> begin \n");
-    exe_cmd("killall pppd");
-    exe_cmd("killall chat");
+    exe_cmd("killall  pppd");
+    exe_cmd("killall  chat");
     while(count--){
         GPRS_DBG("cutoff_pppd check state ---> count=%d  \n",count);
         Poco::Thread::sleep(2000);
         if(!is_pppd_exist() && !is_chat_exist ())
             break;
-        exe_cmd("killall pppd");
-        exe_cmd("killall chat");
+        exe_cmd("killall  pppd");
+        exe_cmd("killall  chat");
     }
     if(count==0){
         GPRS_DBG("cutoff_pppd  ---> timeout\n");
@@ -106,13 +110,27 @@ bool gprs_connector::is_chat_exist()
 bool gprs_connector::cutoff_chat()
 {
     GPRS_DBG("cutoff_chat\n");
-    return exe_cmd("killall chat");
+    return exe_cmd("killall  chat");
 }
 #include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+void
+sig_chld(int signo)
+{
+        pid_t        pid;
+        int        stat;
+
+        while ( (pid = waitpid(-1, &stat, WNOHANG)) >0)
+                printf("child %d terminated\n", pid);
+        return;
+}
 bool gprs_connector::before_run ()
 {
     //ignore child quit, and zombile process
-    signal(SIGCLD, SIG_IGN);
+    //signal(SIGCLD, SIG_IGN);
+    //signal(SIGCHLD, sig_chld);
     return true;
 }
 void gprs_connector::service()
@@ -130,15 +148,23 @@ void gprs_connector::service()
             m_ctrl_func(m_ctrl_arg,1);
         //when return there,the gprs must be reset ok
         int kill_chat_counter = 0;
-        while(is_chat_exist() && (kill_chat_counter++ < 5)){
+        while(is_chat_exist() && !is_pppd_exist() && (kill_chat_counter++ < 5)){
+
             GPRS_DBG("cutoff_chat----> wait %d \n",kill_chat_counter);
             cutoff_chat ();
             Poco::Thread::sleep (1000);
         }
-        GPRS_DBG("reset gprs ok,----> wait 10s for gprs modules init \n");
-        Poco::Thread::sleep (10000);
-        GPRS_DBG("pppd dont exist,call pppd and max wait 60s \n");
-        call_pppd_dial();
+        if(!is_pppd_exist())
+        {
+            GPRS_DBG("reset gprs ok,----> wait 10s for gprs modules init \n");
+            Poco::Thread::sleep (10000);
+        }
+        if(!is_pppd_exist())
+        {
+            GPRS_DBG("pppd dont exist,call pppd and max wait 60s \n");
+            call_pppd_dial();
+        }
+
     }else{
         //存在了pppd ，但是是否连接成功否，是否建立了pppd, and is zombile process??
         if(is_dial_ok()){
