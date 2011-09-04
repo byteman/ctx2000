@@ -1612,6 +1612,7 @@ void CMainCtrl::CollideDetect()
             g_qtzs[index].m_carrier_pos  = g_car_dist;
             g_qtzs[index].m_sarm_angle   = 0;
         }
+        g_qtzs[index].m_online   = true; //本机始终在线
         //fprintf(stderr,"local [%d] angle=%0.2f dang=%0.2f h=%0.2f p=%0.2f\n",index+1,g_qtzs[index].m_long_arm_angle,g_qtzs[index].m_sarm_angle,g_qtzs[index].m_height,g_qtzs[index].m_carrier_pos);
     }
 //根据电台传来的周围塔机的实时参数，更新冲突塔机的算法模块需要的实时参数
@@ -1623,6 +1624,7 @@ void CMainCtrl::CollideDetect()
             g_qtzs[id].m_long_arm_angle   = g_TC[id+1].Angle*180.0f/3.14f;//
             g_qtzs[id].m_carrier_pos      = g_TC[id+1].Position;
             g_qtzs[id].m_sarm_angle       = g_TC[id+1].Dang;
+            g_qtzs[id].m_online           = g_TC[id+1].Valide; //其他塔机的在线状态
         }
         //fprintf(stderr,"tj conflict[%d] angle=%0.2f dang=%0.2f h=%0.2f p=%0.2f \n",id+1,g_qtzs[id].m_long_arm_angle,g_qtzs[id].m_sarm_angle,g_qtzs[id].m_height,g_qtzs[id].m_carrier_pos);
     }
