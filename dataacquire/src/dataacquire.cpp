@@ -15,6 +15,7 @@
 #include "comdata.h"
 #include "common.h"
 #include <math.h>
+#include "filter.h"
 //#define AD_DEBUG
 #ifdef AD_DEBUG
 #define AD_DBG(fmt...) fprintf(stderr,fmt);
@@ -99,7 +100,7 @@ public:
              static double tmp_car_dist  = 0;
              static double tmp_dg_weight = 0;
 
-            ad_car_dist = (data.at(1)<<8)+data.at(2);
+            ad_car_dist = m_filter[0].Filter ((data.at(1)<<8)+data.at(2));
 
             AD_DBG("ad_car=%d up_angle=%0.2f\n",ad_car_dist,g_up_angle);
             if(g_TC[g_local_id].Dyna){ //动臂式的幅度计算
@@ -116,9 +117,9 @@ public:
                 g_TC[g_local_id].Position = g_car_dist;
             }
             //PostMessage(GetActiveWindow(),0x804,0,0);
-            ad_height =  (data.at(3)<<8)+data.at(4);
+            ad_height =  m_filter[1].Filter((data.at(3)<<8)+data.at(4));
             g_dg_height=(ad_height-g_bd[BD_HEIGHT].zero_ad)/g_bd[BD_HEIGHT].bd_k+g_bd[BD_HEIGHT].start_value;
-            ad_weight =  (data.at(5)<<8)+data.at(6);
+            ad_weight =  m_filter[2].Filter((data.at(5)<<8)+data.at(6));
 
             double k = g_bd[BD_WEIGHT].bd_k;
             double z = g_bd[BD_WEIGHT].zero_ad;
@@ -141,11 +142,11 @@ public:
 
             if(gMainMenuIndex==2) //single device mode
             {
-                ad_angle = (data.at(7)<<8)+data.at(8);
+                ad_angle = m_filter[3].Filter((data.at(7)<<8)+data.at(8));
                 calc_angle (ad_angle);
             }
-            ad_angle_x    = (data.at(9)<<8)+data.at(10);
-            ad_angle_y    = (data.at(11)<<8)+data.at(12);
+            ad_angle_x    = m_filter[4].Filter((data.at(9)<<8)+data.at(10));
+            ad_angle_y    = m_filter[5].Filter((data.at(11)<<8)+data.at(12));
 
             static int wild_cnt  = 0;
             if(data.at(13)&0x80)
@@ -211,6 +212,7 @@ protected:
     Poco::Event  m_rdyEvt;
     Poco::Event  m_quitEvt;
     std::string  m_path;
+    CFilter      m_filter[6];
     Poco::NotificationQueue &m_queue;
     volatile bool m_quit;
 
