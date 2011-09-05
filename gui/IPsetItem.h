@@ -48,7 +48,7 @@
 
 #define	BUTTON_OK_ID					1
 #define	BUTTON_OK_STYLE				SI_TYPE_CMDBUTTON|SI_TEST_SHAPE_RECT|SI_STATUS_VISIBLE
-#define	BUTTON_OK_X						270
+#define	BUTTON_OK_X						370
 #define	BUTTON_OK_Y						410
 #define	BUTTON_OK_ITEMRC			{}
 #define	BUTTON_OK_BMPINDEX		1
@@ -110,99 +110,28 @@
 #define SYSCFG_IPSET_X			85
 #define SYSCFG_IPSET_Y			225
 
-#define CENTER_IP_X			197
-#define CENTER_IP_Y			123 //70
-
-#define CENTER_PORT_X			500
-#define CENTER_PORT_Y			123 //70
-
-#define CENTER_PORTEDIT_X			598
-#define CENTER_PORTEDIT_Y			113 //63
-
-#define MEDIA_IP_X			197
-#define MEDIA_IP_Y			173 //120
-
-#define MEDIA_PORT_X			500
-#define MEDIA_PORT_Y			173 //120
-
-#define MEDIA_PORTEDIT_X			598
-#define MEDIA_PORTEDIT_Y			163 //113
-
-#define ETH0_X				350
-#define ETH0_Y				220 //170
-/*
-#define PPP0_X				600
-#define PPP0_Y				220 //170
-*/
-#define ETH0_IP_X				243
-#define ETH0_IP_Y				270 //220
-
-#define ETH0_MASK_X				243
-#define ETH0_MASK_Y				320 //270
-
-#define ETH0_GATEWAY_X			500 //243
-#define ETH0_GATEWAY_Y			270 //320
-
-#define ETH0_DNS_X			500 //243
-#define ETH0_DNS_Y			320 //370
-
-#define DEV_ID_X			243
-#define DEV_ID_Y			73
-
-#define DEV_NAME_X			500 //243
-#define DEV_NAME_Y			73 //370
-
-#define DEV_IPEDIT_X			348
-#define DEV_IPEDIT_Y			63
-
-#define DEV_NAMEEDIT_X			598
-#define DEV_NAMEEDIT_Y			63
-
-/*del gprs begin
-#define PPP0_IP_X				500
-#define PPP0_IP_Y				220
-
-#define PPP0_MASK_X				500
-#define PPP0_MASK_Y				270
-
-#define PPP0_GATEWAY_X			500
-#define PPP0_GATEWAY_Y			320
-
-#define PPP0_DNS_X			500
-#define PPP0_DNS_Y			370
-del gprs end*/
 #define SKIN_MSG_NUM					1
 
 #define BLANK_X					340
 #define BLANK_Y					15
 
 /* new style */
-#define CENTER_EDIT_PORT      {CENTER_EDIT_PORT_X,CENTER_EDIT_PORT_Y,CENTER_EDIT_PORT_W,CENTER_EDIT_PORT_H,""}
-#define MEDIA_EDIT_PORT      {MEDIA_EDIT_PORT_X,MEDIA_EDIT_PORT_Y,MEDIA_EDIT_PORT_W,MEDIA_EDIT_PORT_H,""}
-#define DEV_ID_EDIT      {DEV_ID_EDIT_X,DEV_ID_EDIT_Y,DEV_ID_EDIT_W,DEV_ID_EDIT_H,""}
-#define DEV_NAME_EDIT      {DEV_NAME_EDIT_X,DEV_NAME_EDIT_Y,DEV_NAME_EDIT_W,DEV_NAME_EDIT_H,""}
 
 #define SKIN_BUTTON_OK        {1,BUTTON_OK_X,       BUTTON_OK_Y}
 #define SKIN_BUTTON_CANCEL    {2,BUTTON_CANCEL_X,   BUTTON_CANCEL_Y}
 #define SKIN_BUTTON_EXIT      {3,BUTTON_EXIT_X,     BUTTON_EXIT_Y}
 
-#define SKIN_CHECK_ETH0      {4,CHECK_ETH0_X,       CHECK_ETH0_Y}
-//#define SKIN_CHECK_PPP0     {4,CHECK_PPP0_X,      CHECK_PPP0_Y}
-
 #define IPCTRL_LEN            170
-#define CENTER_IPEDIT     {350,118,IPCTRL_LEN,30,"0.0.0.0"} //{350,68,160,30,"0.0.0.0"}
-#define MEDIA_IPEDIT     {350,168,IPCTRL_LEN,30,"0.0.0.0"} //{350,118,160,30,"0.0.0.0"}
-#define ETH0IP_IPEDIT     {350,268,IPCTRL_LEN,30,"0.0.0.0"} //{345,218,160,30,"0.0.0.0"}
-#define ETH0MASK_IPEDIT     {350,318,IPCTRL_LEN,30,"0.0.0.0"} //{345,268,160,30,"0.0.0.0"}
-#define ETH0GATE_IPEDIT     {603,268,IPCTRL_LEN,30,"0.0.0.0"} //{345,318,160,30,"0.0.0.0"}
-#define ETH0DNS_IPEDIT     {603,318,IPCTRL_LEN,30,"0.0.0.0"} //{345,368,160,30,"0.0.0.0"}
-/*del gprs begin
-#define PPP0IP_IPEDIT     {603,218,160,30,"0.0.0.0"}
-#define PPP0MASK_IPEDIT     {603,268,160,30,"0.0.0.0"}
-#define PPP0GATE_IPEDIT     {603,318,160,30,"0.0.0.0"}
-#define PPP0DNS_IPEDIT     {603,368,160,30,"0.0.0.0"}
-del gprs end*/
-#define DT1000CONF	"dt1000.conf"
-#define VIDEOSERVERCONF	"/yate/conf.d/videoserver.conf"
-#define RCCONF          "/etc/rc.d/rc.conf"
 
+#define CENTER_IP_X			220
+#define CENTER_IP_Y			118 //70
+
+#define CENTER_PORT_X			220
+#define CENTER_PORT_Y			118+60 //70
+
+#define DEV_ID_X			220
+#define DEV_ID_Y			118+120
+
+#define CENTER_IPEDIT       {380,118,IPCTRL_LEN,30,"0.0.0.0"} //{350,68,160,30,"0.0.0.0"}
+#define CENTER_EDIT_PORT    {380,118+60,CENTER_EDIT_PORT_W,CENTER_EDIT_PORT_H,"56000"}
+#define DEV_ID_EDIT         {380,118+120,250,DEV_ID_EDIT_H,"dtu001000000000"}
