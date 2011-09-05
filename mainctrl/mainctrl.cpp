@@ -77,7 +77,7 @@ public:
                         Poco::AutoPtr<QCollisionNotification> pMsgNf = pNf.cast<QCollisionNotification>();
                         if(pMsgNf->m_code == 0)
                         {
-                             CTajiDbMgr::Get().AddAlarmInfo(CurSerial,pMsgNf->m_coll.m_slewing,pMsgNf->m_coll.m_trolley);
+                             CTajiDbMgr::Get().AddAlarmInfo(TCTypeName,pMsgNf->m_coll.m_slewing,pMsgNf->m_coll.m_trolley);
                         }else if(pMsgNf->m_code >= 1 && pMsgNf->m_code<=3 ){
 
                             /*
@@ -91,7 +91,7 @@ public:
                             value.fall   = Poco::format("%d",    pMsgNf->m_fall.m_fall);
                             value.weight = Poco::format("%0.2f", pMsgNf->m_fall.m_weight);
                             value.speed  = Poco::format("%0.2f", pMsgNf->m_fall.m_speed);
-                            value.serial = CurSerial;
+                            value.serial = TCTypeName; //这里改为塔机型号，去掉塔机编号
                             value.type   = pMsgNf->m_fall.m_type;
 
                             CTajiDbMgr::Get().AddWeightInfo(value);
