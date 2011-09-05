@@ -340,6 +340,7 @@ bool CFormCalib::calibrate_ok(int index,int start_ad,double bd_weight)
 
     if(index==0)
     {
+
         cfg.WriteFloat("weight_bd","min_weight",g_bd[BD_WEIGHT+index].start_value);
         cfg.WriteFloat("weight_bd","weight_k",g_bd[BD_WEIGHT+index].bd_k);
         cfg.WriteInteger("weight_bd","zero_ad", g_bd[BD_WEIGHT+index].zero_ad);
@@ -347,6 +348,9 @@ bool CFormCalib::calibrate_ok(int index,int start_ad,double bd_weight)
         cfg.WriteBool ("weight_bd","valid",true);
         cfg.WriteBool ("weight_bd2","valid",false);
         cfg.WriteBool ("weight_bd3","valid",false);
+        g_bd[BD_WEIGHT].valid        = true;
+        g_bd[BD_WEIGHT2].valid       = false;
+        g_bd[BD_WEIGHT3].valid       = false;
 
     }else if(index==1){
         cfg.WriteFloat("weight_bd2","min_weight",g_bd[BD_WEIGHT+index].start_value);
@@ -355,12 +359,18 @@ bool CFormCalib::calibrate_ok(int index,int start_ad,double bd_weight)
         cfg.WriteInteger("weight_bd2","bd_ad", g_bd[BD_WEIGHT+index].bd_ad);
         cfg.WriteBool ("weight_bd2","valid",true);
         cfg.WriteBool ("weight_bd3","valid",false);
+        g_bd[BD_WEIGHT].valid        = true;
+        g_bd[BD_WEIGHT2].valid       = true;
+        g_bd[BD_WEIGHT3].valid       = false;
     }else if(index==2){
         cfg.WriteFloat("weight_bd3","min_weight",g_bd[BD_WEIGHT+index].start_value);
         cfg.WriteFloat("weight_bd3","weight_k",g_bd[BD_WEIGHT+index].bd_k);
         cfg.WriteInteger("weight_bd3","zero_ad", g_bd[BD_WEIGHT+index].zero_ad);
         cfg.WriteInteger("weight_bd3","bd_ad", g_bd[BD_WEIGHT+index].bd_ad);
         cfg.WriteBool ("weight_bd3","valid",true);
+        g_bd[BD_WEIGHT].valid        = true;
+        g_bd[BD_WEIGHT2].valid       = true;
+        g_bd[BD_WEIGHT3].valid       = true;
     }
 
 

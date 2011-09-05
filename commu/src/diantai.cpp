@@ -341,7 +341,7 @@ void         CDianTai::checkUploading()
     if(m_recv_worker)
     {
         static  Poco::Timestamp now;
-        if(m_recv_worker->m_allow_send)
+        if(!m_recv_worker->m_allow_send)
         {
             now.update ();
             if( (now - m_recv_worker->m_upload_stamp ) > 10000000)
