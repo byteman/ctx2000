@@ -125,7 +125,6 @@ void   CSysLogForm::OnShow()
     ChangeType(m_type);
     RefreshList(start);
 }
-
 void CSysLogForm::RefreshList(int start_index)
 {
     _lvAlarmInfo->Clear();
@@ -139,6 +138,10 @@ void CSysLogForm::RefreshList(int start_index)
 
         add_alarminfo_item(list,rst.at(i));
         _lvAlarmInfo->AddSubItems(list);
+    }
+    if(rst.size () > 0)
+    {
+        _lvAlarmInfo->SortByColnum (0);
     }
 }
 void CSysLogForm::add_alarminfo_item (StringList &alarminfoItems,TSysLog &AlarmInfo)

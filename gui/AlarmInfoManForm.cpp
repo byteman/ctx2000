@@ -7,9 +7,8 @@
 #include "comdata.h"
 static TListColum alarminfolist[] =
 {
-        {"编号",      50},
+        {"编号",      100},
         {"时间",      200},
-        //{"塔吊编号",  100},
         {"小车指令",  150},
         {"回转指令",  150}
 };
@@ -200,7 +199,20 @@ void   CAlarmInfoManForm::OnShow()
     USBStorManager::get ().start ();
     USBStorManager::get ().addListener (this);
 }
+std::string GetSubItemText(HWND hlist,HLVITEM item)
+{
+    if (hlist != HWND_INVALID){
+        LVSUBITEM subitem;
+        char strBuf[256] = {0,};
 
+        subitem.subItem = 0;
+        subitem.pszText = strBuf;
+        if( -1 == SendMessage(hlist,LVM_GETSUBITEMTEXT, item , (LPARAM)&subitem))
+            return "";
+        return strBuf;
+
+    }
+}
 void CAlarmInfoManForm::RefreshList(int start_index)
 {
     _lvAlarmInfo->Clear();
@@ -208,17 +220,22 @@ void CAlarmInfoManForm::RefreshList(int start_index)
     {
         THistoyRst rst;
         CTajiDbMgr::Get().ListAlaramInfo(start_index,10,rst);
-
         for(size_t i = 0 ; i < rst.size(); i++)
         {
             StringList list;
-            add_alarminfo_item(list,rst.at(i));
+            list.clear ();
+            add_alarminfo_item (list,rst.at(i));
             _lvAlarmInfo->AddSubItems(list);
         }
+        if(rst.size() > 0)
+        {
+            _lvAlarmInfo->SortByColnum (0);
+            //_lvAlarmInfo->SetSortFunction (0,listview_sortfunc);
+        }
+
     }else if(m_type == 1){
         TWeightHistoyRst rst;
         CTajiDbMgr::Get().ListWeightInfo(start_index,10,rst);
-
         for(size_t i = 0 ; i < rst.size(); i++)
         {
             StringList list;
@@ -230,6 +247,8 @@ void CAlarmInfoManForm::RefreshList(int start_index)
             else
                 _lvAlarmInfo->AddSubItems(list);
         }
+        if(rst.size() > 0)
+            _lvAlarmInfo->SortByColnum (0);
     }
 
 }
@@ -285,6 +304,7 @@ void CAlarmInfoManForm::add_alarminfo_item (StringList &alarminfoItems,THistoy& 
         {
 
             case 0:
+                memset(buff,0,20);
                 sprintf(buff,"%d",AlarmInfo.id);
                 printf("add %s\n",buff);
                 alarminfoItems.push_back(buff);

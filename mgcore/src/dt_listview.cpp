@@ -184,7 +184,61 @@ int  CListView::GetColWidth(int index)
     }
     return ret;
 }
+static std::string GetSubItemText(HWND hlist,HLVITEM item)
+{
+    if (hlist != HWND_INVALID){
+        LVSUBITEM subitem;
+        char strBuf[256] = {0,};
 
+        subitem.subItem = 0;
+        subitem.pszText = strBuf;
+        if( -1 == SendMessage(hlist,LVM_GETSUBITEMTEXT, item , (LPARAM)&subitem))
+            return "";
+        return strBuf;
+
+    }
+}
+static bool tryParse(const std::string& s, int& value)
+{
+    char temp;
+    return std::sscanf(s.c_str(), "%d%c", &value, &temp) == 1;
+}
+static int listview_sortfunc_high (HLVITEM nItem1, HLVITEM nItem2, PLVSORTDATA sortData)
+{
+    int id1,id2;
+    //fprintf(stderr,"listview_sortfunc_high col=%d high=%d\n",sortData->ncol,sortData->losorted);
+    if(tryParse (GetSubItemText(sortData->hLV,nItem1),id1))
+    {
+        if(tryParse (GetSubItemText(sortData->hLV,nItem2),id2))
+        {
+              if(id1 > id2) return -1;
+              if(id1 == id2) return 0;
+              if(id1< id2) return 1;
+        }
+    }
+    fprintf(stderr,"listview_sortfunc_high error\n");
+    return 0;
+}
+static int listview_sortfunc_low (HLVITEM nItem1, HLVITEM nItem2, PLVSORTDATA sortData)
+{
+    int id1,id2;
+    // fprintf(stderr,"listview_sortfunc_low col=%d high=%d\n",sortData->ncol,sortData->losorted);
+    if(tryParse (GetSubItemText(sortData->hLV,nItem1),id1))
+    {
+        if(tryParse (GetSubItemText(sortData->hLV,nItem2),id2))
+        {
+              if(id1 > id2) return 1;
+              if(id1 == id2) return 0;
+              if(id1< id2) return -1;
+        }
+    }
+    fprintf(stderr,"listview_sortfunc_low error\n");
+    return 0;
+}
+bool CListView::SortByColnum(int index,bool high)
+{
+   return SetSortFunction(index,high?listview_sortfunc_high:listview_sortfunc_low);
+}
 int  CListView::GetColNum()
 {
     int ret = 0;
@@ -216,6 +270,18 @@ GHANDLE CListView::AddRootItem(std::string root)
     temp.push_back(root);
     return AddSubItems(temp,25,0);
 }
+bool CListView::SetSortFunction(int colnum,PFNLVCOMPARE sortfunc)
+{
+    if( (_parent) && (_parent->m_hWnd != HWND_INVALID))
+    {
+        static LVSORTDATA  data;
+        data.hLV      = GetDlgItem (_parent->m_hWnd, _id);
+        data.losorted = 1;
+        data.ncol     = colnum;
+        return SendDlgItemMessage (_parent->m_hWnd, _id, LVM_SORTITEMS, (WPARAM)&data, (LPARAM)sortfunc);
+    }
+   return false;
+}
 GHANDLE CListView::AddSubItems(StringList subitems,int itemHeight,GHANDLE hRootItem,gal_pixel color)
 {
     LVITEM    item;
@@ -230,6 +296,7 @@ GHANDLE CListView::AddSubItems(StringList subitems,int itemHeight,GHANDLE hRootI
     subdata.image = 0;
     subdata.nTextColor = color;
     subdata.nItem   =  0;
+
 
     int num = (_colNum>subitems.size())?subitems.size():_colNum;
     for(int  i = 0 ; i < num; i++)

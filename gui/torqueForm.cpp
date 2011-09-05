@@ -338,6 +338,9 @@ void CTorQueForm::ReloadTorqueItems(std::string type, std::string armLen, std::s
             info.push_back(rst.at (i).weight);
             lv->AddSubItems (info,25);
         }
+        if(rst.size () > 0){
+            lv->SortByColnum (0);
+        }
     }
 }
 bool CTorQueForm::loadDB(std::string cur_type, std::string cur_armLen, std::string cur_rate)

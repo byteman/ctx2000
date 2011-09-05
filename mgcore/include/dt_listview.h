@@ -18,6 +18,7 @@ typedef struct tag_ListColum{
     std::string caption;
     int         colum_width;
 }TListColum;
+
 class CListView:public CCommCtrl
 {
 public:
@@ -32,8 +33,10 @@ public:
     void SetColHeight(int height);
     void SetColHeadText(int index, std::string itemText);
     std::string  GetColHeaderText(int idx);
+    bool SetSortFunction(int colnum,PFNLVCOMPARE sortfunc);
     int  GetColWidth(int index);
     int  GetColNum();
+    bool SortByColnum(int index,bool high=true);
     void ex_listview_draw_item(HWND hwnd, int idx, HDC hdc , RECT *rcDraw);
     void ex_listview_draw_bk(HWND hwnd, HLVHDR hlvhdr, HDC hdc , RECT *rcDraw);
 

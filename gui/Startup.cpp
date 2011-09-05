@@ -17,7 +17,7 @@
 #include "SingleFlatForm.h"
 #include "comdata.h"
 #include "beeper.h"
-#include "IPset.h"
+#include "AlarmInfoManForm.h"
 using Poco::Thread;
 using Poco::Event;
 using Poco::SingletonHolder;
@@ -31,6 +31,8 @@ void GUIAPI InitMainUI()
         {
             //CInitForm init;
             //init.CreateForm(HWND_DESKTOP);
+            CAlarmInfoManForm a;
+            a.CreateForm(HWND_DESKTOP);
         }
 
         switch(gMainMenuIndex)
