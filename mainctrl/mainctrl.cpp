@@ -1755,7 +1755,9 @@ EWorkMode CMainCtrl::GetDevMode()
 }
 void    CMainCtrl::DiantaiService()
 {
-    CDianTai::Get ().checkUploading ();
+    static int cnt=0;
+    if( ((cnt++)%10) == 0)
+        CDianTai::Get ().checkUploading ();
 }
 void CMainCtrl::run()
 {

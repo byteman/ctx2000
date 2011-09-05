@@ -31,8 +31,8 @@ void GUIAPI InitMainUI()
         {
             //CInitForm init;
             //init.CreateForm(HWND_DESKTOP);
-            CAlarmInfoManForm a;
-            a.CreateForm(HWND_DESKTOP);
+            //CAlarmInfoManForm a;
+            //a.CreateForm(HWND_DESKTOP);
         }
 
         switch(gMainMenuIndex)

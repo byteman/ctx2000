@@ -32,9 +32,9 @@ if [ ! -e $usbpath ] && [ ! -d $usbpath ]; then
     exit 2
 fi
 echo "export to $usbpath"
-sqlite3 -csv -header ./etc/ctx2000.sqlite3 "select tjindex as 编号,serial as 塔机序列号, dt as 时间, dist as 幅度, weight as 起吊重量, fall as 倍率, angle as 回转角度,speed as 风速  from tblrecord" > $record_output
+sqlite3 -csv -header ./etc/ctx2000.sqlite3 "select tjindex as 编号,serial as 塔机类型, dt as 时间, dist as 幅度, weight as 起吊重量, fall as 倍率, angle as 回转角度,speed as 风速,type as 报警类型  from tblrecord" > $record_output
 retcode1=$?
-sqlite3 -csv -header ./etc/ctx2000.sqlite3 "select tjindex as 编号,serial as 塔机序列号, dt as 时间, dist as 幅度, angle as 回转角度 from tbalarm" > $alarm_output
+sqlite3 -csv -header ./etc/ctx2000.sqlite3 "select tjindex as 编号,serial as 塔机类型, dt as 时间, dist as 幅度, angle as 回转角度 from tbalarm" > $alarm_output
 retcode2=$?
 
 if [ $retcode1 -ne 0 ] || [ $retcode2 -ne 0 ];then
