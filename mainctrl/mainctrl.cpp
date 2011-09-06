@@ -1902,6 +1902,7 @@ bool CMainCtrl::Start()
         PushErrorMsg("DianTai Start Failed");
         RET_ERR;
     }
+ //继电器管理模块
     if(m_dbadmin == NULL)
     {
         m_dbadmin = new CDBAdmin();

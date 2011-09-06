@@ -36,7 +36,7 @@ sqlite3 -csv -header ./etc/ctx2000.sqlite3 "select tjindex as ±àºÅ,serial as Ëþ»
 retcode1=$?
 sqlite3 -csv -header ./etc/ctx2000.sqlite3 "select tjindex as ±àºÅ,serial as Ëþ»úÀàÐÍ, dt as Ê±¼ä, dist as ·ù¶È, angle as »Ø×ª½Ç¶È from tbalarm" > $alarm_output
 retcode2=$?
-
+sync
 if [ $retcode1 -ne 0 ] || [ $retcode2 -ne 0 ];then
     echo "dump data failed"
     exit 1
