@@ -79,6 +79,7 @@ public:
 */
     GHANDLE  GetRelatedWithItem(GHANDLE item,int related);
     //bool SetSortType(SORT_TYPE type=SORT_NUM);
+    int m_sort_index;
 private:   
     GHANDLE  _AddItem(LVITEM& item,GHANDLE itemHwnd,int height);
 
@@ -87,6 +88,7 @@ private:
     DWORD _colFlags;
     int		_colNum;
     CIcon bmpBk,bmpSplit;
+    bool    m_set_data;
     //ItemsList selItemList;
 };
 

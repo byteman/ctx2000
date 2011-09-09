@@ -6,6 +6,8 @@ CListView::CListView(CTRLDATA* data,CSkinForm* parent,string typeName)
 {
     _colFlags = DEF_COLFLAG;
     _colNum = 0;
+    m_set_data = false;
+    m_sort_index = 0;
 }
 bool CListView::EnableTransparent(bool yes)
 {
@@ -184,13 +186,13 @@ int  CListView::GetColWidth(int index)
     }
     return ret;
 }
-static std::string GetSubItemText(HWND hlist,HLVITEM item)
+static std::string GetSubItemText(HWND hlist,HLVITEM item,int sub_index=0)
 {
     if (hlist != HWND_INVALID){
         LVSUBITEM subitem;
         char strBuf[256] = {0,};
 
-        subitem.subItem = 0;
+        subitem.subItem = sub_index;
         subitem.pszText = strBuf;
         if( -1 == SendMessage(hlist,LVM_GETSUBITEMTEXT, item , (LPARAM)&subitem))
             return "";
@@ -206,10 +208,13 @@ static bool tryParse(const std::string& s, int& value)
 static int listview_sortfunc_high (HLVITEM nItem1, HLVITEM nItem2, PLVSORTDATA sortData)
 {
     int id1,id2;
+    CListView* listview = (CListView*)GetWindowAdditionalData(sortData->hLV);
+    assert(listview);
+    int sort_idx = listview->m_sort_index;
     //fprintf(stderr,"listview_sortfunc_high col=%d high=%d\n",sortData->ncol,sortData->losorted);
-    if(tryParse (GetSubItemText(sortData->hLV,nItem1),id1))
+    if(tryParse (GetSubItemText(sortData->hLV,nItem1,sort_idx),id1))
     {
-        if(tryParse (GetSubItemText(sortData->hLV,nItem2),id2))
+        if(tryParse (GetSubItemText(sortData->hLV,nItem2,sort_idx),id2))
         {
               if(id1 > id2) return -1;
               if(id1 == id2) return 0;
@@ -222,10 +227,13 @@ static int listview_sortfunc_high (HLVITEM nItem1, HLVITEM nItem2, PLVSORTDATA s
 static int listview_sortfunc_low (HLVITEM nItem1, HLVITEM nItem2, PLVSORTDATA sortData)
 {
     int id1,id2;
+    CListView* listview = (CListView*)GetWindowAdditionalData(sortData->hLV);
+    assert(listview);
+    int sort_idx = listview->m_sort_index;
     // fprintf(stderr,"listview_sortfunc_low col=%d high=%d\n",sortData->ncol,sortData->losorted);
-    if(tryParse (GetSubItemText(sortData->hLV,nItem1),id1))
+    if(tryParse (GetSubItemText(sortData->hLV,nItem1,sort_idx),id1))
     {
-        if(tryParse (GetSubItemText(sortData->hLV,nItem2),id2))
+        if(tryParse (GetSubItemText(sortData->hLV,nItem2,sort_idx),id2))
         {
               if(id1 > id2) return 1;
               if(id1 == id2) return 0;
@@ -237,6 +245,13 @@ static int listview_sortfunc_low (HLVITEM nItem1, HLVITEM nItem2, PLVSORTDATA so
 }
 bool CListView::SortByColnum(int index,bool high)
 {
+   if(!m_set_data){
+       HWND lvHwnd = GetDlgItem(_parent->m_hWnd,_id);
+       if(lvHwnd == HWND_INVALID)
+           return false;
+        SetWindowAdditionalData(lvHwnd,(DWORD)this);
+        m_set_data = true;
+   }
    return SetSortFunction(index,high?listview_sortfunc_high:listview_sortfunc_low);
 }
 int  CListView::GetColNum()
@@ -278,6 +293,7 @@ bool CListView::SetSortFunction(int colnum,PFNLVCOMPARE sortfunc)
         data.hLV      = GetDlgItem (_parent->m_hWnd, _id);
         data.losorted = 1;
         data.ncol     = colnum;
+        m_sort_index  = colnum;
         return SendDlgItemMessage (_parent->m_hWnd, _id, LVM_SORTITEMS, (WPARAM)&data, (LPARAM)sortfunc);
     }
    return false;
@@ -542,9 +558,8 @@ bool CListView::EnableSkinStyle(bool yes)
         bmpBk.LoadFile("comm/lvbk.png");
         bmpSplit.LoadFile("comm/lvcol.png");
 
-
-
         SetWindowAdditionalData(lvHwnd,(DWORD)this);
+        m_set_data = true;
     }else{
         drawFuncs.pfnDrawHdrBk   = NULL;
         drawFuncs.pfnDrawHdrItem = NULL;

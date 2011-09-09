@@ -42,7 +42,11 @@
 #define SKIN_BUTTON_EXIT       {5,BUTTON_EXIT_X,BUTTON_EXIT_Y}
 #define SKIN_BUTTON_SAVE       {6,BUTTON_ADD_X-200,BUTTON_ADD_Y}
 
-
+#ifdef TOR_DEBUG
+#define TOR_DBG(fmt...) fprintf(stderr,fmt);
+#else
+#define TOR_DBG(fmt...) do { } while (0)
+#endif
 static CTorQueDB gDB;
 static TStrList  typelist;
 
@@ -261,7 +265,7 @@ CTorQueForm::OnButtonClick(skin_item_t * item)
             if( CTorQueMgr::get ().saveCfg (type,arm,rate))
             {
                 MsgBox box;
-                box.ShowBox (this,"力矩配置保存成功","提示");
+                box.ShowBox (this,"力矩配置保存成功,重启后生效","提示");
             }
         }
     }
@@ -295,10 +299,14 @@ CTorQueForm::OnButtonClick(skin_item_t * item)
     {
         USBStorage *usb = USBStorManager::get ().getUsbStorage (0);
         if(!usb){
+            MsgBox box;
+            box.ShowBox (this,"没有检测到U盘","提示");
             return;
         }
         if(!usb->exportData ("tc.db",ctx2000_torque_db))
         {
+            MsgBox box;
+            box.ShowBox (this,"导入数据失败","提示");
             return;
         }
         try{
@@ -307,10 +315,11 @@ CTorQueForm::OnButtonClick(skin_item_t * item)
              CTorQueMgr::get ().ReloadCfg ();
           }catch(...)
           {
-            printf("数据库打开失败\n");
-
+            MsgBox box;
+            box.ShowBox (this,"数据库打开失败\n","提示");
           }
-        fprintf(stderr,"import ok\n");
+          MsgBox box;
+          box.ShowBox (this,"导入数据成功,重启后生效\n","提示");
 
     }
 }
@@ -340,7 +349,7 @@ void CTorQueForm::ReloadTorqueItems(std::string type, std::string armLen, std::s
             lv->AddSubItems (info,25);
         }
         if(rst.size () > 0){
-            lv->SortByColnum (0);
+            lv->SortByColnum (1,false);
         }
     }
 }
@@ -364,11 +373,11 @@ bool CTorQueForm::loadDB(std::string cur_type, std::string cur_armLen, std::stri
            bool fold = true;
            bool equal_type=false;
            std::string type =   "塔机类型_"+ typelist.at(i);
-           fprintf(stderr,"cur=%s type=%s\n",cur_type.c_str (),typelist.at(i).c_str());
+           TOR_DBG("cur=%s type=%s\n",cur_type.c_str (),typelist.at(i).c_str());
            if(typelist.at(i) == cur_type)
            {
                //fold = false;
-               fprintf(stderr,"type=%s\n",cur_type.c_str ());
+               TOR_DBG("type=%s\n",cur_type.c_str ());
                equal_type = true;
            }
            GHANDLE tyNode = tv->AddItem(root,type,fold);
@@ -384,7 +393,7 @@ bool CTorQueForm::loadDB(std::string cur_type, std::string cur_armLen, std::stri
                     if( (lenlist.at(j) == cur_armLen) && (equal_type) )
                     {
                         equal_armlen=true;
-                        fprintf(stderr,"equal_armlen=%s\n",cur_armLen.c_str ());
+                        TOR_DBG("equal_armlen=%s\n",cur_armLen.c_str ());
                     }
 #endif
                     GHANDLE lenNode = tv->AddItem(tyNode,len,fold);
@@ -401,7 +410,7 @@ bool CTorQueForm::loadDB(std::string cur_type, std::string cur_armLen, std::stri
                                   if(equal_type && equal_armlen)
                                   {
                                       m_sel_hwnd = hwnd;
-                                     fprintf(stderr,"cur_rate=%s\n",cur_rate.c_str ());
+                                      TOR_DBG("cur_rate=%s\n",cur_rate.c_str ());
                                       equal_type   = false;
                                       equal_armlen = false;
                                   }
@@ -430,11 +439,11 @@ void CTorQueForm::OnShow()
     try{
          gDB.open(ctx2000_torque_db);
          loadDB(m_cur_tctype,m_cur_armlen,m_cur_rate);
-      }catch(...)
-      {
-        printf("数据库打开失败\n");
-
-      }
+    }catch(...)
+    {
+        TOR_DBG("open db failed\n");
+        return;
+    }
     USBStorManager::get ().start();
     USBStorManager::get ().addListener (this);
     cbx_type->SetText (TCTypeName);

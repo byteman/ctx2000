@@ -40,8 +40,8 @@ void GUIAPI InitMainUI()
                 skt = new SoftKeyboard();
                 skt->T9_Show(false);
             }
-            CTorQueForm init;
-            init.CreateForm(HWND_DESKTOP);
+            //CTorQueForm init;
+            //init.CreateForm(HWND_DESKTOP);
             //Fatal("ctx2000 startup\n");
 
         }
