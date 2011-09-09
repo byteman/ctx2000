@@ -188,13 +188,7 @@ CSingleFlatForm::~CSingleFlatForm()
 }
 void CSingleFlatForm::OnCreate()
 {
-    if(!skt)
-    {
-        skt = new SoftKeyboard();
-        skt->T9_Show(false);
-    }
     SetTimer(m_hWnd,100,10);
-
 }
 
 void CSingleFlatForm::OnShow()

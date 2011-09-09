@@ -17,7 +17,6 @@
 #include "comdata.h"
 #include "torque_mgr.h"
 #include "mainctrl.h"
-#include "SoftKeyboard.h"
 #include "guinotifyer.h"
 #include "Password.h"
 #include "jdqadmin.h"
@@ -130,10 +129,7 @@ static POS IConsPos[] = {
     {680,315},            //max weight lable
     {L_S2-5,L_S_V2+3*V_S+12}//max weight edit
 };
-/*
-软键盘输入法对象
-*/
-SoftKeyboard *skt=NULL;
+
 void CMainMenu::LoadOptionItem()
 {
     int pos = OPTION_POS_START;
@@ -267,12 +263,6 @@ void CMainMenu::OnCreate()
         else
             statusIcon[i+10] = new CStatusIcon(this,i+11,rt);
 
-    }
-
-    if(!skt)
-    {
-        skt = new SoftKeyboard();
-        skt->T9_Show(false);
     }
     SetTimer(m_hWnd,100,10);
 

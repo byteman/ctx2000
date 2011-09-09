@@ -19,20 +19,31 @@
 #include "beeper.h"
 #include "AlarmInfoManForm.h"
 #include "LoggerMgr.h"
+#include "SoftKeyboard.h"
+#include "torqueForm.h"
 using Poco::Thread;
 using Poco::Event;
 using Poco::SingletonHolder;
 
 static std::string gAppName="";
-
+/*
+软键盘输入法对象
+*/
+SoftKeyboard *skt=NULL;
 void GUIAPI InitMainUI()
 {
 
     try{
         {
-            //CInitForm init;
-            //init.CreateForm(HWND_DESKTOP);
+            if(!skt)
+            {
+                skt = new SoftKeyboard();
+                skt->T9_Show(false);
+            }
+            CTorQueForm init;
+            init.CreateForm(HWND_DESKTOP);
             //Fatal("ctx2000 startup\n");
+
         }
 
         switch(gMainMenuIndex)

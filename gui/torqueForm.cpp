@@ -89,8 +89,8 @@ static COMM_CTRL_DESC CommCtrlsDesc[] =
     {20,50,200,350,"0"},
     {230,100,550,300,"0"},
     {320,55,100,40,""},
-    {470,55,100,40,""},
-    {635,55,100,40,""}
+    {480,55,100,40,""},
+    {640,55,100,40,""}
 };
 
 static const char *icon_path[] =
@@ -160,17 +160,17 @@ CTorQueForm::CTorQueForm()
 
 #define LBL_W  80
 #define LBL_H  30
-#define LBL_X  220
+#define LBL_X  230
 #define LBL_Y  60
     for(int i = 0; i < 3; i++)
     {
-        SetRect(&m_lable[i],        LBL_X+i*180,LBL_Y,  LBL_W+LBL_X+i*180,LBL_Y+LBL_H);
+        SetRect(&m_lable[i],        LBL_X+i*150,LBL_Y,  LBL_W+LBL_X+i*180,LBL_Y+LBL_H);
     }
     InitSkinHeader("CUserManForm");
 
-    m_cur_tctype = "tc15";
-    m_cur_armlen = "75";
-    m_cur_rate   = "4";
+    m_cur_tctype = TCTypeName;
+    m_cur_armlen = StrTCArmLen;
+    m_cur_rate   = StrTCRate;
 
 }
 
@@ -364,6 +364,7 @@ bool CTorQueForm::loadDB(std::string cur_type, std::string cur_armLen, std::stri
            bool fold = true;
            bool equal_type=false;
            std::string type =   "Ëþ»úÀàÐÍ_"+ typelist.at(i);
+           fprintf(stderr,"cur=%s type=%s\n",cur_type.c_str (),typelist.at(i).c_str());
            if(typelist.at(i) == cur_type)
            {
                //fold = false;
@@ -450,6 +451,8 @@ std::string GetRealText(std::string txt)
           return "";
 
 }
+#include "SoftKeyboard.h"
+extern SoftKeyboard *skt;
 void CTorQueForm::OnCommCtrlNotify(HWND hwnd, int id, int nc)
 {
     if(id == tv->GetId ())
@@ -479,6 +482,16 @@ void CTorQueForm::OnCommCtrlNotify(HWND hwnd, int id, int nc)
                     }
 
                 }
+            }
+        }
+    }
+    else if( id == cbx_type->GetId () || id == cbx_arm_len->GetId () || id==cbx_beilv->GetId ())
+    {
+        if(nc==CBN_SETFOCUS)
+        {
+            if(skt)
+            {
+                skt->T9_Show(true);
             }
         }
     }
