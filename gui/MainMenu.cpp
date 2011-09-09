@@ -38,19 +38,19 @@
 /*
 所有的文本框位置
 */
-#define EDIT_ANGLE    {L_S,L_S_V+0*V_S, E_W,E_H,""}
-#define EDIT_DIST     {L_S,L_S_V+1*V_S, E_W,E_H,""}
-#define EDIT_WEIGHT   {L_S,L_S_V+2*V_S, E_W,E_H,""}
-#define EDIT_SPEED    {L_S,L_S_V+3*V_S, E_W,E_H,""}
-#define EDIT_HEIGHT   {L_S,L_S_V+4*V_S, E_W,E_H,""}
-#define EDIT_UP_ANGL  {L_S,L_S_V+5*V_S, E_W,E_H,""}
+#define EDIT_ANGLE    {L_S-2,L_S_V+0*V_S, E_W+2,E_H,""}
+#define EDIT_DIST     {L_S-2,L_S_V+1*V_S, E_W+2,E_H,""}
+#define EDIT_WEIGHT   {L_S,L_S_V+2*V_S, E_W+1,E_H,""}
+#define EDIT_SPEED    {L_S,L_S_V+3*V_S, E_W+1,E_H,""}
+#define EDIT_HEIGHT   {L_S,L_S_V+4*V_S, E_W+1,E_H,""}
+#define EDIT_UP_ANGL  {L_S,L_S_V+5*V_S, E_W+1,E_H,""}
 
 
-#define EDIT_FALL               {150,350,30, 30, ""}
+#define EDIT_FALL               {150,350,30, 24, ""}
 #define STATIC_FALL_PERCENT     {142,80, 50,200, ""}
-#define EDIT_T_H                {L_S2,L_S_V2+0*V_S, E_W+2,E_H,""}
-#define EDIT_L_ARM              {L_S2,L_S_V2+1*V_S, E_W+2,E_H+2,""}
-#define EDIT_S_ARM              {L_S2,L_S_V2+2*V_S, E_W+2,E_H,""}
+#define EDIT_T_H                {L_S2-2,L_S_V2+0*V_S, E_W+4,E_H,""}
+#define EDIT_L_ARM              {L_S2-2,L_S_V2+1*V_S, E_W+4,E_H+2,""}
+#define EDIT_S_ARM              {L_S2-2,L_S_V2+2*V_S, E_W+4,E_H,""}
 #define EDIT_MAX_W              {L_S2-3,L_S_V2+3*V_S+15, E_W+2,E_H,""}
 #define EDIT_MSG1               {300, 5,   150, 25,""} //7
 #define EDIT_MSG2               {205, 35,  243, 32,""} //8
@@ -272,7 +272,7 @@ void CMainMenu::OnShow()
 {
     fast_angle->Create();
     fast_dist->Create();
-    fast_fall->Create();
+    fast_fall->Create(Align_Center);
     fast_tower_height->Create();
     fast_long_arm_len->Create();
     fast_short_arm_len->Create();

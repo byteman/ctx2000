@@ -11,6 +11,7 @@ CFastStatic::CFastStatic(COMM_CTRL_DESC* desc,CSkinForm* parent)
     m_h      = desc->h;
     SetRect(&m_rect,0 , 0, desc->w, desc->h);
     Font24 = CFontMgr::Get().GetFont("stxinwei",24);
+    format  = DT_WORDBREAK;
 }
 CFastStatic::~CFastStatic()
 {
@@ -18,7 +19,7 @@ CFastStatic::~CFastStatic()
 
     }
 }
-bool CFastStatic::Create()
+bool CFastStatic::Create(EAlign align)
 {
     if(m_hwnd == HWND_INVALID)
         m_hwnd =  GetDlgItem(m_parent->m_hWnd,m_ctrl->GetId());
@@ -32,7 +33,21 @@ bool CFastStatic::Create()
     else{
         fprintf(stderr,"can't get hwnd\n");
     }
-
+    switch(align)
+    {
+        case Align_Center:
+            format |= DT_CENTER|DT_VCENTER;
+            break;
+        case Align_Left:
+            format |= DT_LEFT;
+            break;
+        case Align_Right:
+            format |= DT_RIGHT;
+            break;
+        default:
+            format |= DT_LEFT;
+            break;
+    }
     return (m_hwnd!=HWND_INVALID);
 }
 bool CFastStatic::Attach(CCommCtrl* ctrl)
@@ -77,7 +92,9 @@ void CFastStatic::SetText(std::string value,gal_pixel bkcolor,CFont* font)
     SetBkColor(m_hdcMem,bkcolor);
     SetBrushColor(m_hdcMem,bkcolor);
     FillBox(m_hdcMem,m_rect.left,m_rect.top,RECTW(m_rect),RECTH(m_rect));
-    DrawText(m_hdcMem,  value.c_str(),value.length (),&m_rect,DT_LEFT|DT_TOP|DT_WORDBREAK);
+
+
+    DrawText(m_hdcMem,  value.c_str(),value.length (),&m_rect,format);
     BitBlt(m_hdcMem,0,0,m_w,m_h,m_hdc,0,0,0);
 
     ReleaseDC(m_hdc);

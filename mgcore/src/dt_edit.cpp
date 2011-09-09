@@ -42,16 +42,31 @@ ES_LEFT
 ES_CENTER
 ES_RIGHT
 */
-void CEdit::SetTextAligned(int aligned)
+void CEdit::SetTextAligned(EAlign aligned)
 {
     if( (_parent) && (_parent->m_hWnd != HWND_INVALID))
     {
-        //可以提供一个类级别的函数，修改该类的所有属性
-        //IncludeWindowStyle();
-        //ExcludeWindowExStyle
-        //IncludeWindowExStyle
-        //GetWindowExStyle
-        //BOOL GUIAPI ExcludeWindowStyle (HWND hWnd, DWORD dwStyle)
+        HWND hEdit = GetDlgItem(_parent->m_hWnd,_id);
+        if(hEdit == HWND_INVALID)
+            return;
+        switch(aligned)
+        {
+            case Align_Center:
+                IncludeWindowStyle(hEdit,ES_CENTER);
+                break;
+            case Align_Left:
+                IncludeWindowStyle(hEdit,ES_LEFT);
+                break;
+            case Align_Right:
+                IncludeWindowStyle(hEdit,ES_RIGHT);
+                break;
+            default:
+                IncludeWindowStyle(hEdit,ES_LEFT);
+                break;
+        }
+        if(_parent && (_parent->m_hWnd != HWND_INVALID))
+            InvalidateRect(hEdit,NULL,TRUE);
+
     }
 }
 std::string  CEdit::GetSelText()

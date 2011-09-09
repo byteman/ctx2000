@@ -16,7 +16,7 @@ do
 	exportpath=$exportpath:../$item/lib/$arch
 	#echo $exportpath
 done
-export LD_LIBRARY_PATH=$exportpath:/usr/local/lib
+export LD_LIBRARY_PATH=$exportpath:/usr/local/lib:../lib
 while :
 do
 ./ctx2000

@@ -8,7 +8,7 @@ public:
     CFastStatic(COMM_CTRL_DESC* desc,CSkinForm* parent);
     ~CFastStatic();
     bool Attach(CCommCtrl* ctrl);
-    bool Create();
+    bool Create(EAlign align=Align_Left);
     void SetText(double value,gal_pixel bkcolor=0,CFont* font=0);
     void SetText(std::string value,gal_pixel bkcolor=0,CFont* font=0);
 
@@ -23,7 +23,7 @@ private:
     RECT        m_rect;
     char        buf[32];
     CFont*      Font24;
-
+    UINT        format;
 };
 
 #endif // PERCENT_H

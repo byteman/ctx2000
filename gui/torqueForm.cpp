@@ -306,7 +306,7 @@ CTorQueForm::OnButtonClick(skin_item_t * item)
         if(!usb->exportData ("tc.db",ctx2000_torque_db))
         {
             MsgBox box;
-            box.ShowBox (this,"导入数据失败","提示");
+            box.ShowBox (this,"导入数据失败,U盘中没有检测到数据","提示");
             return;
         }
         try{

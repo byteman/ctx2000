@@ -1,6 +1,12 @@
 #ifndef DT_CTRL_H
 #define DT_CTRL_H
 #include "SkinForm.h"
+
+typedef enum{
+    Align_Left=0,
+    Align_Right,
+    Align_Center
+}EAlign;
 class CCtrl
 {
 public:

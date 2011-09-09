@@ -5,13 +5,14 @@
 
 #define DEF_EDIT_EXSTYLE WS_EX_TRANSPARENT
 #define DEF_EDIT_STYLE   WS_VISIBLE| WS_GROUP
+
 class CEdit:public CCommCtrl
 {
 public:
     CEdit(CTRLDATA* data,CSkinForm* parent,string typeName=CTRL_EDIT);
     CEdit(COMM_CTRL_DESC* desc,CSkinForm* parent,string typeName=CTRL_EDIT);
     virtual ~CEdit();
-    void SetTextAligned(int aligned);
+    void SetTextAligned(EAlign aligned);
     void EnablePassword(bool yes);
     void EnableUpperCase(bool yes);
     void EnableLowerCase(bool yes);
