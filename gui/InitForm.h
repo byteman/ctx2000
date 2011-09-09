@@ -31,7 +31,7 @@ public:
     void    device_check();
     void    check_kernel();
     void    addItem(std::string text,int height,int err=0);
-
+    void    StartCtx2000();
 private:
     TRECTVECT items_vct;
     RECT header_rect;

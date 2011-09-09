@@ -110,9 +110,9 @@ int MiniGUIMain (int argc, const char* argv[])
         return 2;
     }
 
-    //CInitForm init;
-    //init.CreateForm(HWND_DESKTOP);
-#if 1
+    CInitForm init;
+    init.CreateForm(HWND_DESKTOP);
+#if 0
     if( ! CMainCtrl::Get().Start())
     {
         fprintf(stderr,"MainCtrl Start Failed\n");

@@ -369,7 +369,7 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
     CDianTai::Get().ClearMessage(); //在申请加入之前要把电台缓存的数据全部丢掉
     //listen 5s to recv rtmsg;
     CDianTai::Get().ResetCount();
-    while( (CurTime-StartTime) < 5000000) //等待5s看是否能收到主机获取其他从机的数据
+    while( (CurTime-StartTime) < 10000000) //等待5s看是否能收到主机获取其他从机的数据
     {
         if(CDianTai::Get().GetMessage(msg))//这个数据有可能是主机发的，也有可能是从机回应的
         {
@@ -1501,7 +1501,7 @@ bool CMainCtrl::DealWorkSiteInfo()
 void CMainCtrl::ParseCollideStatus()
 {
     int slewing = 0, trolley=0;
-#if 0
+#if 1
     for(int i = 0 ;i < 12; i++)
     {
         if(m_control_state.b[i] != m_old_ctrl_state.b[i])
@@ -1781,6 +1781,19 @@ void    CMainCtrl::DiantaiService()
     static int cnt=0;
     if( ((cnt++)%10) == 0)
         CDianTai::Get ().checkUploading ();
+}
+void    CMainCtrl::SignalMode()
+{
+    while(!m_quit)
+    {
+        DealWorkSiteInfo();
+        DealHeightInfo();
+        if(g_show_max_weight)
+            LjService();
+        if(g_show_speed)
+            WildService ();
+        DiantaiService();
+    }
 }
 void CMainCtrl::run()
 {

@@ -223,7 +223,7 @@ CMainMenu::CMainMenu()
     m_lables.AddIcons(ICons,TABLESIZE(ICons));
     m_signal.LoadFile("ctx2000/signal.png",6);
     m_cur_signal_db = 1;
-    gDispFilter[1].m_span = 0.01;// for percent
+    gDispFilter[disp_percent].m_span = 0.01;// for percent
 #endif
 
     InitSkinHeader("MainMenu");

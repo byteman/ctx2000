@@ -254,8 +254,8 @@ public:
                 m_buf.clear();
 
                 m_port->Write((unsigned char*)m_cmd,4);
-                Poco::Thread::sleep(50);
-                m_port->Read(m_buf, 0, 50);
+                Poco::Thread::sleep(100);
+                m_port->Read(m_buf, 0, 100);
 
                 if(m_buf.size() != 13)
                 {
@@ -263,6 +263,7 @@ public:
                 }
                 memcpy(buf,m_buf.data()+1,11);
                 buf[11]=0;
+                //fprintf(stderr,"%s\n",buf);
                 if(Poco::NumberParser::tryParse(buf,tmp))
                 {
                     ad_angle = tmp;//m_filter[5].Filter(tmp);
@@ -270,6 +271,7 @@ public:
                 }
             }catch(LibSerial::SerialPort::ReadTimeout& e)
             {
+
                 #ifdef AD_DEBUG
                     AD_DBG("ad1 data=");
                     for(size_t i = 0; i <m_buf.size();i++)

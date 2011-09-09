@@ -258,7 +258,28 @@ void   CInitForm::OnShow()
     //}
         //启动主控制模块
 }
+void    CInitForm::StartCtx2000()
+{
+    if( ! CMainCtrl::Get().Start())
+    {
+        fprintf(stderr,"MainCtrl Start Failed\n");
 
+        for(size_t i = 0 ; i < CMainCtrl::Get().m_errList.size(); i++)
+        {
+            std::cerr << CMainCtrl::Get().m_errList.at(i) << std::endl;
+        }
+        for(size_t i = 0 ; i < CMainCtrl::Get().m_warnList.size(); i++)
+        {
+            std::cerr << CMainCtrl::Get().m_warnList.at(i) << std::endl;
+        }
+        CBeeper::get().BeepMs(200,100000);
+        Poco::Thread::sleep(400);
+        CBeeper::get().BeepMs(200,100000);
+        Poco::Thread::sleep(400);
+        CBeeper::get().BeepMs(200,100000);
+    }
+
+}
 void   CInitForm::OnTimer(int ID)
 {
     TIniFile cfg("ctx2000.conf");
@@ -270,7 +291,7 @@ void   CInitForm::OnTimer(int ID)
     }
 
     KillTimer(m_hWnd,100);
-
+    StartCtx2000();
     Close();
 
 }
