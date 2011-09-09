@@ -155,15 +155,16 @@ CTorQueForm::CTorQueForm()
     _icons.AddIcons(icon_path,ARRAY_SIZE(icon_path,char*));
 
     Font16 = CFontMgr::Get().GetFont("stxinwei",16);
+    assert(Font16);
     Font16->setFontColor(RGB2Pixel(HDC_SCREEN,0,0,0));
 
-#define LBL_W  100
+#define LBL_W  80
 #define LBL_H  30
 #define LBL_X  220
 #define LBL_Y  60
     for(int i = 0; i < 3; i++)
     {
-        SetRect(&m_lable[i],        LBL_X+i*180,LBL_Y,  LBL_W+LBL_X+i*150,LBL_Y+LBL_H);
+        SetRect(&m_lable[i],        LBL_X+i*180,LBL_Y,  LBL_W+LBL_X+i*180,LBL_Y+LBL_H);
     }
     InitSkinHeader("CUserManForm");
 
@@ -179,8 +180,8 @@ CTorQueForm::~CTorQueForm()
 
 static const char* lables[] = {
     "塔机类型:",
-    "     臂长:",
-    "     倍率:"
+    "    臂长:",
+    "    倍率:"
 };
 void
 CTorQueForm::OnPaint(HWND hWnd)
@@ -366,6 +367,7 @@ bool CTorQueForm::loadDB(std::string cur_type, std::string cur_armLen, std::stri
            if(typelist.at(i) == cur_type)
            {
                //fold = false;
+               fprintf(stderr,"type=%s\n",cur_type.c_str ());
                equal_type = true;
            }
            GHANDLE tyNode = tv->AddItem(root,type,fold);
@@ -381,6 +383,7 @@ bool CTorQueForm::loadDB(std::string cur_type, std::string cur_armLen, std::stri
                     if( (lenlist.at(j) == cur_armLen) && (equal_type) )
                     {
                         equal_armlen=true;
+                        fprintf(stderr,"equal_armlen=%s\n",cur_armLen.c_str ());
                     }
 #endif
                     GHANDLE lenNode = tv->AddItem(tyNode,len,fold);
@@ -397,7 +400,7 @@ bool CTorQueForm::loadDB(std::string cur_type, std::string cur_armLen, std::stri
                                   if(equal_type && equal_armlen)
                                   {
                                       m_sel_hwnd = hwnd;
-
+                                     fprintf(stderr,"cur_rate=%s\n",cur_rate.c_str ());
                                       equal_type   = false;
                                       equal_armlen = false;
                                   }
@@ -420,6 +423,7 @@ bool CTorQueForm::loadDB(std::string cur_type, std::string cur_armLen, std::stri
 }
 void CTorQueForm::OnShow()
 {
+
     InitListCol ();
     tv->EnableIconStyle(true);
     try{

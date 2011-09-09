@@ -99,6 +99,7 @@ public:
         {
              static double tmp_car_dist  = 0;
              static double tmp_dg_weight = 0;
+             static double tmp_dg_height = 0;
 
             ad_car_dist = m_filter[0].Filter ((data.at(1)<<8)+data.at(2));
 
@@ -118,7 +119,7 @@ public:
             }
             //PostMessage(GetActiveWindow(),0x804,0,0);
             ad_height =  m_filter[1].Filter((data.at(3)<<8)+data.at(4));
-            g_dg_height=(ad_height-g_bd[BD_HEIGHT].zero_ad)/g_bd[BD_HEIGHT].bd_k+g_bd[BD_HEIGHT].start_value;
+            tmp_dg_height=(ad_height-g_bd[BD_HEIGHT].zero_ad)/g_bd[BD_HEIGHT].bd_k+g_bd[BD_HEIGHT].start_value;
             ad_weight =  m_filter[2].Filter((data.at(5)<<8)+data.at(6));
 
             double k = g_bd[BD_WEIGHT].bd_k;
@@ -139,12 +140,13 @@ public:
             }
 
             tmp_dg_weight=(ad_weight-z)/k;
-
+#if 0
             if(gMainMenuIndex==2) //single device mode
             {
                 ad_angle = m_filter[3].Filter((data.at(7)<<8)+data.at(8));
                 calc_angle (ad_angle);
             }
+#endif
             ad_angle_x    = m_filter[4].Filter((data.at(9)<<8)+data.at(10));
             ad_angle_y    = m_filter[5].Filter((data.at(11)<<8)+data.at(12));
 
@@ -177,6 +179,7 @@ public:
             //fprintf(stderr,"x=%0.2f y=%0.2f\n",g_angle_x,g_angle_y);
             g_dg_weight= tmp_dg_weight<0?0:tmp_dg_weight;
             g_car_dist = tmp_car_dist<0?0:tmp_car_dist;
+            g_dg_height= tmp_dg_height<0?0:tmp_dg_height;
         }
     }
     virtual void run()
@@ -305,11 +308,15 @@ bool CDataAcquire::Init(std::string path1,std::string path2)
 {
     if(!m_aq_work1)
         m_aq_work1 = new CDataAcquireWorker1(path1,m_nq);
+    if(!m_aq_work2)
+        m_aq_work2 = new CDataAcquireWorker2(path2,m_nq);
+#if 0
     if(gMainMenuIndex==1) //multi type
     {
         if(!m_aq_work2)
             m_aq_work2 = new CDataAcquireWorker2(path2,m_nq);
     }
+#endif
     return true;
 
 }

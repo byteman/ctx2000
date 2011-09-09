@@ -25,6 +25,7 @@
 #include <guinotifyer.h>
 #include "iniFile.h"
 #include "gprs.h"
+#include "LoggerMgr.h"
 using Poco::SingletonHolder;
 using Poco::StringTokenizer;
 using Poco::NotificationQueue;
@@ -32,7 +33,13 @@ using Poco::NotificationQueue;
 
 Poco::Timespan g_SubWaitSubTime(3,0);
 TIniFile cfg;
-
+#define CTX_DEBUG
+#ifdef CTX_DEBUG
+#define CTX_DBG(fmt...) fprintf(stderr,fmt);
+//#define CTX_DBG(fmt...) TraceEx(fmt)
+#else
+#define CTX_DBG(fmt...) do { } while (0)
+#endif
 
 class CDBAdmin:public Poco::Runnable
 {
@@ -69,7 +76,7 @@ public:
         {
             try
             {
-                //fprintf(stderr,"Wait QCollisionNotification Msg\n");
+                //CTX_DBG("Wait QCollisionNotification Msg\n");
                 Poco::AutoPtr<Poco::Notification> pNf(Poco::NotificationQueue::defaultQueue().waitDequeueNotification(1000));
                 if (pNf)
                 {
@@ -145,10 +152,10 @@ int       CMainCtrl::ValideTCNum()
  {
     int result = 0;
     int valid_num = ValideTCNum();
-    //fprintf(stderr,"valid=%d\n",valid_num);
+    //CTX_DBG("valid=%d\n",valid_num);
     if(valid_num == 1){
         result =  m_local_id;
-        //fprintf(stderr,"m_local_id=%d\n",m_local_id);
+        //CTX_DBG("m_local_id=%d\n",m_local_id);
     }else{
         for(int i =1 ;i <= TCTotalNum;i++){
             if( (g_TC[i].Valide) && (i != m_main_id)){
@@ -176,7 +183,6 @@ std::string CMainCtrl::GetNextID()
 {
     bool found = false;
     std::string result = "0";
-    DBG("RightNo=%d\n",RightNo);
 
     if (RightNo==TCTotalNum ){
         for(int i = 1; i <= TCTotalNum; i++){
@@ -234,7 +240,7 @@ std::string      CMainCtrl::build_qurey_msg()
     std::string Next;
     std::string result;
     std::string tmpStr;
-    DBG("localid=%d,mode=%d\n",m_local_id,m_mode);
+
     if(m_mode==mode_master){
         Next = GetNextID();
 
@@ -267,7 +273,7 @@ std::string      CMainCtrl::build_qurey_msg()
 
         int nextId = RightNo;//Poco::NumberParser::parse(Next);
         int maxid  = MaxNo() ;
-        //fprintf(stderr,"maxid=%d,nextid=%d\n",maxid,nextId);
+        //CTX_DBG("maxid=%d,nextid=%d\n",maxid,nextId);
         if(maxid == nextId){//已经呼叫了最后一个有效塔机，申请加入一个新的塔机
             tmpStr=Poco::format("%2s",GetAddID());
         }else
@@ -301,7 +307,7 @@ void      CMainCtrl::UpdateTCStatus()
             cnt++;
         }
     }
-    //fprintf(stderr,"valid=%d\n",cnt);
+    //CTX_DBG("valid=%d\n",cnt);
     //DBG("%s main_id=%d local_id=%d\n",__FUNCTION__,m_main_id,m_local_id);
     g_TC[m_main_id].Valide  = true; //主机始终有效
     g_TC[m_local_id].Valide = true; //本机始终有效
@@ -309,22 +315,21 @@ void      CMainCtrl::UpdateTCStatus()
 void      CMainCtrl::DripMainNoAndAddNo(std::string &MainNo, std::string &RightNo, std::string &AddNo)
 {
     CTX_Message msg;
-    int id = 0;
     if(CDianTai::Get().GetMessage(msg))
     {
-          int rightNo,senderId;
+          int    rightNo,senderId;
           double angle,position,AngleSpeed,Dang;
-          fprintf(stderr,"DripMainNoAndAddNo %s\n",msg.context.c_str());
+          CTX_DBG("DripMainNoAndAddNo %s\n",msg.context.c_str());
           Poco::StringTokenizer token(msg.context,"N");
-#if 1
+#ifdef CTX_DEBUG
             for(size_t i = 0 ; i < token.count(); i++)
             {
-                fprintf(stderr,"token[%d]=%s\n",i,token[i].c_str());
+                CTX_DBG("token[%d]=%s\n",i,token[i].c_str());
             }
 #endif
           if(token.count() != 7)
           {
-               fprintf(stderr,"DripMainNoAndAddNo Error MsgCount =%d\n",token.count());
+               CTX_DBG("DripMainNoAndAddNo Error MsgCount =%d\n",token.count());
                return;
           }
 
@@ -360,7 +365,7 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
     RightNo = "0";
     AddNo   = "0";
     m_mode  = mode_unknown;
-    fprintf(stderr,"m_mode=%d\n",m_mode);
+
     CDianTai::Get().ClearMessage(); //在申请加入之前要把电台缓存的数据全部丢掉
     //listen 5s to recv rtmsg;
     CDianTai::Get().ResetCount();
@@ -368,7 +373,7 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
     {
         if(CDianTai::Get().GetMessage(msg))//这个数据有可能是主机发的，也有可能是从机回应的
         {
-                fprintf(stderr,"%s Recv RtMsg\n",__FUNCTION__);
+                CTX_DBG("WatchNetWork Capture Message ----> Maybe Find Master\n");
                 FoundM = true;
                 break;
         }
@@ -377,7 +382,7 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
 
         CurTime.update();
     }
-    //fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
+
     if(FoundM){
         //等待100ms，再接收一个消息,在这100ms中可能已经收到了好几个数
         Poco::Thread::sleep(100);
@@ -387,35 +392,31 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
         }
         while( (RightNo=="0") || (AddNo != CurID) || (MainDevID == CurID) ){
             Poco::Thread::sleep(10);
-            //fprintf(stderr,"%s %d\n",__FUNCTION__,__LINE__);
             if(CDianTai::Get().CheckMessage())
             {
                 DripMainNoAndAddNo(MainDevID,RightNo,AddNo);
-                fprintf(stderr,"%s DripMainNoAndAddNo Ok MainId=%s RightId=%s AddNo=%s CurId\n",__FUNCTION__,MainDevID.c_str(),RightNo.c_str(),AddNo.c_str());
+                CTX_DBG("DripMainNoAndAddNo Ok MainId=%s RightId=%s AddNo=%s CurId\n",MainDevID.c_str(),RightNo.c_str(),AddNo.c_str());
                 if( (RightNo!="0") && (AddNo == CurID) && (MainDevID != CurID))
                 {
-                    //fprintf(stderr,"========================\n");
+
                 }
             }
         }
-        fprintf(stderr,"********************%s ok MainId=%s RightId=%s AddNo=%s***************************\n",__FUNCTION__,MainDevID.c_str(),RightNo.c_str(),AddNo.c_str());
+        CTX_DBG("WatchNetwork ok MainId=%s RightId=%s AddNo=%s\n",MainDevID.c_str(),RightNo.c_str(),AddNo.c_str());
         m_mode    = mode_slave;
         if(!Poco::NumberParser::tryParse(MainDevID,m_main_id))
         {
-            fprintf(stderr,"*************Cant Convert MainDevID=%s\n",MainDevID.c_str());
+            CTX_DBG("Cant Convert MainDevID=%s\n",MainDevID.c_str());
         }
 
-        fprintf(stderr,"DripMainNoAndAddNo ok MainDevID=%d local_id=%d\n ",m_main_id,m_local_id);
+        CTX_DBG("DripMainNoAndAddNo ok MainDevID=%d local_id=%d\n ",m_main_id,m_local_id);
         g_TC[m_local_id].Valide = true;
         g_TC[m_main_id].Valide  = true;
         AddState = true;
 
-
-        //Poco::Thread::sleep(20);
-
         StartTime.update();
         CurTime=StartTime;
-        DBG("[Ready Add TC] Wait Slave Ack\n");
+        CTX_DBG("[Ready Add TC] Wait Slave Ack\n");
         //再接受一个有效数据然后发送本机信息 [就是接收被查询的从机所发来的信息，必须要接收到这个消息后，才能发送，否则造成同时发送的冲突]
         //因为新加入塔机号是跟随在塔机查询信息中的，所以被查询塔机也会回应信息，而且是立即回应，而新加入塔机会等待20ms后，并且收到了该回应
         //后才会回应自己的信息,如果只有一个主机的情况下，那么主机的下一条加入指令1s内它也能收到，故可以加入成功
@@ -425,16 +426,15 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
                 AddState=false;
             }
             Poco::Thread::sleep(20);
-            fprintf(stderr,"New Add TC wait [Slave RightNo Ack]\n");
+            CTX_DBG("New Add TC wait [Slave RightNo Ack]\n");
         }
         if(!AddState)
         {
-            fprintf(stderr,"[Ready Add TC] Wait Slave Ack Failed\n");
+            CTX_DBG("[Ready Add TC] Wait Slave Ack Failed\n");
             return;
         }
         //这里为什么要回应数据,因为要发送塔机加入命令
         std::string sendInfo = build_qurey_msg();
-        fprintf(stderr,"========================[New Add TC] Send %s\n",sendInfo.c_str());
         CDianTai::Get().SendMessage(sendInfo);
         lastDateTime.update();
         sendInfoTime=lastDateTime;
@@ -443,7 +443,7 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
         //严格要求主机在等待过程中不能收到任何一条数据,才能变为主机
         if( CDianTai::Get().GetReceivedCount() > 0) //虽然没有收到正确的数据，但是有可能是收到了乱码。所以也不能让其加入网络
         {
-            fprintf(stderr,"WatchNetwork Failed beacuse of GetReceivedCount=%d\n",CDianTai::Get().GetReceivedCount());
+            Error("WatchNetwork Failed beacuse of GetReceivedCount=%d\n",CDianTai::Get().GetReceivedCount());
             AddState  = false;
         }else{
             for(int i = 1; i <= TCTotalNum; i++)
@@ -477,12 +477,12 @@ void      CMainCtrl::DistillData(std::string &msg,std::string &ID)
 #if 0
     for(size_t i = 0 ; i < token.count(); i++)
     {
-        fprintf(stderr,"token[%d]=%s\n",i,token[i].c_str());
+        CTX_DBG("token[%d]=%s\n",i,token[i].c_str());
     }
 #endif
     if(token.count() != 7)
     {
-         fprintf(stderr,"DistillData Error MsgCount =%d\n",token.count());
+         CTX_DBG("DistillData Error MsgCount =%d\n",token.count());
          return;
     }
     ID = "0"; //先给一个默认值，即使转换失败了或则数据有误差，也有一个默认值
@@ -529,24 +529,24 @@ void CMainCtrl::slave_loop()
             lastDateTime.update();
             DistillData(msg.context,ID); //ID是主机呼叫的塔机编号。
             span = lastDateTime-sendInfoTime; //计算多长时间没有收到主机发来的请求包了，超时后重新申请加入网络，说明主机已经更换，或则主机已经认为该从机已经下线。我们需要重新申请加入网络
-            //fprintf(stderr,"span=%d\n",span.seconds());
+            //CTX_DBG("span=%d\n",span.seconds());
 
             if(span > sub_wait_span){
-                fprintf(stderr,"========slave receive timeout re WatchNetWork\n");
+                CTX_DBG("========slave receive timeout re WatchNetWork\n");
             #if 1
                 AddState=false;
                 while(AddState==false)
                       WatchNetWork(MainMachineID,AddState);
             #endif
             }
-            //fprintf(stderr,"slave_loop3\n");
+            //CTX_DBG("slave_loop3\n");
             if(ID==CurID){ //收到了主机发给本机的查询消息
                 std::string sendInfo = build_qurey_msg();
                 CDianTai::Get().SendMessage(sendInfo);
                 sendInfoTime.update();
-                //fprintf(stderr,"slave %s %s\n",ID.c_str(),sendInfo.c_str());
+                //CTX_DBG("slave %s %s\n",ID.c_str(),sendInfo.c_str());
             }
-            //fprintf(stderr,"slave_loop4\n");
+            //CTX_DBG("slave_loop4\n");
         }
 
     }else{ //如果这里不休息，那么从机的cpu占用率很高
@@ -554,13 +554,13 @@ void CMainCtrl::slave_loop()
         //自己不主动变为主机，从机不主动变为主机，但是可以申请加入网络变成从机
         Poco::Thread::sleep(20);
     }
-    //fprintf(stderr,"slave_loop\n");
+    //CTX_DBG("slave_loop\n");
     //Poco::Thread::sleep(20); //可以把这里的等待给去掉，因为在调用slave_loop之前已经消耗过25ms了
 
 }
 void CMainCtrl::master_loop()
 {
-    //fprintf(stderr,"master_loop\n");
+    //CTX_DBG("master_loop\n");
     CTX_Message msg;
     std::string ID;
     int  msg_count = 0;
@@ -582,19 +582,19 @@ void CMainCtrl::master_loop()
     {
         curTime.update();
         span = curTime - start;
-        //fprintf(stderr,"Master Wait Recv RtMsg\n");
+        //CTX_DBG("Master Wait Recv RtMsg\n");
         while (CDianTai::Get().GetMessage(msg)) {
                 msg_count++;
-                //fprintf(stderr,"Master recv %d RtMsg %d,context=%s\n",msg_count+1,msg.wType,msg.context.c_str());
+                //CTX_DBG("Master recv %d RtMsg %d,context=%s\n",msg_count+1,msg.wType,msg.context.c_str());
                 DistillData(msg.context,ID);
                 RecieveValidData=true;
         }
         if(RecieveValidData)
         {
-            //fprintf(stderr,"Master Recved %d Data\n",msg_count);
+            //CTX_DBG("Master Recved %d Data\n",msg_count);
             break;
         }else{
-            //fprintf(stderr,"Master Can't Recved Slave's Ack\n");
+            //CTX_DBG("Master Can't Recved Slave's Ack\n");
         }
         Poco::Thread::sleep(10);
     }
@@ -604,10 +604,10 @@ void CMainCtrl::master_loop()
     }
 
     MaxTCNo = MaxNo(); //获取有效塔机编号中最后一个塔机
-    //fprintf(stderr,"Master MaxTCNo=%d RightNo=%d\n",MaxTCNo,RightNo);
+    //CTX_DBG("Master MaxTCNo=%d RightNo=%d\n",MaxTCNo,RightNo);
     //判断能否接收到塔机加入的回应信息
     if(MaxTCNo == RightNo){//如果呼叫完了最后一个塔机 ，并且发送过申请加入一个新的塔机的指令，就等待接收新加入塔机的回应
-        //fprintf(stderr,"Master wait New Add TC %d slave's ack \n",RightNo);
+        //CTX_DBG("Master wait New Add TC %d slave's ack \n",RightNo);
         //等待200ms，等新加入塔机的响应消息
         //Poco::Thread::sleep(200);
 
@@ -620,12 +620,12 @@ void CMainCtrl::master_loop()
         }
         if(repeat <= 10){
             DistillData(msg.context,ID);
-            fprintf(stderr,"Master received New Add TC slave's ack id=%s \n",ID.c_str());
+            CTX_DBG("Master received New Add TC slave's ack id=%s \n",ID.c_str());
 
             UpdateTCStatus();
         }
     }else{ //不是最后一次加入塔机呼叫数据的回应
-        //fprintf(stderr,"Call Slave %d Without AddTC\n",RightNo);
+        //CTX_DBG("Call Slave %d Without AddTC\n",RightNo);
     }
 /*
 取在线设备列表中的下一个编号，作为呼叫的塔机编号，如果呼叫塔机编号是最后一个在线设备编号
@@ -633,7 +633,7 @@ void CMainCtrl::master_loop()
 */
     std::string sendInfo = build_qurey_msg();
 
-    //fprintf(stderr,"Master SendData %s len=%d\n",sendInfo.c_str(),sendInfo.length());
+    //CTX_DBG("Master SendData %s len=%d\n",sendInfo.c_str(),sendInfo.length());
     CDianTai::Get().SendMessage(sendInfo);
 
 }
@@ -747,12 +747,12 @@ void      CMainCtrl::CreateDefaultTjParam()
 
 void CMainCtrl::PushErrorMsg(std::string msg)
 {
-    fprintf(stderr,"%s\n",msg.c_str());
+    CTX_DBG("%s\n",msg.c_str());
     m_errList.push_back("******error*****: " + msg);
 }
 void CMainCtrl::PushWarnMsg(std::string  msg)
 {
-    fprintf(stderr,"%s\n",msg.c_str());
+    CTX_DBG("%s\n",msg.c_str());
     m_warnList.push_back("******warn******: " + msg);
 }
 bool CMainCtrl::ReloadParam()
@@ -789,7 +789,7 @@ bool CMainCtrl::ReloadParam()
 
 
     g_gprs_com   = Poco::trim(cfg.ReadString("serial","gprs_com","/dev/ttymxc3"));
-
+    g_gps_com    = Poco::trim(cfg.ReadString("serial","gps_com","/dev/tts1"));
     std::cerr << "type: "      << TCTypeName  <<  std::endl;
     std::cerr << "ArmLen: "    << StrTCArmLen <<  std::endl;
     std::cerr << "Fall: "      << StrTCRate  <<  std::endl;
@@ -816,7 +816,7 @@ bool CMainCtrl::ReloadParam()
                 break;
             TcNum++;
             tcfile.read((char*)&g_TC[TcNum],sizeof(TTjRecord));
-            fprintf(stderr,"TC[%d].Serial=%s height=%6.2f\n",TcNum,g_TC[TcNum].Serial,\
+            CTX_DBG("TC[%d].Serial=%s height=%6.2f\n",TcNum,g_TC[TcNum].Serial,\
                     g_TC[TcNum].Height);
             g_TC[TcNum].Angle      = 0;
             g_TC[TcNum].AngleSpeed = 0;
@@ -829,7 +829,7 @@ bool CMainCtrl::ReloadParam()
                 CurID = Poco::format("%d",TcNum);
                 m_local_id = TcNum;
                 g_local_id = m_local_id;
-                fprintf(stderr,"Find CurID:%s\n",CurID.c_str());
+                CTX_DBG("Find CurID:%s\n",CurID.c_str());
                 FindLocalId =  true;
             }
             g_TC[TcNum].InfoTime = 0; //fix 因为刚初始化的塔机数据接收时间为0，才能在状态更新的时候，设置为不在线状态
@@ -862,14 +862,14 @@ bool CMainCtrl::ReloadParam()
             //if(count < 11)
             {
                 tcfile.read((char*)&wba[count++],sizeof(Twb));
-                fprintf(stderr,"wba[%d] VertexNum=%d height=%6.2f\n",count,wba[count].VertexNum,wba[count].h);
+                CTX_DBG("wba[%d] VertexNum=%d height=%6.2f\n",count,wba[count].VertexNum,wba[count].h);
             }
         }
         tcfile.close();
     }else{
         PushWarnMsg("protect.red open failed");
     }
-    fprintf(stderr,"Total wbNum=%d Vaild Num=%d\n",wbNum,count);
+    CTX_DBG("Total wbNum=%d Vaild Num=%d\n",wbNum,count);
 
     for (int i = 1; i <= TCTotalNum ; i++)
     {
@@ -895,23 +895,23 @@ bool CMainCtrl::ReloadParam()
 #endif
 //获取有效塔机信息,就是在tc.red文件中存在设备序列号的塔机
     int ret = GetValidTjList(g_valid_tj_list);
-    fprintf(stderr,"Total Tower Number = %d\n",ret);
+    CTX_DBG("Total Tower Number = %d\n",ret);
     for(int i = 0 ; i < ret; i++)
     {
-        fprintf(stderr,"valid id[%d] = %d\n",i,g_valid_tj_list.at(i));
+        CTX_DBG("valid id[%d] = %d\n",i,g_valid_tj_list.at(i));
     }
 //在塔机参数已经读取成功后，再获取与本机id冲突的设备id列表
     ret = GetConflictTjList(g_conflict_tj_list);
-    fprintf(stderr,"Conflict Tower Number = %d\n",ret);
+    CTX_DBG("Conflict Tower Number = %d\n",ret);
     for(int i = 0 ; i < ret; i++)
     {
-        fprintf(stderr,"conflict localid[%d] : id[%d] = %d\n",g_local_id,i,g_conflict_tj_list.at(i));
+        CTX_DBG("conflict localid[%d] : id[%d] = %d\n",g_local_id,i,g_conflict_tj_list.at(i));
     }
     //初始化标定系数
     InitBDParam();
 //计算ABC角度
     calc_angle(czwzb,g_TC[g_local_id].x,g_TC[g_local_id].y,g_angle_A,g_angle_B,g_angle_C);
-    fprintf(stderr,"angleA=%0.2f,angleB=%0.2f,angleC=%0.2f\n",g_angle_A,g_angle_B,g_angle_C);
+    CTX_DBG("angleA=%0.2f,angleB=%0.2f,angleC=%0.2f\n",g_angle_A,g_angle_B,g_angle_C);
     InitAlgoData();
 
     return true;
@@ -1002,7 +1002,7 @@ void CMainCtrl::InitAlgoData()
         g_qtzs[i].m_carrier_pos      = 0;
         g_qtzs[i].m_long_arm_angle   = 0;
 
-        fprintf(stderr,"g_qtzs[%d] car_pos=%0.2f height=%0.2f longarm=%0.2f shortarm=%0.2f,x=%0.2f y=%0.2f brake_dist=%0.2f stop_dist=%0.2f slowdown_dist=%0.2f v_slow_dist=%0.2f v_brake_dist=%0.2f\n",\
+        CTX_DBG("g_qtzs[%d] car_pos=%0.2f height=%0.2f longarm=%0.2f shortarm=%0.2f,x=%0.2f y=%0.2f brake_dist=%0.2f stop_dist=%0.2f slowdown_dist=%0.2f v_slow_dist=%0.2f v_brake_dist=%0.2f\n",\
                 i,g_qtzs[i].m_carrier_pos,g_qtzs[i].m_height,g_qtzs[i].m_long_arm_len,g_qtzs[i].m_short_arm_len,\
                 g_qtzs[i].m_coord.x,g_qtzs[i].m_coord.y,BrakeDis,DangerDis,WarnDis,VWarnDis,VStopDis);
     }
@@ -1015,7 +1015,7 @@ void CMainCtrl::InitAlgoData()
             int id = g_conflict_tj_list.at(i);
             if(id < NUMBER_OF_QTZ)
             {
-                fprintf(stderr,"local TC[%d] Conflict with TC[%d]\n",g_local_id,id);
+                CTX_DBG("local TC[%d] Conflict with TC[%d]\n",g_local_id,id);
                 g_qtzs[local_tower_id].QtzAddDetect(&g_qtzs[id-1]);
 
             }
@@ -1024,14 +1024,14 @@ void CMainCtrl::InitAlgoData()
     /*
     初始化区域检测
 */
-    fprintf(stderr,"Loading Diving Paramter\n");
+    CTX_DBG("Loading Diving Paramter\n");
     g_polys.clear();
     for(int i=0; i < wbNum; i++)
     {
 
         if( ( wba[i].VertexNum > 0 ) && ( wba[i].VertexNum < 6 ) )
         {
-            fprintf(stderr,"Add Diving[%d] VertexNum=%d Height=%0.2f\n",i,wba[i].VertexNum,wba[i].h);
+            CTX_DBG("Add Diving[%d] VertexNum=%d Height=%0.2f\n",i,wba[i].VertexNum,wba[i].h);
             PolyDef poly;
             poly.clear();
             poly.height  = wba[i].h;
@@ -1045,7 +1045,7 @@ void CMainCtrl::InitAlgoData()
                 z.y = y;
                 poly.push_back(z);
 
-                fprintf(stderr,"Divding[%d] Vertex[%d]  X=%0.2f Y=%0.2f\n",i,j,x,y);
+                CTX_DBG("Divding[%d] Vertex[%d]  X=%0.2f Y=%0.2f\n",i,j,x,y);
             }
             //一定要使区域处于闭合状态，否则算法模块检测会出错。
             poly.push_back(poly[0]);
@@ -1059,7 +1059,7 @@ void CMainCtrl::InitAlgoData()
         {
             g_qtzs[local_tower_id].QtzAddDetect( &g_polys[i]);
             //for(size_t j = 0 ; j < g_polys[i].size(); j++)
-            //    fprintf(stderr,"x=%0.2f y=%0.2f\n",g_polys[i].at(j).x,g_polys[i].at(j).y);
+            //    CTX_DBG("x=%0.2f y=%0.2f\n",g_polys[i].at(j).x,g_polys[i].at(j).y);
         }
 
     }
@@ -1098,6 +1098,7 @@ void CMainCtrl::SaveSiteInfo()
 }
 void CMainCtrl::SaveDivideInfo()
 {
+#if 0
     ofstream divfile("DivideLine.tc");
 
     if(divfile.good()){
@@ -1107,14 +1108,14 @@ void CMainCtrl::SaveDivideInfo()
         }
     }
 
-    /*
+
     FILE* fp = fopen("DivideLine.tc","wb+");
     for(int i = 0 ;i < DividePointNum;i++)
     {
         fwrite((const void*)&DividePoint[i],sizeof(TDividePoint),1,fp);
     }
     fclose(fp);
-    */
+#endif
 }
 void CMainCtrl::SaveBuildingInfo()
 {
@@ -1138,7 +1139,7 @@ void CMainCtrl::SaveBuildingInfo()
 
     fclose(fp);
     */
-    fprintf(stderr,"wbnum=%d\n",wbNum);
+    CTX_DBG("wbnum=%d\n",wbNum);
 }
 void CMainCtrl::SaveWorksiteInfomation()
 {
@@ -1157,22 +1158,22 @@ bool CMainCtrl::DealHeightInfo()
     double TCHeight;
     //DBG("%s %d\n",__FUNCTION__,__LINE__);
     if(CDianTai::Get().GetMessage(msg,2)){
-        fprintf(stderr,"Recv HeighInfo =%s\n",msg.context.c_str());
+        CTX_DBG("Recv HeighInfo =%s\n",msg.context.c_str());
         Poco::StringTokenizer token(msg.context,"N");
         if(token.count() != 2)
         {
-            fprintf(stderr,"Error Height\n");
+            CTX_DBG("Error Height\n");
             return false;
         }
         if(!Poco::NumberParser::tryParse(token[0],HTCNo))         {
-            fprintf(stderr,"Error No %s\n",token[0].c_str());
+            CTX_DBG("Error No %s\n",token[0].c_str());
             return false;
         }
         if(!Poco::NumberParser::tryParseFloat(token[1],TCHeight)) {
-            fprintf(stderr,"Error Height %s \n",token[1].c_str());
+            CTX_DBG("Error Height %s \n",token[1].c_str());
             return false;
         }
-        fprintf(stderr,"Modify TC[%d] Height=%6.2f\n",HTCNo,TCHeight);
+        CTX_DBG("Modify TC[%d] Height=%6.2f\n",HTCNo,TCHeight);
 
         g_TC[HTCNo].Height = TCHeight;
         SaveTowerCraneInfo();
@@ -1184,11 +1185,11 @@ bool CMainCtrl::DealHeightInfo()
         if(m_mode == mode_master)
         {
             //Poco::Thread::sleep(m_local_id*1000);
-            fprintf(stderr,"Master[%d] DealHeightInfo OK\n",m_local_id);
+            CTX_DBG("Master[%d] DealHeightInfo OK\n",m_local_id);
             //Poco::Thread::sleep(3000);
 
         }else{
-            fprintf(stderr,"Slave[%d] DealWorkSiteInfo OK\n",m_local_id);
+            CTX_DBG("Slave[%d] DealWorkSiteInfo OK\n",m_local_id);
         }
         Poco::Thread::sleep(m_local_id*1000);
 
@@ -1209,7 +1210,7 @@ bool  CMainCtrl::DiveideSettingInfomation(std::string &msg)
         {
             if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_wksp[i][j]))
             {
-                fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+                CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
                 return false;
             }
 
@@ -1221,7 +1222,7 @@ bool  CMainCtrl::DiveideSettingInfomation(std::string &msg)
         {
             if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_czwzb[i][j]))
             {
-                fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+                CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
                 return false;
             }
 
@@ -1231,59 +1232,59 @@ bool  CMainCtrl::DiveideSettingInfomation(std::string &msg)
 
     if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_YNAngle))
     {
-        fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+        CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
         return false;
     }
     curpos+=8;
     if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_VStopDis))
     {
-        fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+        CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
         return false;
     }
     curpos+=8;
 
     if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_VWarnDis))
     {
-        fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+        CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
         return false;
     }
     curpos+=8;
 
     if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_BrakeDis))
     {
-        fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+        CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
         return false;
     }
     curpos+=8;
 
     if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_DangerDis))
     {
-        fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+        CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
         return false;
     }
     curpos+=8;
     if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_WarnDis))
     {
-        fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+        CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
         return false;
     }
     curpos+=8;
     if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_AddAngle))
     {
-        fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+        CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
         return false;
     }
     curpos+=8;
 
     if(!Poco::NumberParser::tryParse(Poco::trim(msg.substr(curpos,2)),tmp_TcNum))
     {
-        fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+        CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
         return false;
     }
     curpos+=2;
     if( (tmp_TcNum < 1) || (tmp_TcNum >20 ))
     {
-        fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+        CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
         return false;
     }
 //塔机信息
@@ -1291,45 +1292,45 @@ bool  CMainCtrl::DiveideSettingInfomation(std::string &msg)
         memset(tmp_TC[i].Serial,0,20);
         msg.substr(curpos,8).copy(tmp_TC[i].Serial,8);
         curpos+=8;
-        fprintf(stderr,"serial=%s\n",tmp_TC[i].Serial);
+        CTX_DBG("serial=%s\n",tmp_TC[i].Serial);
         if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_TC[i].x))
         {
-            fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+            CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
             return false;
         }
         curpos+=8;
         if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_TC[i].y))
         {
-            fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+            CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
             return false;
         }
         curpos+=8;
         if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_TC[i].Height))
         {
             std::string height = msg.substr(curpos,8);
-            fprintf(stderr,"Invalid Param %s %d %s\n",__FUNCTION__,__LINE__,height.c_str ());
+            CTX_DBG("Invalid Param %s %d %s\n",__FUNCTION__,__LINE__,height.c_str ());
             return false;
         }
         curpos+=8;
         if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_TC[i].LongArmLength))
         {
-            fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+            CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
             return false;
         }
         curpos+=8;
-        fprintf(stderr,"left=%s\n",msg.substr(curpos,50).c_str());
+        CTX_DBG("left=%s\n",msg.substr(curpos,50).c_str());
         if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_TC[i].ShortArmLenght))
         {
-            fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+            CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
             return false;
         }
         curpos+=8;
-        fprintf(stderr,"left=%s\n",msg.substr(curpos,50).c_str());
+        CTX_DBG("left=%s\n",msg.substr(curpos,50).c_str());
         int  dy_flag = 0;
         std::string tmp = Poco::trim(msg.substr(curpos,1));
         if(!Poco::NumberParser::tryParse(tmp,dy_flag))
         {
-            fprintf(stderr,"Invalid Param %s %d dy_flag=%s\n",__FUNCTION__,__LINE__,tmp.c_str());
+            CTX_DBG("Invalid Param %s %d dy_flag=%s\n",__FUNCTION__,__LINE__,tmp.c_str());
 
             return false;
         }
@@ -1338,37 +1339,37 @@ bool  CMainCtrl::DiveideSettingInfomation(std::string &msg)
         curpos+=1;
         if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_TC[i].Rs))
         {
-            fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+            CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
             return false;
         }
         curpos+=8;
         if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_TC[i].L1))
         {
-            fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+            CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
             return false;
         }
         curpos+=8;
         if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_TC[i].L2))
         {
-            fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+            CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
             return false;
         }
         curpos+=8;
         if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_TC[i].a0))
         {
-            fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+            CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
             return false;
         }
         curpos+=8;
         if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_TC[i].Dang))
         {
-            fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+            CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
             return false;
         }
         curpos+=8;
         if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_TC[i].L))
         {
-            fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+            CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
             return false;
         }
         curpos+=8;
@@ -1377,26 +1378,26 @@ bool  CMainCtrl::DiveideSettingInfomation(std::string &msg)
  //保护区域信息
     if(!Poco::NumberParser::tryParse(Poco::trim(msg.substr(curpos,2)),tmp_wbNum))
     {
-        fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+        CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
         return false;
     }
     curpos+=2;
     if( (tmp_wbNum < 1) || (tmp_wbNum >6 ))
     {
-        fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+        CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
         return false;
     }
     for(int i = 0 ; i < tmp_wbNum; i++ ){
         if(!Poco::NumberParser::tryParse(Poco::trim(msg.substr(curpos,2)),tmp_wba[i].VertexNum))
         {
-            fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+            CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
             return false;
         }
         curpos+=2;
 
         if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_wba[i].h))
         {
-            fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+            CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
             return false;
         }
         curpos+=8;
@@ -1404,13 +1405,13 @@ bool  CMainCtrl::DiveideSettingInfomation(std::string &msg)
         for(int j = 0; j < tmp_wba[i].VertexNum; j++){
             if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_wba[i].Pointxy[j][0]))
             {
-                fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+                CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
                 return false;
             }
             curpos+=8;
             if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_wba[i].Pointxy[j][1]))
             {
-                fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+                CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
                 return false;
             }
             curpos+=8;
@@ -1419,25 +1420,25 @@ bool  CMainCtrl::DiveideSettingInfomation(std::string &msg)
 
     if(!Poco::NumberParser::tryParse(Poco::trim(msg.substr(curpos,2)),tmp_DividePointNum))
     {
-        fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+        CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
         return false;
     }
     curpos+=2;
     if( (tmp_DividePointNum < 1) || (tmp_DividePointNum >10 ))
     {
-        fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+        CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
         return false;
     }
     for(int i = 0 ; i < tmp_DividePointNum; i++){
         if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_DividePoint[i].x))
         {
-            fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+            CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
             return false;
         }
         curpos+=8;
         if(!Poco::NumberParser::tryParseFloat(Poco::trim(msg.substr(curpos,8)),tmp_DividePoint[i].y))
         {
-            fprintf(stderr,"Invalid Param %s %d\n",__FUNCTION__,__LINE__);
+            CTX_DBG("Invalid Param %s %d\n",__FUNCTION__,__LINE__);
             return false;
         }
         curpos+=8;
@@ -1474,7 +1475,7 @@ bool CMainCtrl::DealWorkSiteInfo()
     if(CDianTai::Get().GetMessage(msg,3)){
         if(!DiveideSettingInfomation(msg.context))
         {
-            fprintf(stderr,"=======Invalid Upload Parameter\n");
+            CTX_DBG("=======Invalid Upload Parameter\n");
             return false;
         }
         SaveWorksiteInfomation();
@@ -1484,11 +1485,11 @@ bool CMainCtrl::DealWorkSiteInfo()
         if(m_mode == mode_master)
         {
             //Poco::Thread::sleep(m_local_id*1000);
-            fprintf(stderr,"Master[%d] DealWorkSiteInfo OK\n",m_local_id);
+            CTX_DBG("Master[%d] DealWorkSiteInfo OK\n",m_local_id);
             Poco::Thread::sleep(3000);
 
         }else{
-            fprintf(stderr,"Slave[%d] DealWorkSiteInfo OK\n",m_local_id);
+            CTX_DBG("Slave[%d] DealWorkSiteInfo OK\n",m_local_id);
         }
         TGuiMsg msg(2,"Restart App");
         TGuiNotifyer::Get().Notify(&msg);
@@ -1500,6 +1501,7 @@ bool CMainCtrl::DealWorkSiteInfo()
 void CMainCtrl::ParseCollideStatus()
 {
     int slewing = 0, trolley=0;
+#if 0
     for(int i = 0 ;i < 12; i++)
     {
         if(m_control_state.b[i] != m_old_ctrl_state.b[i])
@@ -1508,6 +1510,7 @@ void CMainCtrl::ParseCollideStatus()
             PostMessage(GetActiveWindow(),MSG_CONTRL_MSG,(WPARAM)i,(LPARAM)(m_control_state.b[i]?1:0));
         }
     }
+#endif
     if(m_control_state.b1 != m_old_ctrl_state.b1){
 
         if(m_control_state.b1) //右回转限制
@@ -1519,21 +1522,24 @@ void CMainCtrl::ParseCollideStatus()
 
         if(m_control_state.b2) //回转制动
         {
-            trolley |= 0x2;
+            //trolley |= 0x2;
+            trolley |= 0x1;
         }
     }
     if(m_control_state.b3 != m_old_ctrl_state.b3){
 
         if(m_control_state.b3)//左回转限制
         {
-            trolley |= 0x4;
+            //trolley |= 0x4;
+            trolley |= 0x1;
         }
     }
     if(m_control_state.b4 != m_old_ctrl_state.b4){
 
         if(m_control_state.b4) //小车向外高速限制
         {
-            slewing |= 0x1;
+            //trolley |= 0x1;
+            slewing |= 0x2;
          }
     }
     if(m_control_state.b5 != m_old_ctrl_state.b5){
@@ -1545,22 +1551,26 @@ void CMainCtrl::ParseCollideStatus()
     }
     if(m_control_state.b6 != m_old_ctrl_state.b6){
         if(m_control_state.b6){ //小车向内运行停车
-            slewing |= 0x4;
+            //slewing |= 0x4;
+            slewing |= 0x2;
         }
     }
     if(m_control_state.b7 != m_old_ctrl_state.b7){
         if(m_control_state.b7){ //小车向内高速限制
-            slewing |= 0x8;
+            //slewing |= 0x8;
+            slewing |= 0x2;
         }
     }
     if(m_control_state.b9 != m_old_ctrl_state.b9){
         if(m_control_state.b9){ //左回转高速限制
-            trolley |= 0x8;
+            //trolley |= 0x8;
+            trolley |= 0x1;
         }
     }
     if(m_control_state.b10 != m_old_ctrl_state.b10){
         if(m_control_state.b10){//右回转高速限制
-            trolley |= 0x16;
+            //trolley |= 0x16;
+            trolley |= 0x1;
         }
     }
 
@@ -1572,11 +1582,24 @@ void CMainCtrl::ParseCollideStatus()
         {
             if(!m_dbadmin->PostMessage(new QCollisionNotification(0,slewing,trolley)))
             {
-                fprintf(stderr,"Post Collision Message to DBAdmin Failed\n");
+                CTX_DBG("Post Collision Message to DBAdmin Failed\n");
             }
         }
         //Poco::NotificationQueue::defaultQueue().enqueueNotification();
     }
+}
+bool      CMainCtrl::NotifyBypass(bool on)
+{
+    if(m_dbadmin)
+    {
+        if(!m_dbadmin->PostMessage(new QCollisionNotification(0,0xAA,on?1:0)))
+        {
+            CTX_DBG("Post Collision Message to DBAdmin Failed\n");
+
+        }
+        return true;
+    }
+    return false;
 }
 /*
 在这个地方填充算法模块的实时参数
@@ -1587,7 +1610,7 @@ void CMainCtrl::CollideDetect()
     int index= g_local_id-1;
     int id   = 0;
 //用本机的实时参数，更新本机和算法的实时参数,这样做会造成本机塔机刷新时快时慢，因为有200ms的延时
-    //fprintf(stderr,"g_local_id=%d angle=%0.2f\n",g_local_id,g_TC[g_local_id].Angle);
+    //CTX_DBG("g_local_id=%d angle=%0.2f\n",g_local_id,g_TC[g_local_id].Angle);
     /*
     g_TC[g_local_id].Angle    = g_angle*3.14/180;
 
@@ -1613,7 +1636,7 @@ void CMainCtrl::CollideDetect()
             g_qtzs[index].m_sarm_angle   = 0;
         }
         g_qtzs[index].m_online   = true; //本机始终在线
-        //fprintf(stderr,"local [%d] angle=%0.2f dang=%0.2f h=%0.2f p=%0.2f\n",index+1,g_qtzs[index].m_long_arm_angle,g_qtzs[index].m_sarm_angle,g_qtzs[index].m_height,g_qtzs[index].m_carrier_pos);
+        //CTX_DBG("local [%d] angle=%0.2f dang=%0.2f h=%0.2f p=%0.2f\n",index+1,g_qtzs[index].m_long_arm_angle,g_qtzs[index].m_sarm_angle,g_qtzs[index].m_height,g_qtzs[index].m_carrier_pos);
     }
 //根据电台传来的周围塔机的实时参数，更新冲突塔机的算法模块需要的实时参数
     for(size_t i = 0; i < g_conflict_tj_list.size(); i++)
@@ -1626,13 +1649,13 @@ void CMainCtrl::CollideDetect()
             g_qtzs[id].m_sarm_angle       = g_TC[id+1].Dang;
             g_qtzs[id].m_online           = g_TC[id+1].Valide; //其他塔机的在线状态
         }
-        //fprintf(stderr,"tj conflict[%d] angle=%0.2f dang=%0.2f h=%0.2f p=%0.2f \n",id+1,g_qtzs[id].m_long_arm_angle,g_qtzs[id].m_sarm_angle,g_qtzs[id].m_height,g_qtzs[id].m_carrier_pos);
+        //CTX_DBG("tj conflict[%d] angle=%0.2f dang=%0.2f h=%0.2f p=%0.2f \n",id+1,g_qtzs[id].m_long_arm_angle,g_qtzs[id].m_sarm_angle,g_qtzs[id].m_height,g_qtzs[id].m_carrier_pos);
     }
 
     QtzCollideDetectOne(&g_qtzs[index]);
     m_control_state = g_qtzs[index].m_controled_status;
     ParseCollideStatus();
-    //fprintf(stderr,"state=%d%d%d%d%d%d%d%d%d%d%d%d\n",m_control_state.b1,m_control_state.b2,m_control_state.b3,\
+    //CTX_DBG("state=%d%d%d%d%d%d%d%d%d%d%d%d\n",m_control_state.b1,m_control_state.b2,m_control_state.b3,\
     //        m_control_state.b4,m_control_state.b5,m_control_state.b6,m_control_state.b7,m_control_state.b8,\
     //        m_control_state.b9,m_control_state.b10,m_control_state.b11,m_control_state.b12);
 }
@@ -1672,7 +1695,7 @@ void      CMainCtrl::SendAlarmData()
     data.m_dg_speed  =  0;
     if(!gprs::get().send_tc_data(0,data))
     {
-        fprintf(stderr,"send_alarm_tc_data failed\n");
+        CTX_DBG("send_alarm_tc_data failed\n");
     }
 }
 void   CMainCtrl::SendWetRecord(double qd_max_weight,bool alarm)
@@ -1699,7 +1722,7 @@ void    CMainCtrl::LjService()
     static int  alarmType = 0;     //起吊重量的报警类型 0：每次起吊过程中的最大重量没有超过额定载荷的95% 1：重量超过95%
     static double max_weight = 0;  //每次起吊过程中的最大重量
     //static double max_speed  = 0; //起吊过程中的最大风速
-    //fprintf(stderr,"out_status=%d\n",out_state);
+    //CTX_DBG("out_status=%d\n",out_state);
     //根据力矩输出的状态来控制继电器的动作
 
     out_state     = CTorQueMgr::get ().getState(g_car_dist,g_dg_weight);
@@ -1738,7 +1761,7 @@ void    CMainCtrl::LjService()
             {
                 if(!m_dbadmin->PostMessage(new QCollisionNotification(1,g_car_dist,max_weight,g_tc_rate,g_angle,g_wild_speed,alarmType)))
                 {
-                    fprintf(stderr,"Post Fall  Message to DBAdmin Failed\n");
+                    CTX_DBG("Post Fall  Message to DBAdmin Failed\n");
                 }
             }
             SendWetRecord (max_weight,alarmType?true:false);
@@ -1771,7 +1794,7 @@ void CMainCtrl::run()
         WatchNetWork(MainMachineID,AddState);
     }
 
-    fprintf(stderr,"watch ok mode=%d mainID=%s\n",m_mode,MainMachineID.c_str());
+    CTX_DBG("watch ok mode=%d mainID=%s\n",m_mode,MainMachineID.c_str());
     while(!m_quit)
     {
         CollideDetect();
@@ -1818,32 +1841,32 @@ void blockRtSignal()
 
 bool CMainCtrl::Stop()
 {
-    fprintf(stderr,"==============Begin Stop Ctx2000=============\n");
+    CTX_DBG("==============Begin Stop Ctx2000=============\n");
     m_quit  = true;
 
     if(false == m_quitEvt.tryWait(1000))
     {
-        fprintf(stderr,"MainCtrl Stop Failed\n");
+        CTX_DBG("MainCtrl Stop Failed\n");
     }
 
     if(m_dbadmin){
         if(false == m_dbadmin->stop())
         {
-            fprintf(stderr,"DBAdmin Stop Failed\n");
+            CTX_DBG("DBAdmin Stop Failed\n");
         }
         delete m_dbadmin;
     }
     if(false == CDataAcquire::Get().Stop())
     {
-        fprintf(stderr,"DataAcquire Stop Failed\n");
+        CTX_DBG("DataAcquire Stop Failed\n");
     }
     if(false == CDianTai::Get().Stop())
     {
-        fprintf(stderr,"DianTai Stop Failed\n");
+        CTX_DBG("DianTai Stop Failed\n");
     }
     if(false == CJDQAdmin::Get().Stop())
     {
-        fprintf(stderr,"JDQAdmin Stop Failed\n");
+        CTX_DBG("JDQAdmin Stop Failed\n");
     }
     return true;
 }
@@ -1851,13 +1874,14 @@ bool CMainCtrl::mainctrl_dev_ctrl_func(int state)
 {
     if(state==1){
         CJDQAdmin::Get ().ResetDevice (1);
-        fprintf(stderr,"ResetDevice called -----> wait 5s for reset ok\n");
+        CTX_DBG("ResetDevice called -----> wait 5s for reset ok\n");
         Poco::Thread::sleep (5000); //wait 5s for reset ok;
     }
+    return true;
 }
 bool dev_ctrl_func(void* arg, int state)
 {
-    fprintf(stderr,"***********8reset gprs\n");
+    CTX_DBG("dev_ctrl_func reset gprs\n");
     CMainCtrl* ctrl = (CMainCtrl*)arg;
     if(ctrl)
         return ctrl->mainctrl_dev_ctrl_func (state);
@@ -1886,6 +1910,13 @@ bool CMainCtrl::Start()
         PushErrorMsg("StartAcquireMcuAD  Failed");
         RET_ERR;
     }
+
+    if( ! CDataAcquire::Get().StartAcquireAngleEncoder (g_encoder_com) )
+    {
+        PushErrorMsg("StartAcquireAngleEncoder  Failed");
+        RET_ERR;
+    }
+#if 0
     if(gMainMenuIndex == 1) // when multi type,call StartAcquireAngleEncoder
     {
         if( ! CDataAcquire::Get().StartAcquireAngleEncoder (g_encoder_com) )
@@ -1894,7 +1925,7 @@ bool CMainCtrl::Start()
             RET_ERR;
         }
     }
-
+#endif
 
 //启动电台模块
     if( ! CDianTai::Get().Start(g_diantai_com))
@@ -1921,8 +1952,9 @@ bool CMainCtrl::Start()
         PushErrorMsg("CJDQAdmin Start Failed");
         RET_ERR;
     }
-    CJDQAdmin::Get ().ResetDevice (1);
+
 #if 1
+    CJDQAdmin::Get ().ResetDevice (1);
 //启动gprs上传模块
     if( !gprs::get ().start (gprs_remote_ip,gprs_remote_port,gprs_dtu_id))
     {

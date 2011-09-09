@@ -79,6 +79,7 @@ public:
     void SaveBuildingInfo();
     void onTimer(Timer& timer);
     EWorkMode GetDevMode();
+    bool      NotifyBypass(bool on);
     ControledStatus m_control_state,m_old_ctrl_state;
 private:
     EWorkMode m_mode;

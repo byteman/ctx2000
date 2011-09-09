@@ -4,6 +4,18 @@
 #include <sys/prctl.h>
 #include <stdarg.h>
 
+TDispParam::TDispParam(double span):
+    m_span(span)
+{
+    prev = 1234567;
+}
+bool TDispParam::need_update(double value)
+{
+    if(fabs(value-prev) < m_span) return false;
+    prev = value;
+    return true;
+}
+TDispParam gDispFilter[8];
 TBD g_bd[13];
 TID g_valid_tj_list;
 TID g_conflict_tj_list;
@@ -26,7 +38,7 @@ TTjRecord g_TC[21];
 double g_car_dist,g_dg_height,g_dg_weight,g_angle,g_wild_speed,g_up_angle,g_angle_x,g_angle_y;
 double g_rated_weight=0;
 double g_angle_A,g_angle_B,g_angle_C;
-std::string g_diantai_com,g_ad_com,g_encoder_com,g_gprs_com;
+std::string g_diantai_com,g_ad_com,g_encoder_com,g_gprs_com,g_gps_com;
 int encoder_addr;
 //gprs===
 std::string gprs_remote_ip;

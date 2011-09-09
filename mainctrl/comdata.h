@@ -57,7 +57,7 @@ extern  int ad_angle, ad_up_angle, ad_car_dist, ad_weight,ad_angle_x,ad_angle_y,
 extern  double g_car_dist,g_dg_height,g_dg_weight,g_angle,g_wild_speed,g_up_angle,g_angle_x,g_angle_y;
 extern  double g_rated_weight;
 extern double g_angle_A,g_angle_B,g_angle_C;
-extern std::string g_diantai_com,g_ad_com,g_encoder_com,g_gprs_com;
+extern std::string g_diantai_com,g_ad_com,g_encoder_com,g_gprs_com,g_gps_com;
 extern int encoder_addr;
 //======================gprs data====================
 extern std::string gprs_remote_ip;
@@ -68,6 +68,22 @@ extern bool g_show_speed;
 extern bool g_show_dg_height;
 extern bool g_show_max_weight;
 extern int  g_alarm_wild_speed;
+struct TDispParam{
+    TDispParam(double span=0.2);
+    bool need_update(double value);
+    double prev;
+    double m_span;
+};
+typedef enum{
+    disp_angle=0,
+    disp_weight,
+    disp_height,
+    disp_speed,
+    disp_percent,
+    disp_dist,
+    disp_up
+}EDisp;
+extern TDispParam gDispFilter[8];
 //======================ЩҪĲ,ҲеĹ̶======================
 extern double          tmp_wksp[4][2]; //64
 extern double          tmp_czwzb[2][2]; //32

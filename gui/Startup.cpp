@@ -18,6 +18,7 @@
 #include "comdata.h"
 #include "beeper.h"
 #include "AlarmInfoManForm.h"
+#include "LoggerMgr.h"
 using Poco::Thread;
 using Poco::Event;
 using Poco::SingletonHolder;
@@ -31,8 +32,7 @@ void GUIAPI InitMainUI()
         {
             //CInitForm init;
             //init.CreateForm(HWND_DESKTOP);
-            //CAlarmInfoManForm a;
-            //a.CreateForm(HWND_DESKTOP);
+            //Fatal("ctx2000 startup\n");
         }
 
         switch(gMainMenuIndex)
@@ -47,10 +47,10 @@ void GUIAPI InitMainUI()
             {
                 if(g_TC[g_local_id].Dyna)
                 {
-                    CSingleFlatForm form;
+                    CSingleDynForm form;
                     form.CreateForm( HWND_DESKTOP );
                 }else{
-                    CSingleDynForm form;
+                    CSingleFlatForm form;
                     form.CreateForm( HWND_DESKTOP );
                 }
 
@@ -79,7 +79,7 @@ void GUIAPI InitMainUI()
     std::cerr << "Exit guiApp\n";
 
 }
-
+#include "torqueForm.h"
 int MiniGUIMain (int argc, const char* argv[])
 {
 
@@ -99,8 +99,9 @@ int MiniGUIMain (int argc, const char* argv[])
         return 2;
     }
 
-    //启动主控制模块
-
+    //CInitForm init;
+    //init.CreateForm(HWND_DESKTOP);
+#if 1
     if( ! CMainCtrl::Get().Start())
     {
         fprintf(stderr,"MainCtrl Start Failed\n");
@@ -119,7 +120,7 @@ int MiniGUIMain (int argc, const char* argv[])
         Poco::Thread::sleep(400);
         CBeeper::get().BeepMs(200,100000);
     }
-
+#endif
     //启动主界面模块
     InitMainUI ();
 	

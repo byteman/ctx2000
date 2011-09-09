@@ -20,7 +20,9 @@
 #include "BmpRes.h"
 #include <Poco/LocalDateTime.h>
 #include <Poco/DateTimeFormatter.h>
-
+#include "Password.h"
+#include "jdqadmin.h"
+#include "MsgBox.h"
 
 #define SKIN_BUTTON_MAINCFG     {1,22,410}
 #define SKIN_BUTTON_BYPASS      {2,92,410}
@@ -138,8 +140,6 @@ CSingleFlatForm::CSingleFlatForm()
 #if 1
     fast_angle           = new CFastStatic(&commctrls[0],this);
     fast_dist            = new CFastStatic(&commctrls[1],this);
-    fast_max_weight      = new CFastStatic(&commctrls[2],this);
-    fast_weight          = new CFastStatic(&commctrls[3],this);
     fast_beilv           = new CFastStatic(&commctrls[6],this);
 
     fast_percent         = new CFastStatic(&commctrls[12],this);
@@ -152,6 +152,11 @@ CSingleFlatForm::CSingleFlatForm()
     if(g_show_dg_height){
         edt_height          = new CStatic(&commctrls[4],this);
         fast_height         = new CFastStatic(&commctrls[4],this);
+    }
+
+    if(g_show_max_weight){
+        fast_max_weight      = new CFastStatic(&commctrls[2],this);
+        fast_weight          = new CFastStatic(&commctrls[3],this);
     }
     m_fall_fact             = new DT_Percent(&commctrls[13],this);
     m_dist_fact             = new DT_Percent(&commctrls[14],this);
@@ -217,11 +222,15 @@ void CSingleFlatForm::OnShow()
 
     fast_angle->Attach(edt_angle);
     fast_dist->Attach(edt_dist);
-    fast_weight->Attach(edt_weight);
+
     fast_beilv->Attach(edt_fall);
     fast_percent->Attach(edt_percent);
-    fast_max_weight->Attach(edt_max_weight);
+
     fast_time->Attach(edt_time);
+    if(g_show_max_weight){
+        fast_weight->Attach(edt_weight);
+        fast_max_weight->Attach(edt_max_weight);
+    }
     if(g_show_speed)
     {
        fast_fengsu->Attach(edt_fengsu);
@@ -257,24 +266,24 @@ void CSingleFlatForm::OnTimer(int ID)
     //EmulateSensor();
 
     fast_angle->SetText(Poco::format("%0.1f",g_angle),color_black,Font24);
-    //?С
+
     fast_dist->SetText(Poco::format("%0.1fm",g_car_dist),color_black,Font40);
     m_dist_fact->Show(g_car_dist/g_TC[g_local_id].LongArmLength);
     if(g_show_dg_height)
         m_hi_fact->Show(g_dg_height/g_TC[g_local_id].Height);
-    //?????
+     if(g_show_max_weight){
+         fast_max_weight->SetText(Poco::format("%0.1ft",CTorQueMgr::get ().m_rated_weight),color_black,Font40);
+         fast_weight->SetText(Poco::format("%0.1ft",g_dg_weight),color_black,Font40);
+         char buf[32] = {0,};
+         int tmp = CTorQueMgr::get ().m_percent*100.0f+0.5;
+         snprintf(buf,32,"%d%%",tmp);
+         fast_percent->SetText(buf,color_black,Font24);
+     }
 
 
-    fast_max_weight->SetText(Poco::format("%0.1ft",CTorQueMgr::get ().m_rated_weight),color_black,Font40);
-    fast_weight->SetText(Poco::format("%0.1ft",g_dg_weight),color_black,Font40);
-    char buf[32] = {0,};
-    int tmp = CTorQueMgr::get ().m_percent*100.0f+0.5;
-    snprintf(buf,32,"%d%",tmp);
-    buf[strlen(buf)]='%';
+
     m_fall_fact->Show(CTorQueMgr::get ().m_percent);
-
-    fast_percent->SetText(buf,color_black,Font24);
-    //???
+    fast_beilv->SetText(StrTCRate,color_black,Font24);
 
     if(g_show_dg_height)
     {
@@ -301,13 +310,31 @@ void CSingleFlatForm::OnTimer(int ID)
 void CSingleFlatForm::OnButtonClick(skin_item_t* item)
 {
     if(item->id == _skinBtns[0]->GetId()){
-        KillTimer(m_hWnd,100);
-        CSysSet ss;
-        ss.CreateForm(m_hWnd);
-        SetTimer(m_hWnd,100,10);
-        fast_beilv->SetText(StrTCRate,color_black,Font24);
+
+
+        PassWord psd;
+        if(psd.ShowBox (this,"密码:","系统设置密码","8334"))
+        {
+            KillTimer(m_hWnd,100);
+            CSysSet ss;
+            ss.CreateForm(m_hWnd);
+            SetTimer(m_hWnd,100,10);
+        }
+
     }else if(item->id == _skinBtns[1]->GetId()){
-        Close();
+#if 1
+        PassWord psd;
+        if(psd.ShowBox (this,"密码:","Bypass密码","hitech"))
+        {
+            CJDQAdmin::Get ().Bypass (true);
+            CMainCtrl::Get ().NotifyBypass (true);
+            MsgBox box;
+            box.ShowBox (this,"取消bypass","Bypass设置");
+            CJDQAdmin::Get ().Bypass (false);
+            CMainCtrl::Get ().NotifyBypass (false);
+        }
+#endif
+        //CJDQAdmin::Get ().ResetDevice (1);
     }
 }
 void CSingleFlatForm::OnLButtonUp(int x, int y)

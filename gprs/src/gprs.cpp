@@ -83,6 +83,10 @@ void gprs::set_control_func(void *func,void* arg)
 }
 bool gprs::start(std::string ip, U16 port,std::string dtu_id)
 {
+    if(!gps::get ().start (g_gps_com))
+    {
+        GPRS_DBG("gps start failed\n");
+    }
     GPRS_DBG("gprs connect to %s %d with id=%s\n",ip.c_str (),port,dtu_id.c_str ());
     m_addr=SocketAddress(ip,port);
     m_dtu_id = dtu_id;

@@ -133,6 +133,7 @@ bool gps::enable_other_output()
 }
 bool gps::start(std::string path)
 {
+    fprintf(stderr,"gps open %s\n",path.c_str ());
     if(com == NULL)
     {
         com = new SerialPort(path);

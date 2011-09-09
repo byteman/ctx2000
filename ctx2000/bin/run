@@ -1,12 +1,22 @@
 #!/bin/sh
+RUNLIBS="mgcore cppsqlite3 datacopy gprs"
+arch=arm   #x86 arm armv5te
+exportpath=
 cat /proc/cpuinfo | grep "ARM926EJ-S"
 if [ $? == 0 ];then
 	echo "arm platform"
-    export LD_LIBRARY_PATH=../lib:../mgcore/lib/arm:../cppsqlite3/lib/arm:../datacopy/lib/arm:../gprs/lib/arm
+	arch=arm
 else
+	arch=x86
 	echo "x86 platform"
-    export LD_LIBRARY_PATH=../mgcore/lib/x86:../cppsqlite3/lib/x86:../datacopy/lib/x86
+    
 fi
+for item in $RUNLIBS
+do
+	exportpath=$exportpath:../$item/lib/$arch
+	#echo $exportpath
+done
+export LD_LIBRARY_PATH=$exportpath:/usr/local/lib
 while :
 do
 ./ctx2000

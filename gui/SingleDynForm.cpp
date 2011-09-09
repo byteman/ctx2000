@@ -19,7 +19,9 @@
 #include <Poco/Format.h>
 #include <Poco/LocalDateTime.h>
 #include <Poco/DateTimeFormatter.h>
-
+#include "Password.h"
+#include "jdqadmin.h"
+#include "MsgBox.h"
 #define SKIN_BUTTON_MAINCFG     {1,22,410}
 #define SKIN_BUTTON_BYPASS      {2,92,410}
 
@@ -32,13 +34,13 @@
 #define L_S2   695
 #define L_S_V2 195
 
-#define EDIT_ANGLE    {60,280,  E_W,E_H,"angle"}
-#define EDIT_DIST     {315,305, 180,60,"dist"}
+#define EDIT_ANGLE    {60,280,  E_W,E_H,"0"}
+#define EDIT_DIST     {315,305, 180,60,"0"}
 
 #define EDIT_WEIGHT   {530, 225,E_W,E_H+10,"kg"}
 #define EDIT_HEIGHT   {630, 305,150,E_H+10,"height"}
 #define EDIT_UP_ANGL  {380, 170, 180,60,"upangle"}
-#define EDIT_BEILV    {665, 125, E_W, 30,"5"}
+#define EDIT_BEILV    {665, 125, E_W, 30,""}
 
 #define STATIC_LIJU    {375,55,  150,60,"liju"}
 #define EDIT_MAX_W     {575,40,  150,E_H+10,"maxw"}
@@ -51,7 +53,6 @@
 #define EDIT_PERCENT  {385,55, E_W,E_H,"80%"}
 
 #define Client_Height 72
-
 
 extern SoftKeyboard *skt;
 //////////////////////////////////////////////////////////////////////
@@ -112,7 +113,7 @@ CSingleDynForm::CSingleDynForm()
         _skinBtns[i] = new CSkinButton(&SkinBtns[i],this);
     }
 
-#if 1
+#if 0
     edt_angle           = new CStatic(&commctrls[0],this);
     edt_dist            = new CStatic(&commctrls[1],this);
     edt_max_weight      = new CStatic(&commctrls[2],this);
@@ -125,8 +126,10 @@ CSingleDynForm::CSingleDynForm()
 #endif
     fast_angle           = new CFastStatic(&commctrls[0],this);
     fast_dist            = new CFastStatic(&commctrls[1],this);
-    fast_max_weight      = new CFastStatic(&commctrls[2],this);
-    fast_weight          = new CFastStatic(&commctrls[3],this);
+    if(g_show_max_weight){
+        fast_max_weight      = new CFastStatic(&commctrls[2],this);
+        fast_weight          = new CFastStatic(&commctrls[3],this);
+    }
     fast_up_angle        = new CFastStatic(&commctrls[5],this);
     fast_beilv           = new CFastStatic(&commctrls[6],this);
     fast_percent         = new CFastStatic(&commctrls[12],this);
@@ -158,6 +161,7 @@ CSingleDynForm::CSingleDynForm()
     SetRect(&m_liju_rect, 617, 117, 700, 155);
 
     color_black  = RGB2Pixel(HDC_SCREEN,255,255,255);
+    gDispFilter[1].m_span = 0.01;
     InitSkinHeader("SingleTaji1");
 }
 
@@ -198,20 +202,23 @@ void CSingleDynForm::OnShow()
     rst.push_back(color);
 
     m_fall_fact->SetColorPercent(rst);
-    fast_time->Attach(edt_time);
-    fast_angle->Attach(edt_angle);
-    fast_dist->Attach(edt_dist);
-    fast_weight->Attach(edt_weight);
-    fast_beilv->Attach(edt_beilv);
-    fast_percent->Attach(edt_percent);
-    fast_max_weight->Attach(edt_max_weight);
-    fast_up_angle->Attach(edt_up_angle);
+    fast_time->Create ();
+    fast_angle->Create();
+    fast_dist->Create();
+
+    fast_beilv->Create();
+    fast_percent->Create();
+    fast_up_angle->Create();
+    if(g_show_max_weight){
+        fast_weight->Create();
+        fast_max_weight->Create();
+    }
     if(g_show_speed)
     {
-       fast_fengsu->Attach(edt_fengsu);
+       fast_fengsu->Create();
     }
     if(g_show_dg_height){
-       fast_height->Attach(edt_height);
+       fast_height->Create();
     }
     fast_beilv->SetText(StrTCRate,color_black,Font24);
 
@@ -238,33 +245,52 @@ static    double dist  = 0;
 
 void CSingleDynForm::OnTimer(int ID)
 {
-    fast_angle->SetText(Poco::format("%0.1f",g_angle),color_black,Font24);
-    //?С
-    fast_dist->SetText(Poco::format("%0.1fm",g_car_dist),color_black,Font40);
-
-    //?????
+    //if(gDispFilter[disp_angle].need_update (g_angle))
+    {
+        fast_angle->SetText(Poco::format("%0.1f",g_angle),color_black,Font24);
+    }
+    //if(gDispFilter[disp_dist].need_update (g_car_dist))
+    {
+        fast_dist->SetText(Poco::format("%0.1fm",g_car_dist),color_black,Font40);
+    }
+    fast_beilv->SetText(StrTCRate,color_black,Font24);
     fast_up_angle->SetText(Poco::format("%0.1f",g_up_angle),color_black,Font40);
-    fast_max_weight->SetText(Poco::format("%0.1ft",CTorQueMgr::get ().m_rated_weight),color_black,Font40);
-    fast_weight->SetText(Poco::format("%0.1ft",g_dg_weight),color_black,Font40);
-    char buf[32] = {0,};
-    int tmp = CTorQueMgr::get ().m_percent*100.0f+0.5;
-    snprintf(buf,32,"%d%",tmp);
-    //fprintf(stderr,"len = %d\n",tmp);
-    buf[strlen(buf)]='%';
+    if(g_show_max_weight)
+    {
+        //if(gDispFilter[disp_weight].need_update (g_dg_weight))
+        {
+            fast_weight->SetText(Poco::format("%0.1ft",g_dg_weight),color_black,Font40);
+        }
+        fast_max_weight->SetText(Poco::format("%0.1ft",CTorQueMgr::get ().m_rated_weight),color_black,Font40);
+        double per = CTorQueMgr::get ().m_percent;
+        //if(gDispFilter[disp_percent].need_update (per))
+        {
+            char buf[32] = {0,};
+            int tmp = per*100.0f+0.5;
+            snprintf(buf,32,"%d%%",tmp);
+            fast_percent->SetText(buf,color_black,Font24);
+        }
+
+    }
     m_fall_fact->Show(CTorQueMgr::get ().m_percent);
-
-    fast_percent->SetText(buf,color_black,Font24);
-    //???
-
     if(g_show_dg_height)
     {
-       fast_height->SetText(Poco::format("%0.1fm",g_dg_height),color_black,Font40);
+        //if(gDispFilter[disp_height].need_update (g_dg_height))
+        {
+              fast_height->SetText(Poco::format("%0.1fm",g_dg_height),color_black,Font40);
+        }
+
     }
 
-
-    fast_max_weight->SetText(Poco::format("%0.1ft",CTorQueMgr::get ().m_rated_weight),color_black,Font40);
+    //fast_max_weight->SetText(Poco::format("%0.1ft",CTorQueMgr::get ().m_rated_weight),color_black,Font40);
     if(g_show_speed)
-        fast_fengsu->SetText(Poco::format("F=%0.1fm/s",g_wild_speed),color_black,Font24);
+    {
+        //if(gDispFilter[disp_speed].need_update (g_wild_speed))
+        {
+            fast_fengsu->SetText(Poco::format("F=%0.1fm/s",g_wild_speed),color_black,Font24);
+
+        }
+    }
     static int cnt = 0;
     if( (cnt%10) == 0)
     {
@@ -290,11 +316,31 @@ void CSingleDynForm::OnLButtonUp(int x, int y)
 void CSingleDynForm::OnButtonClick(skin_item_t* item)
 {
     if(item->id == _skinBtns[0]->GetId()){
-        KillTimer(m_hWnd,100);
-        CSysSet ss;
-        ss.CreateForm(m_hWnd);
-        SetTimer(m_hWnd,100,10);
+
+
+        PassWord psd;
+        if(psd.ShowBox (this,"密码:","系统设置密码","8334"))
+        {
+            KillTimer(m_hWnd,100);
+            CSysSet ss;
+            ss.CreateForm(m_hWnd);
+            SetTimer(m_hWnd,100,10);
+        }
+
     }else if(item->id == _skinBtns[1]->GetId()){
-        Close();
+#if 1
+        PassWord psd;
+        if(psd.ShowBox (this,"密码:","Bypass密码","hitech"))
+        {
+            CJDQAdmin::Get ().Bypass (true);
+            CMainCtrl::Get ().NotifyBypass (true);
+            MsgBox box;
+            box.ShowBox (this,"取消bypass","Bypass设置");
+            CJDQAdmin::Get ().Bypass (false);
+            CMainCtrl::Get ().NotifyBypass (false);
+        }
+#endif
+        //CJDQAdmin::Get ().ResetDevice (1);
     }
+
 }

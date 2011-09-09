@@ -111,20 +111,21 @@ static const char* ICons[] = {
     "ctx2000/up_angle.jpg",
     "ctx2000/edt_bk.jpg",
 };
-
+#define X1 3
+#define Y1 3
 static POS IConsPos[] = {
 
     {12,198},            //option 1 lable
-    {L_S,L_S_V+2*V_S},  //option  1 edit
+    {L_S-X1,L_S_V+2*V_S-Y1},  //option  1 edit
 
     {18,252},            //option 2 lable
-    {L_S,L_S_V+3*V_S},  //option 2 edit
+    {L_S-X1,L_S_V+3*V_S-Y1},  //option 2 edit
 
     {20,300},           //option 3 lable
-    {L_S,L_S_V+4*V_S},  //option 3 edit
+    {L_S-X1,L_S_V+4*V_S-Y1},  //option 3 edit
 
     {18,343},           //option 4 lable
-    {L_S,L_S_V+5*V_S},  //option 4 edit
+    {L_S-X1,L_S_V+5*V_S-Y1},  //option 4 edit
 
     {680,315},            //max weight lable
     {L_S2-5,L_S_V2+3*V_S+12}//max weight edit
@@ -226,6 +227,7 @@ CMainMenu::CMainMenu()
     m_lables.AddIcons(ICons,TABLESIZE(ICons));
     m_signal.LoadFile("ctx2000/signal.png",6);
     m_cur_signal_db = 1;
+    gDispFilter[1].m_span = 0.01;// for percent
 #endif
 
     InitSkinHeader("MainMenu");
@@ -359,7 +361,8 @@ void CMainMenu::OnTimer(int ID)
 {
     //EmulateSensor();
 #if 1
-    UpdateRealTimeParam();
+    UpdateRealTimeParam(m_need_update);
+    if(m_need_update)m_need_update=false;
     UpdateDevMode();
     UpdateCollideStatus();
     UpdateSignal();
@@ -400,7 +403,9 @@ void CMainMenu::OnButtonClick(skin_item_t* item)
             CSysSet ss;
             ss.CreateForm(m_hWnd);
             SetTimer(m_hWnd,100,10);
+            UpdateUIArea (false);
         }
+        m_need_update = true;
 
     }else if(item->id == _skinBtns[1]->GetId()){
 #if 1
@@ -408,10 +413,14 @@ void CMainMenu::OnButtonClick(skin_item_t* item)
         if(psd.ShowBox (this,"密码:","Bypass密码","hitech"))
         {
             CJDQAdmin::Get ().Bypass (true);
+            CMainCtrl::Get ().NotifyBypass (true);
             MsgBox box;
             box.ShowBox (this,"取消bypass","Bypass设置");
             CJDQAdmin::Get ().Bypass (false);
+            CMainCtrl::Get ().NotifyBypass (false);
+
         }
+         m_need_update = true;
 #endif
         //CJDQAdmin::Get ().ResetDevice (1);
     }
@@ -476,32 +485,55 @@ __inline__ void CMainMenu::UpdateSignal()
         }
     }
 }
-__inline__ void CMainMenu::UpdateRealTimeParam()
+
+__inline__ void CMainMenu::UpdateRealTimeParam(bool update)
 {
     if(g_show_max_weight)
     {
         //是否显示额定重量和当前重量
         fast_max_weight->SetText(Poco::format("%0.1ft",CTorQueMgr::get ().m_rated_weight));
-        fast_weight->SetText(Poco::format("%0.1ft",g_dg_weight));
-        m_per.Show(CTorQueMgr::get ().m_percent);
+        if(gDispFilter[disp_weight].need_update (g_dg_weight) || update){
+            fast_weight->SetText(Poco::format("%0.1ft",g_dg_weight));
+        }
+        double per = CTorQueMgr::get ().m_percent;
+
+        if(gDispFilter[disp_percent].need_update (per) || update){
+            fprintf(stderr,"per=%0.2f\n",per);
+            m_per.Show(per);
+        }
+
     }
     //是否显示吊钩高度
     if(g_show_dg_height)
     {
-       fast_height->SetText(Poco::format("%0.1fm",g_dg_height));
+        if(gDispFilter[disp_height].need_update (g_dg_height) || update){
+            fast_height->SetText(Poco::format("%0.1fm",g_dg_height));
+        }
+
     }
     //是否显示仰角
     if(g_show_up_angle)
     {
-        fast_up_angle->SetText(Poco::format("%0.1f°",g_up_angle,Font16));
+        if(gDispFilter[disp_up].need_update (g_up_angle) || update){
+            fast_up_angle->SetText(Poco::format("%0.1f°",g_up_angle,Font16));
+        }
+
     }
     //是否显示风速
     if(g_show_speed)
     {
-        fast_fengsu->SetText(Poco::format("%0.1fm/s",g_wild_speed));
+        if(gDispFilter[disp_speed].need_update (g_wild_speed) || update){
+            fast_fengsu->SetText(Poco::format("%0.1fm/s",g_wild_speed));
+        }
     }
-    fast_dist->SetText(Poco::format("%0.1fm",g_car_dist));
-    fast_angle->SetText(Poco::format("%0.1f°",g_angle));
+    if(gDispFilter[disp_dist].need_update (g_car_dist) || update){
+        fast_dist->SetText(Poco::format("%0.1fm",g_car_dist));
+    }
+    if(gDispFilter[disp_angle].need_update (g_angle) || update){
+        fast_angle->SetText(Poco::format("%0.1f°",g_angle));
+    }
+
+
     //刷新小车幅度
     m_worksite->update();
 
@@ -627,7 +659,7 @@ void CMainMenu::UpdateCollideStatus(int type, bool flag)
     ReleaseDC(m_hdc);
 }
 
-void CMainMenu::UpdateUIArea()
+void CMainMenu::UpdateUIArea(bool first)
 {
     HDC hdc = GetClientDC(m_hWnd);
 
@@ -635,9 +667,10 @@ void CMainMenu::UpdateUIArea()
     DrawDevSerial(hdc,m_dev_serail_rect,CurSerial);
     DrawTCType(hdc,m_tc_type_rect,TCTypeName);
     CreateInfoArea(hdc);
-    for(int i = 0; i < 20 ; i++)
-        statusIcon[i]->SetOnline (hdc,false);
-
+    if(first){
+        for(int i = 0; i < 20 ; i++)
+            statusIcon[i]->SetOnline (hdc,false);
+    }
     ReleaseDC(hdc);
     //显示塔机高度
      fast_tower_height->SetText(Poco::format("%0.1fm",g_TC[g_local_id].Height));

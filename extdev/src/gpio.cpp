@@ -38,7 +38,7 @@ static std::string gRegFiles[] = {
 
 CGpio::CGpio()
 {
-
+    m_init_ok = false;
 }
 
 /*
@@ -54,6 +54,7 @@ bool    CGpio::Init(int num_input, int num_output,bool reset)
        if ( (!f0.exists () ) || (!f1.exists ()))
        {
             DBG("%s don't exist \n",REG_DIR0);
+            m_init_ok = false;
             return false;
        }
         try
@@ -79,6 +80,7 @@ bool    CGpio::Init(int num_input, int num_output,bool reset)
             fos1.close();
             fos2.close();
             fos3.close();
+            m_init_ok = true;
             return true;
         }
         catch(Poco::Exception& e)
@@ -97,6 +99,7 @@ bool    CGpio::Init(int num_input, int num_output,bool reset)
 IO_STATUS CGpio::Input(IO_TYPE type, int index)
 {
     int value = 0;
+    if(!m_init_ok) return IO_INVALID;
     std::string regfile = REG_INPUT1;
     if(type == IO_OUTPUT){
         if(index >=8 )
@@ -121,7 +124,7 @@ IO_STATUS CGpio::Output(int index, IO_STATUS status)
 {
     std::string regfile = REG_OUTPUT1;
     unsigned int output = 0;
-
+    if(!m_init_ok) return IO_INVALID;
     if(index >=8 )
     {
         regfile = REG_OUTPUT0;

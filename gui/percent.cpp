@@ -29,7 +29,7 @@ int  CPercent::worksite_proc(HWND hwnd, int message, WPARAM w, LPARAM l)
 
     char buf[32] = {0,};
     int tmp = m_percent*100.0f+0.5;
-    snprintf(buf,32,"%d%",tmp);
+    snprintf(buf,32,"%d%%",tmp);
 
     SetBkMode(hdc,BM_TRANSPARENT);
     SelectFont(hdc,GetSystemFont(SYSLOGFONT_FIXED));
@@ -100,8 +100,7 @@ void CPercent::Show(double percent)
     {
         char buf[32] = {0,};
         int tmp = m_percent*100.0f+0.5;
-        tmp = snprintf(buf,32,"%d",tmp);
-        buf[tmp]='%';
+        tmp = snprintf(buf,32,"%d%%",tmp);
         HDC hdc = GetClientDC(m_hwnd);
         //SetBkMode(hdc,BM_TRANSPARENT);
         SelectFont(hdc,GetSystemFont(SYSLOGFONT_FIXED));

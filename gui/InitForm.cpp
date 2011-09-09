@@ -11,6 +11,7 @@
 #include <Poco/Glob.h>
 #include <Poco/FileStream.h>
 #include "mainctrl.h"
+#include "beeper.h"
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -253,9 +254,9 @@ void   CInitForm::OnShow()
     //    SetTimer(m_hWnd,100,10);
     //else
     //{
-        SetTimer(m_hWnd,100,300);
+        SetTimer(m_hWnd,100,1);
     //}
-
+        //启动主控制模块
 }
 
 void   CInitForm::OnTimer(int ID)

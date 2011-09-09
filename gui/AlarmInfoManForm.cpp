@@ -17,7 +17,7 @@ static TListColum weightinfolist[] =
 {
         //{"类型",    55},
         {"编号",    100},
-        {"时间",    150},
+        {"时间",    200},
         {"幅度",    50},
         {"重量",    50},
         {"倍率",    50},
@@ -193,7 +193,7 @@ void  CAlarmInfoManForm::OnClose ()
 }
 void   CAlarmInfoManForm::OnShow()
 {
-    //_lvAlarmInfo->EnableSkinStyle(true);
+    _lvAlarmInfo->EnableSkinStyle(true);
     ChangeType(m_type);
     RefreshList(start);
     USBStorManager::get ().start ();
@@ -306,17 +306,28 @@ void CAlarmInfoManForm::add_alarminfo_item (StringList &alarminfoItems,THistoy& 
             case 0:
                 memset(buff,0,20);
                 sprintf(buff,"%d",AlarmInfo.id);
-                printf("add %s\n",buff);
                 alarminfoItems.push_back(buff);
                 break;
             case 1:
                 alarminfoItems.push_back(AlarmInfo.date);
                 break;
             case 2:
-                alarminfoItems.push_back(AlarmInfo.slewing);
+                if(AlarmInfo.slewing=="170")
+                    alarminfoItems.push_back("Bypass");
+                else{
+                    alarminfoItems.push_back(AlarmInfo.slewing);
+                }
                 break;
             case 3:
-                alarminfoItems.push_back(AlarmInfo.trolley);
+                if(AlarmInfo.slewing=="170")
+                {
+                    if(AlarmInfo.trolley=="1"){
+                        alarminfoItems.push_back("ON");
+                    }else {
+                        alarminfoItems.push_back("OFF");
+                    }
+                }else
+                    alarminfoItems.push_back(AlarmInfo.trolley);
                 break;
 
 

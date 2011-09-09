@@ -49,7 +49,7 @@ void CJDQAdmin::Bypass(bool yes)
 }
 int  CJDQAdmin::Service(CTX_JDQ type, bool state)
 {
-        fprintf(stderr,"jdq control %d state=%d\n",type,state?1:0);
+        //fprintf(stderr,"jdq control %d state=%d\n",type,state?1:0);
         if(m_bypass) return 0;
         if(type == JDQ_RIGHT_CIRCLE_LIMIT)
         {

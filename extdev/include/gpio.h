@@ -21,6 +21,8 @@ public:
     IO_STATUS Output(int index, IO_STATUS status);
     IO_STATUS Input( IO_TYPE type, int index);
     bool      CreateVirtualFiles();
+private:
+    bool      m_init_ok;
 };
 
 #endif // GPIO_H

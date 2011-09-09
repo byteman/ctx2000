@@ -25,6 +25,14 @@ linux-arm-g++ {
     OBJECTS_DIR = ./tmpobj/arm
     DESTDIR = $$OUTPUT/arm
 }
+linux-arm-v5te-g++ {
+    message(g++ = linux-arm-v5te-g++)
+    BASE=/media/linuxdata/home/byteman/works/mx27/buildroot/test/root/dt1000/platform-i.mx/sysroot-target
+    INCLUDEPATH+=$$BASE/usr/include
+    LIBS+=-L$$BASE/usr/lib
+    OBJECTS_DIR = ./tmpobj/armv5te
+    DESTDIR = $$OUTPUT/armv5te
+}
 linux-g++ {
     message(g++ = linux-g++)
     OBJECTS_DIR = ./tmpobj/x86

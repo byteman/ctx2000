@@ -9,7 +9,7 @@
 #include "dt_percent.h"
 #include "FastStatic.h"
 #include "percent.h"
-
+#include "filter.h"
 #define MM_SKIN_BTN_NUM  3
 class CStatusIcon;
 class CFormWorksite;
@@ -27,7 +27,7 @@ public:
     virtual void OnUserMsg(HWND hWnd, int message, WPARAM wParam, LPARAM lParam);
 private:
         void LoadOptionItem();
-        void UpdateUIArea();
+        void UpdateUIArea(bool first=true);
         void CreateStatusArea(HDC hdc,RECT rt);
         void CreateInfoArea(HDC hdc);
         void EmulateSensor();
@@ -37,7 +37,7 @@ private:
         void UpdateCollideStatus(int type, bool flag);
         void UpdateCollideStatus();
         __inline__ void UpdateSignal();
-        __inline__ void UpdateRealTimeParam();
+        __inline__ void UpdateRealTimeParam(bool update=false);
         __inline__ void UpdateDevMode();
         CSkinButton* _skinBtns[5];
         int     m_msg_delay;
@@ -82,6 +82,7 @@ private:
         bool m_quit;
         int  m_cur_signal_db;
         int  m_cur_option_pos;
+        bool m_need_update;
 };
 
 #endif // !defined(AFX_MAINMENU_H__D30D85AD_3072_4144_A340_2273333C1696__INCLUDED_)

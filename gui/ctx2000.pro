@@ -71,7 +71,9 @@ SOURCES += \
     UISetForm.cpp \
     CaliBox.cpp \
     ../torque/src/torque_mgr.cpp \
-    ../torque/src/torque_db.cpp
+    ../torque/src/torque_db.cpp \
+    ../bycore/src/LoggerMgr.cpp \
+    ../bycore/src/ErrorBuilder.cpp
 DEFINES += 
 INCLUDEPATH += ../include ../mgcore/include \
                ../torque/include ../cppsqlite3/include \
@@ -82,30 +84,40 @@ INCLUDEPATH += ../include ../mgcore/include \
                ../dataacquire/include ../commu/include \
                ../gprs/include
 DEPENDPATH +=$$INCLUDEPATH
-CONFIG +=
+DESTDIR=../bin
+
+LINKLIBS=mgcore cppsqlite3 datacopy gprs bycore
 linux-g++ {
     message(g++ = linux-g++)
     DEFINES+= 
     OBJECTS_DIR = ../tmpobj/x86
-    LIBS +=  -L../mgcore/lib/x86 -L../cppsqlite3/lib/x86  \
-            -L../datacopy/lib/x86 -L../bycore/lib/x86 ../extlib/x86/libQtzCollideLib.a
+    for(lib,LINKLIBS):LIBS+=-L../$$lib/x86
+    LIBS += ../extlib/x86/libQtzCollideLib.a
 }
 linux-arm-g++ {
     message(g++ = linux-arm-g++)
     DEFINES+= 
     OBJECTS_DIR = ../tmpobj/arm
-    LIBS +=  -L../mgcore/lib/arm  -L../cppsqlite3/lib/arm \
-            -L../datacopy/lib/arm -L../bycore/lib/arm  -L../cppsqlite3/lib/arm -L../gprs/lib/arm\
-            -lttf ../extlib/arm/libQtzCollideLib.a
+    for(lib,LINKLIBS):LIBS+=-L../$$lib/lib/arm
+    LIBS += -lttf ../extlib/arm/libQtzCollideLib.a
 }
-QMAKE_CXXFLAGS+=-g
+linux-arm-v5te-g++ {
+    message(g++ = linux-arm-v5te-g++)
+    SOURCES+=../algo/QtzParam.cpp
+    BASE=/media/linuxdata/home/byteman/works/mx27/buildroot/test/root/dt1000/platform-i.mx/sysroot-target
+    INCLUDEPATH+=$$BASE/usr/include $$BASE/usr/local/include
+    LIBS+=-L$$BASE/usr/lib -L$$BASE/usr/local/lib
+    LIBS+= -lm -lpcre -lz #../extlib/arm/libQtzCollideLib.a
+    for(lib,LINKLIBS):LIBS+=-L../$$lib/lib/armv5te
+    OBJECTS_DIR = ./tmpobj/armv5te
+    TARGET = ctx2000-armv5te
+    message($$LIBS)
+}
+#QMAKE_CXXFLAGS+=-g
 LIBS += -lmgcore -lminigui -lmgext -ljpeg \
-        -lpng -lPocoFoundation -lts \
-        -lcppsqlite3 -lusbmount -lserial -lgprs
+        -lpng -lPocoFoundation -lts -lsqlite3\
+        -lcppsqlite3 -lusbmount -lserial -lgprs -lPocoUtil 
 
-DESTDIR += 
-
-TARGET = ../bin/ctx2000
 HEADERS += \
     torqueForm.h \
     BmpRes.h \
@@ -138,6 +150,5 @@ HEADERS += \
     ime/hw.h \
     ime/config.h \
     UISetForm.h \
-    CaliBox.h
-
-
+    CaliBox.h \
+    ../bycore/include/LoggerMgr.h
