@@ -243,7 +243,6 @@ public:
         m_rdyEvt.set();
         m_quitEvt.reset();
         m_quit = false;
-        std::string data="";
         char buf[15] = {0,};
         int tmp=0;
         while(!m_quit)
@@ -259,20 +258,22 @@ public:
 
                 if(m_buf.size() != 13)
                 {
+                    //fprintf(stderr,"encoder size=%d\n",m_buf.size());
                     continue;
                 }
                 memcpy(buf,m_buf.data()+1,11);
                 buf[11]=0;
-                //fprintf(stderr,"%s\n",buf);
+                //fprintf(stderr,"ad1 %s\n",buf);
                 if(Poco::NumberParser::tryParse(buf,tmp))
                 {
                     ad_angle = tmp;//m_filter[5].Filter(tmp);
                     my_calc_angle();
                 }
+                //fprintf(stderr,"ad2 %s\n",buf);
             }catch(LibSerial::SerialPort::ReadTimeout& e)
             {
 
-                #ifdef AD_DEBUG
+                #if 1
                     AD_DBG("ad1 data=");
                     for(size_t i = 0; i <m_buf.size();i++)
                     {

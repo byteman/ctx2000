@@ -8,6 +8,7 @@ public:
     virtual ~ByThread(){}
     bool start(long timeout_ms=1000);
     bool stop(long timeout_ms=1000);
+    bool set_thread_name(std::string th_name);
     virtual bool before_run();
     virtual void service();
     virtual void run();

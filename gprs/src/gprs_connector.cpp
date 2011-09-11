@@ -131,6 +131,7 @@ bool gprs_connector::before_run ()
     //ignore child quit, and zombile process
     //signal(SIGCLD, SIG_IGN);
     //signal(SIGCHLD, sig_chld);
+    set_thread_name ("ctx2000.gprs_ppp");
     return true;
 }
 void gprs_connector::service()

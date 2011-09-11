@@ -100,6 +100,7 @@ std::string gps::poll_gprmc_msg(bool force)
 bool gps::before_run ()
 {
      //enable_other_output();
+     set_thread_name ("ctx2000.gps");
      return true;
 }
 bool gps::enable_other_output()

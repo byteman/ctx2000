@@ -61,6 +61,7 @@ public:
     //15位的dtu_id;
     bool request_login(std::string dtu_id,int &reason);
     bool is_connected();
+    bool before_run ();
     void service();
 private:
     void buildpacket(tc_data& data);

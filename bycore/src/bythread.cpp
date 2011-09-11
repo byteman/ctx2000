@@ -1,10 +1,14 @@
 #include "bythread.h"
-
+#include <sys/prctl.h>
 bool ByThread::start(long timeout_ms)
 {
    m_quit = false;
    m_thread.start(*this);
    return m_rdyEvt.tryWait(timeout_ms);
+}
+bool ByThread::set_thread_name(std::string th_name)
+{
+   return (prctl(PR_SET_NAME,th_name.c_str ())==0) ;
 }
 bool ByThread::stop(long timeout_ms)
 {

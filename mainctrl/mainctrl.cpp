@@ -72,6 +72,7 @@ public:
         m_rdyEvt.set();
         m_quitEvt.reset();
         m_quit = false;
+        set_thread_title ("ctx2000.dbadmin");
         while(!m_quit)
         {
             try
@@ -443,7 +444,7 @@ void      CMainCtrl::WatchNetWork(std::string &MainDevID, bool &AddState)
         //严格要求主机在等待过程中不能收到任何一条数据,才能变为主机
         if( CDianTai::Get().GetReceivedCount() > 0) //虽然没有收到正确的数据，但是有可能是收到了乱码。所以也不能让其加入网络
         {
-            Error("WatchNetwork Failed beacuse of GetReceivedCount=%d\n",CDianTai::Get().GetReceivedCount());
+            CTX_DBG("WatchNetwork Failed beacuse of GetReceivedCount=%d\n",CDianTai::Get().GetReceivedCount());
             AddState  = false;
         }else{
             for(int i = 1; i <= TCTotalNum; i++)

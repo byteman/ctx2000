@@ -27,7 +27,7 @@ const int DataLength   = 39;
 const int WSDataLength = 154;
 #define     MAX_LEN         8192
 Poco::Timespan timeout_span(5,0);
-//#define DT_DEBUG
+#define DT_DEBUG
 #ifdef DT_DEBUG
 #define DT_DBG(fmt...) fprintf(stderr,fmt);
 #else
@@ -73,13 +73,13 @@ public:
     {
         static int work_site_count=0;
         int type = 0;
-        DT_DBG("%c\n",c);
+        //DT_DBG("%c\n",c);
         if( (c == '%') || (c=='(') || (c=='$')){
             m_pos = 0;
             m_start_flag = true;
         }else if( m_start_flag && c=='#')
         {
-            DT_DBG("recv # char m_pos = %d\n",m_pos);
+            //DT_DBG("recv # char m_pos = %d\n",m_pos);
             if(m_pos == 38)
             {
                 type = 1;
@@ -166,7 +166,7 @@ public:
     }
     bool checkValid(char c)
     {
-        return true;
+        //return true;
         //暂时不过滤，因为有可能设置塔机编号里面有任意的ascii字符
         if( ( (c >= '0')&&(c<='9')) || (c=='N') || (c=='%')|| (c=='#') || (c=='.')|| (c=='-')|| (c==' ') ||  (c=='$') ||  (c=='*') ||(c=='(' || (c==')')))
             return true;
@@ -192,9 +192,7 @@ public:
                        parse_recv_data(c);
                     }else{
                         fprintf(stderr,"***********************Invalid char 0x%x\n",c);
-                     }
-
-
+                    }
                 }
              }catch(LibSerial::SerialPort::ReadTimeout& e)
              {

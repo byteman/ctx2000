@@ -71,9 +71,7 @@ SOURCES += \
     UISetForm.cpp \
     CaliBox.cpp \
     ../torque/src/torque_mgr.cpp \
-    ../torque/src/torque_db.cpp \
-    ../bycore/src/LoggerMgr.cpp \
-    ../bycore/src/ErrorBuilder.cpp
+    ../torque/src/torque_db.cpp
 DEFINES += 
 INCLUDEPATH += ../include ../mgcore/include \
                ../torque/include ../cppsqlite3/include \
@@ -152,3 +150,5 @@ HEADERS += \
     UISetForm.h \
     CaliBox.h \
     ../bycore/include/LoggerMgr.h
+
+

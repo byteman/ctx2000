@@ -102,7 +102,7 @@ bool   CTorQueMgr::loadCfg(std::string type, std::string armlen, std::string rat
         {
             m_rate_int = g_tc_rate;
         }else{
-            TC_DBG ("can not Convert Rate[%s] to int\n",rate);
+            TC_DBG ("can not Convert Rate[%s] to int\n",rate.c_str ());
         }
         m_torque_item_list.clear ();
         for(size_t i = 0 ; i < m_torque_list.size (); i++)

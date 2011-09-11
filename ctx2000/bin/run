@@ -17,8 +17,12 @@ do
 	#echo $exportpath
 done
 export LD_LIBRARY_PATH=$exportpath:/usr/local/lib:../lib
+if [ -e reset.txt ];then
+	rm reset.txt 
+fi
 while :
 do
+echo `date` >> reset.txt
 ./ctx2000
 sleep 2
 done

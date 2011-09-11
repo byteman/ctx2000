@@ -101,7 +101,11 @@ bool gprs::start(std::string ip, U16 port,std::string dtu_id)
 
 
 }
-
+bool gprs::before_run ()
+{
+    set_thread_name ("ctx2000.gprs");
+    return true;
+}
 bool gprs::_send_queue_data(tc_data &data)
 {
     if(data.m_type==0)

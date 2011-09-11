@@ -464,6 +464,7 @@ __inline__ void CMainMenu::UpdateSignal()
     if(( (cnt++) % 10) == 0)
     {
         m_cur_signal_db = CDianTai::Get().getSignalDB();
+        //fprintf(stderr,"sinal db= %d\n",m_cur_signal_db);
         m_cur_signal_db /= 2;
         if(m_cur_signal_db < 1)        m_cur_signal_db = 1;
         else if(m_cur_signal_db > 6)   m_cur_signal_db = 6;
@@ -488,7 +489,7 @@ __inline__ void CMainMenu::UpdateRealTimeParam(bool update)
         double per = CTorQueMgr::get ().m_percent;
 
         if(gDispFilter[disp_percent].need_update (per) || update){
-            fprintf(stderr,"per=%0.2f\n",per);
+            //fprintf(stderr,"per=%0.2f\n",per);
             m_per.Show(per);
         }
 
