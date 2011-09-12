@@ -291,7 +291,7 @@ void   CInitForm::OnTimer(int ID)
     }
 
     KillTimer(m_hWnd,100);
-    StartCtx2000();
+    //StartCtx2000();
     Close();
 
 }

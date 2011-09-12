@@ -20,11 +20,11 @@ public:
 	virtual ~CMainMenu();
 	virtual void OnCreate();
 	virtual void OnTimer(int ID);
-    virtual void OnPaint(HWND hWnd);
-    virtual void OnShow();
+        virtual void OnPaint(HWND hWnd);
+        virtual void OnShow();
 	virtual void OnButtonClick(skin_item_t* item);
-    virtual void OnLButtonUp(int x, int y);
-    virtual void OnUserMsg(HWND hWnd, int message, WPARAM wParam, LPARAM lParam);
+        virtual void OnLButtonUp(int x, int y);
+        virtual void OnUserMsg(HWND hWnd, int message, WPARAM wParam, LPARAM lParam);
 private:
         void LoadOptionItem();
         void UpdateUIArea(bool first=true);

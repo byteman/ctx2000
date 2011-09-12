@@ -138,7 +138,7 @@ gprs_connect:
     while(1){
         if( (m_conn) && m_conn->is_gprs_conneted())
             break;
-        GPRS_DBG("wait gprs conneted\n");
+        //GPRS_DBG("wait gprs conneted\n");
         Poco::Thread::sleep(5000);
     }
     GPRS_DBG("gprs pppd dial ok\n");

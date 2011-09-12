@@ -115,7 +115,7 @@ public:
             m_tmp[m_pos++]=c;
 
         if(type > 0){
-            if(m_pos>=1)
+            if((m_pos>=1) && (m_pos < MAX_LEN))
             {
                 //m_tmp[0]       = 0;
                 m_tmp[m_pos-1] = 0;
@@ -129,7 +129,8 @@ public:
                     //m_recv_stamp.update();
                     m_signal = 5;
                     m_receive_msg_count++;
-                    m_msg_que.push(msg);
+                    if(m_msg_que.size () < 1000)
+                        m_msg_que.push(msg);
 
                     //TGuiMsg* guiMsg = new TGuiMsg(1,msg.context);
                     //TGuiNotifyer::Get().Notify(guiMsg);
@@ -142,7 +143,9 @@ public:
                 else if(type == 2)
                 {
                     Poco::FastMutex::ScopedLock lock(_mutex);
-                    m_height_msg_que.push(msg);
+                     if(m_height_msg_que.size () < 10)
+                        m_height_msg_que.push(msg);
+
                     fprintf(stderr,"recv height msg %s\n",msg.context.c_str());
                     if(m_height_msg_que.size() > 10)
                         fprintf(stderr,"m_height_msg_que push data size=%d\n",m_height_msg_que.size());
@@ -150,7 +153,8 @@ public:
                 else if(type == 3) // worksite
                 {
                     Poco::FastMutex::ScopedLock lock(_mutex);
-                    m_ws_msg_que.push(msg);
+                    if(m_ws_msg_que.size () < 10)
+                        m_ws_msg_que.push(msg);
                     fprintf(stderr,"recv ws msg %s\n",msg.context.c_str());
                     m_allow_send=true;
                     if(m_ws_msg_que.size() > 10)
@@ -164,8 +168,10 @@ public:
 
 
     }
+#include <ctype.h>
     bool checkValid(char c)
     {
+        return isprint (c);
         //return true;
         //暂时不过滤，因为有可能设置塔机编号里面有任意的ascii字符
         if( ( (c >= '0')&&(c<='9')) || (c=='N') || (c=='%')|| (c=='#') || (c=='.')|| (c=='-')|| (c==' ') ||  (c=='$') ||  (c=='*') ||(c=='(' || (c==')')))
@@ -192,6 +198,9 @@ public:
                        parse_recv_data(c);
                     }else{
                         fprintf(stderr,"***********************Invalid char 0x%x\n",c);
+                        char buf[16] = {0,};
+                        sprintf(buf,"echo errcode %x >> err.out",c);
+                        system(buf);
                     }
                 }
              }catch(LibSerial::SerialPort::ReadTimeout& e)
@@ -199,7 +208,9 @@ public:
                  if(m_signal>0)m_signal--;
                  //fprintf(stderr,"%s for diantai timeout len=%d\n",m_path.c_str(),m_buf.size());
                  continue;
-             }
+            }catch(...){
+                system("echo diantai `date` >> err.out");
+            }
 
         }
         if(m_port)
@@ -308,6 +319,7 @@ public:
             }
             catch (...)
             {
+                system("echo diantai `date` >> err.out");
             }
         }
         m_quitEvt.set();

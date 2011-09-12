@@ -92,6 +92,7 @@ bool    CGpio::Init(int num_input, int num_output,bool reset)
         }catch(...)
         {
             std::cerr << "InitDefaultParam fail" << std::endl;
+            system("echo gpio `date` >> err.out");
         }
         return false;
 }

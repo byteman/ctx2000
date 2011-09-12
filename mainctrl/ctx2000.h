@@ -247,7 +247,8 @@ struct TAlarmInfo{
 typedef enum{
     mode_slave,
     mode_master,
-    mode_unknown
+    mode_unknown,
+    mode_invalid
 }EWorkMode;
 
 typedef struct tag_QueryMsg{

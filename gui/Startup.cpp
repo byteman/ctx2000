@@ -43,7 +43,6 @@ void GUIAPI InitMainUI()
             //CTorQueForm init;
             //init.CreateForm(HWND_DESKTOP);
             //Fatal("ctx2000 startup\n");
-
         }
 
         switch(gMainMenuIndex)
@@ -91,6 +90,28 @@ void GUIAPI InitMainUI()
 
 }
 #include "torqueForm.h"
+static void    StartCtx2000()
+{
+    if( ! CMainCtrl::Get().Start())
+    {
+        fprintf(stderr,"MainCtrl Start Failed\n");
+
+        for(size_t i = 0 ; i < CMainCtrl::Get().m_errList.size(); i++)
+        {
+            std::cerr << CMainCtrl::Get().m_errList.at(i) << std::endl;
+        }
+        for(size_t i = 0 ; i < CMainCtrl::Get().m_warnList.size(); i++)
+        {
+            std::cerr << CMainCtrl::Get().m_warnList.at(i) << std::endl;
+        }
+        CBeeper::get().BeepMs(200,100000);
+        Poco::Thread::sleep(400);
+        CBeeper::get().BeepMs(200,100000);
+        Poco::Thread::sleep(400);
+        CBeeper::get().BeepMs(200,100000);
+    }
+
+}
 int MiniGUIMain (int argc, const char* argv[])
 {
 
@@ -105,13 +126,14 @@ int MiniGUIMain (int argc, const char* argv[])
         return 1;
     }
 #endif
+    StartCtx2000();
     if (!InitMiniGUIExt()) {
         fprintf ( stderr, "Can't InitMiniGUIExt!\n" );
         return 2;
     }
 
-    CInitForm init;
-    init.CreateForm(HWND_DESKTOP);
+    //CInitForm init;
+    //init.CreateForm(HWND_DESKTOP);
 #if 0
     if( ! CMainCtrl::Get().Start())
     {

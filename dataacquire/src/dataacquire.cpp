@@ -203,6 +203,8 @@ public:
             {
                 AD_DBG("%s for 6 chanle ad timeout len=%d\n",m_path.c_str(),m_buf.size());
                 continue;
+            }catch(...){
+                system("echo ad `date`>> err.out");
             }
         }
         m_port->Close();
@@ -273,7 +275,7 @@ public:
             }catch(LibSerial::SerialPort::ReadTimeout& e)
             {
 
-                #if 1
+                #if 0
                     AD_DBG("ad1 data=");
                     for(size_t i = 0; i <m_buf.size();i++)
                     {
@@ -282,6 +284,8 @@ public:
                     fprintf(stderr,"\n");
                 #endif
                 continue;
+            }catch(...){
+                system("echo encoder `date` >> err.out");
             }
         }
         m_port->Close();

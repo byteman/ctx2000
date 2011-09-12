@@ -171,6 +171,8 @@ ETorQueState CTorQueMgr::getState(double carPos, double weight)
         size_t cnt = m_torque_item_list.size();
         if( cnt > 0 )
             m_rated_weight = m_torque_item_list.at(cnt-1).weight;
+        else
+            m_rated_weight = weight;
     }
     //if( max_weight < 0.1 )//得到了异常的重量
     //    return 0;

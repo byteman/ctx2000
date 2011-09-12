@@ -160,7 +160,7 @@ CMainMenu::CMainMenu()
     m_msg_delay     = 0;
     m_quit          = false;
     m_cur_signal_db = 0xff;
-
+    m_mode = mode_invalid;
     if (!LoadRes(&mmenu_bmps[0], ARRAY_SIZE(mmenu_bmps, char *)))
     {
         printf("Can't loadres\n");
@@ -350,17 +350,22 @@ void CMainMenu::OnPaint(HWND hWnd)
 void CMainMenu::OnTimer(int ID)
 {
     //EmulateSensor();
-#if 1
-    UpdateRealTimeParam(m_need_update);
-    if(m_need_update)m_need_update=false;
-    UpdateDevMode();
-    UpdateCollideStatus();
-    UpdateSignal();
-#endif
-    if(m_quit){
-        KillTimer(m_hWnd,100);
-        Close();
+
+    if(ID == 100)
+    {
+    #if 1
+        UpdateRealTimeParam(m_need_update);
+        if(m_need_update)m_need_update=false;
+        UpdateDevMode();
+        UpdateCollideStatus();
+        UpdateSignal();
+    #endif
+        if(m_quit){
+            KillTimer(m_hWnd,100);
+            Close();
+        }
     }
+
 }
 void CMainMenu::OnLButtonUp(int x, int y)
 {
@@ -421,27 +426,15 @@ void CMainMenu::OnButtonClick(skin_item_t* item)
 void CMainMenu::OnUserMsg(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
 {
     if(message == 0x804 || message == 0x805){
-        fast_dist->SetText(Poco::format("%0.1fm",g_car_dist));
-        fast_angle->SetText(Poco::format("%0.1f°",g_angle));
+        //fast_dist->SetText(Poco::format("%0.1fm",g_car_dist));
+        //fast_angle->SetText(Poco::format("%0.1f°",g_angle));
         //刷新小车幅度
-        m_worksite->update();
+        //m_worksite->update();
     }else if(message == MSG_CONTRL_MSG){
-        fprintf(stderr,"Receive UpdateCollideStatus Msg\n");
+        //fprintf(stderr,"Receive UpdateCollideStatus Msg\n");
         //UpdateCollideStatus((int)wParam, (int)lParam);
     }else if(message == MSG_GUI_NOFITY_MSG){
-        TGuiMsg* msg = (TGuiMsg*)wParam;
-        if(msg)
-        {
-            if(1==msg->type)
-            {
-                DrawMsg(0,msg->strMsg);
-            }else if(2==msg->type)
-            {
-                fprintf(stderr,"Recv Msg %s\n",msg->strMsg.c_str());
-                Close();
-            }
-            //delete msg;
-        }
+
     }
 }
 void CMainMenu::EmulateSensor()
@@ -471,7 +464,6 @@ __inline__ void CMainMenu::UpdateSignal()
         InvalidateRect(m_hWnd,&m_signal_rect,FALSE);
         for(int i = 0; i < 20 ; i++)
         {
-            //g_TC[i+1].Valide = !g_TC[i+1].Valide;
             statusIcon[i]->Update (m_hWnd,g_TC[i+1].Valide);
         }
     }
@@ -483,6 +475,8 @@ __inline__ void CMainMenu::UpdateRealTimeParam(bool update)
     {
         //是否显示额定重量和当前重量
         fast_max_weight->SetText(Poco::format("%0.1ft",CTorQueMgr::get ().m_rated_weight));
+        //fast_max_weight->SetText(Poco::format("%0.1ft",30.0));
+
         if(gDispFilter[disp_weight].need_update (g_dg_weight) || update){
             fast_weight->SetText(Poco::format("%0.1ft",g_dg_weight));
         }
@@ -531,18 +525,18 @@ __inline__ void CMainMenu::UpdateRealTimeParam(bool update)
 }
 __inline__ void CMainMenu::UpdateDevMode()
 {
-
-    m_mode = CMainCtrl::Get().GetDevMode() ;
-    if(m_mode== mode_slave)
+    if(CMainCtrl::Get().GetDevMode() != m_mode)
     {
-        fast_msg[0]->SetText("Slave",PIXEL_lightwhite,Font24);
-    }else if(m_mode== mode_master){
-        fast_msg[0]->SetText("Master",PIXEL_lightwhite,Font24);
-    }else{
-        fast_msg[0]->SetText("Loading..",PIXEL_lightwhite,Font24);
+        m_mode = CMainCtrl::Get().GetDevMode() ;
+        if(m_mode== mode_slave)
+        {
+            fast_msg[0]->SetText("Slave",PIXEL_lightwhite,Font24);
+        }else if(m_mode== mode_master){
+            fast_msg[0]->SetText("Master",PIXEL_lightwhite,Font24);
+        }else{
+            fast_msg[0]->SetText("Loading..",PIXEL_lightwhite,Font24);
+        }
     }
-
-
 }
 
 void CMainMenu::UpdateCollideStatus()

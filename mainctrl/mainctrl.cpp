@@ -471,7 +471,6 @@ void dealOtherData()
 }
 void      CMainCtrl::DistillData(std::string &msg,std::string &ID)
 {
-    int id = 0;
     int rightNo,senderId;
     double angle,position,AngleSpeed,Dang;
     Poco::StringTokenizer token(msg,"N");
@@ -483,6 +482,7 @@ void      CMainCtrl::DistillData(std::string &msg,std::string &ID)
 #endif
     if(token.count() != 7)
     {
+         ID = "0";
          CTX_DBG("DistillData Error MsgCount =%d\n",token.count());
          return;
     }
@@ -1157,6 +1157,7 @@ bool CMainCtrl::DealHeightInfo()
     CTX_Message msg;
     int HTCNo;
     double TCHeight;
+
     //DBG("%s %d\n",__FUNCTION__,__LINE__);
     if(CDianTai::Get().GetMessage(msg,2)){
         CTX_DBG("Recv HeighInfo =%s\n",msg.context.c_str());
@@ -1175,7 +1176,8 @@ bool CMainCtrl::DealHeightInfo()
             return false;
         }
         CTX_DBG("Modify TC[%d] Height=%6.2f\n",HTCNo,TCHeight);
-
+        if( (HTCNo > 20) || (HTCNo < 0) ) return false;
+        system("echo DealHeightInfo `date` >>err.out");
         g_TC[HTCNo].Height = TCHeight;
         SaveTowerCraneInfo();
         //Read
@@ -1508,7 +1510,7 @@ void CMainCtrl::ParseCollideStatus()
         if(m_control_state.b[i] != m_old_ctrl_state.b[i])
         {
             CJDQAdmin::Get().Service((CTX_JDQ)i,m_control_state.b[i]);
-            PostMessage(GetActiveWindow(),MSG_CONTRL_MSG,(WPARAM)i,(LPARAM)(m_control_state.b[i]?1:0));
+            //PostMessage(GetActiveWindow(),MSG_CONTRL_MSG,(WPARAM)i,(LPARAM)(m_control_state.b[i]?1:0));
         }
     }
 #endif
@@ -1668,7 +1670,7 @@ void    CMainCtrl::WildService()
     {
         CBeeper::get().BeepMs(1000,100000);
         if(!over_flag){
-            SendAlarmData();
+            //SendAlarmData();
         }
         over_flag = true;
     }else{
@@ -1733,7 +1735,7 @@ void    CMainCtrl::LjService()
         CJDQAdmin::Get().Control(JDQ_CAR_OUTSIDE_BREAK,JDQ_OPEN);//限制 小车向外运行停车
         CJDQAdmin::Get().Control(JDQ_HOOK_UP_LIMIT,JDQ_OPEN);//限制吊钩向上
         if(!over_flag){
-            SendAlarmData();
+            //SendAlarmData();
         }
         over_flag = true;
         CBeeper::get().BeepMs(1000,100000);
@@ -1765,7 +1767,7 @@ void    CMainCtrl::LjService()
                     CTX_DBG("Post Fall  Message to DBAdmin Failed\n");
                 }
             }
-            SendWetRecord (max_weight,alarmType?true:false);
+            //SendWetRecord (max_weight,alarmType?true:false);
             up_flag     = false;
             alarmType   = 0;
             max_weight  = 0;
@@ -1947,7 +1949,7 @@ bool CMainCtrl::Start()
         PushErrorMsg("DianTai Start Failed");
         RET_ERR;
     }
- //继电器管理模块
+#if 0
     if(m_dbadmin == NULL)
     {
         m_dbadmin = new CDBAdmin();
@@ -1959,15 +1961,16 @@ bool CMainCtrl::Start()
     }else{
 
     }
+#endif
 //初始化gpio模块
-
+ //继电器管理模块
     if( ! CJDQAdmin::Get().Start())
     {
         PushErrorMsg("CJDQAdmin Start Failed");
         RET_ERR;
     }
 
-#if 1
+#if 0
     CJDQAdmin::Get ().ResetDevice (1);
 //启动gprs上传模块
     if( !gprs::get ().start (gprs_remote_ip,gprs_remote_port,gprs_dtu_id))
