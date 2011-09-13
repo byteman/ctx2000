@@ -5,22 +5,22 @@
 #include <arpa/inet.h>
 #include "gprs_connector.h"
 using Poco::Net::SocketAddress;
-
+static Poco::FastMutex _mutex;
 #ifdef GPRS_DEBUG
 #define GPRS_DBG(fmt...) fprintf(stderr,fmt);
 #else
 #define GPRS_DBG(fmt...) do { } while (0)
 #endif
-
+#define MAX_GPS_BUF 128
 struct TGPSMessage{
     TGPSMessage()
     {
-        memset(gprmc,0,128);
+        memset(gprmc,0,MAX_GPS_BUF);
     }
     U8   header;
     U8   packet_no;
     U8   packet_len;
-    char gprmc[128];
+    char gprmc[MAX_GPS_BUF];
 }__attribute__ ((packed));;
 struct TNetMessage{
     U8  header;
@@ -83,10 +83,12 @@ void gprs::set_control_func(void *func,void* arg)
 }
 bool gprs::start(std::string ip, U16 port,std::string dtu_id)
 {
+#if 1
     if(!gps::get ().start (g_gps_com))
     {
         GPRS_DBG("gps start failed\n");
     }
+#endif
     GPRS_DBG("gprs connect to %s %d with id=%s\n",ip.c_str (),port,dtu_id.c_str ());
     m_addr=SocketAddress(ip,port);
     m_dtu_id = dtu_id;
@@ -121,6 +123,10 @@ bool gprs::_send_queue_data(tc_data &data)
 
 bool gprs::build_send_gps_data(std::string &gps)
 {
+    if(gps.length () >= MAX_GPS_BUF){
+        GPRS_DBG("gps len %d > max_gps_buf[%d]\n",gps.length (),MAX_GPS_BUF);
+        return false;
+    }
     TGPSMessage msg;
     msg.header = 0x8;
     msg.packet_no = 0;
@@ -201,18 +207,25 @@ gprs_connect:
              }if( ((count++) % 20) == 0) //10s
              {
                  std::string gps_info = gps::get ().poll_gprmc_msg ();
-                 build_send_gps_data(gps_info);
+                 if(gps_info.length () != 0)
+                    build_send_gps_data(gps_info);
              }
-             if(m_tcdata_queue.size() > 0){
-                 //GPRS_DBG("send tcdata type=1\n");
-                 tc_data d = m_tcdata_queue.front();
-                 buildpacket(d);
-                 GPRS_DBG("send tcdata type=1 count=%d ok\n",tc_send_count);
-                 m_tcdata_queue.pop();
-             }else{
+             if( ((count++) % 2) == 0) //5s
+             {
+                 if(m_tcdata_queue.size() > 0){
+                     tc_data d;
+                     {
+                         Poco::FastMutex::ScopedLock lock(_mutex);
+                         d = m_tcdata_queue.front();
+                         m_tcdata_queue.pop();
+                     }
+                     buildpacket(d);
+                     GPRS_DBG("send tcdata type=1 count=%d ok\n",tc_send_count);
 
+                 }else{
+
+                 }
              }
-
              if(!gprs::get().is_connected())
              {
                  GPRS_DBG("disconnected\n");
@@ -341,12 +354,14 @@ void gprs::buildpacket(tc_data& data)
     }
 
 }
+
 bool gprs::send_tc_data(int type,tc_data data)
 {
 
     if(m_tcdata_queue.size() < MAX_QUEUE_DATA_COUNT)
     {
-        data.m_type = type;
+        Poco::FastMutex::ScopedLock lock(_mutex);
+        data.m_type = type;  
         m_tcdata_queue.push(data);
         return true;
     }

@@ -1670,7 +1670,7 @@ void    CMainCtrl::WildService()
     {
         CBeeper::get().BeepMs(1000,100000);
         if(!over_flag){
-            //SendAlarmData();
+            SendAlarmData();
         }
         over_flag = true;
     }else{
@@ -1735,7 +1735,7 @@ void    CMainCtrl::LjService()
         CJDQAdmin::Get().Control(JDQ_CAR_OUTSIDE_BREAK,JDQ_OPEN);//限制 小车向外运行停车
         CJDQAdmin::Get().Control(JDQ_HOOK_UP_LIMIT,JDQ_OPEN);//限制吊钩向上
         if(!over_flag){
-            //SendAlarmData();
+            SendAlarmData();
         }
         over_flag = true;
         CBeeper::get().BeepMs(1000,100000);
@@ -1767,7 +1767,7 @@ void    CMainCtrl::LjService()
                     CTX_DBG("Post Fall  Message to DBAdmin Failed\n");
                 }
             }
-            //SendWetRecord (max_weight,alarmType?true:false);
+            SendWetRecord (max_weight,alarmType?true:false);
             up_flag     = false;
             alarmType   = 0;
             max_weight  = 0;
@@ -1949,7 +1949,7 @@ bool CMainCtrl::Start()
         PushErrorMsg("DianTai Start Failed");
         RET_ERR;
     }
-#if 0
+#if 1
     if(m_dbadmin == NULL)
     {
         m_dbadmin = new CDBAdmin();
@@ -1970,7 +1970,7 @@ bool CMainCtrl::Start()
         RET_ERR;
     }
 
-#if 0
+#if 1
     CJDQAdmin::Get ().ResetDevice (1);
 //启动gprs上传模块
     if( !gprs::get ().start (gprs_remote_ip,gprs_remote_port,gprs_dtu_id))

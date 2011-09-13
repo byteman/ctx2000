@@ -525,7 +525,7 @@ __inline__ void CMainMenu::UpdateRealTimeParam(bool update)
 }
 __inline__ void CMainMenu::UpdateDevMode()
 {
-    if(CMainCtrl::Get().GetDevMode() != m_mode)
+    //if(CMainCtrl::Get().GetDevMode() != m_mode)
     {
         m_mode = CMainCtrl::Get().GetDevMode() ;
         if(m_mode== mode_slave)

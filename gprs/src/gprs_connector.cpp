@@ -39,7 +39,7 @@ bool gprs_connector::is_pppd_exist()
 }
 bool gprs_connector::is_dial_ok()
 {
-    return exe_cmd("/sbin/ifconfig ppp0");
+    return exe_cmd("/sbin/ifconfig ppp0 | grep inet");
 }
 /*
   call and wait 60s,wait call ok
@@ -141,10 +141,18 @@ void gprs_connector::service()
     GPRS_DBG("gprs_connector sleep\n");
     return;
 #endif
+    static int dial_retry_counter = 0;
     if(!is_pppd_exist()){
         //不存在pppd就拨号
         m_gprs_conn_flag = false;
         m_dial_cnt = 0;
+        if(dial_retry_counter++ > 1)
+        {
+            Poco::Thread::sleep (60000*dial_retry_counter);
+            if(dial_retry_counter > 100){
+                dial_retry_counter = 0;
+            }
+        }
         if(m_ctrl_func)
             m_ctrl_func(m_ctrl_arg,1);
         //when return there,the gprs must be reset ok
@@ -167,6 +175,7 @@ void gprs_connector::service()
         }
 
     }else{
+        dial_retry_counter = 0;
         //存在了pppd ，但是是否连接成功否，是否建立了pppd, and is zombile process??
         if(is_dial_ok()){
             //存在了pppd ，dial ok
@@ -207,6 +216,7 @@ void gprs_connector::service()
             }
 
         }else{
+#if 0
             //没能建立成功ppp0,but exist pppd,有可能在拨号中，等待60s次,看是否连接成功
             m_gprs_conn_flag = false;
             GPRS_DBG("pppd exist ,but not dial ok--->wait %ds to restart pppd\n",20-m_dial_cnt*10);
@@ -231,6 +241,8 @@ void gprs_connector::service()
 
                 m_dial_cnt = 0;
             }
+#endif
+            GPRS_DBG("pppd exist ,but can not dial ok\n");
             Poco::Thread::sleep(10000);
        }
     }
@@ -240,11 +252,8 @@ void gprs_connector::service()
 bool gprs_connector::connect(SocketAddress remoteAddr)
 {
    try{
-        GPRS_DBG("Con1\n");
        m_socket.close();
-       GPRS_DBG("Con2\n");
        m_socket.connect(remoteAddr);
-          GPRS_DBG("Con3\n");
        m_addr = remoteAddr;
    }catch(Poco::Net::ConnectionRefusedException& e){
         GPRS_DBG("ConnectionRefusedException [%s] : %s\n",e.what(),e.displayText().c_str());
@@ -272,8 +281,13 @@ U32  gprs_connector::send(U8* data, U32 datalen)
     }
     GPRS_DBG("\n");
 #endif
-
-    return m_socket.sendBytes(data,datalen);
+    int sendBytes = 0;
+    try{
+        sendBytes = m_socket.sendBytes(data,datalen);
+    }catch(...){
+        GPRS_DBG("Send Failed Exception occur!\n");
+    }
+    return sendBytes;
 }
 size_t gprs_connector::send(TNetBuffer& data)
 {
@@ -281,14 +295,12 @@ size_t gprs_connector::send(TNetBuffer& data)
 }
 size_t gprs_connector::recv(TNetBuffer& data,size_t datalen, long timeout_ms)
 {
-
-    Timespan timeout(timeout_ms*1000);
-    m_socket.setReceiveTimeout(timeout);
-
-    data.assign(datalen+1,0);
     int bRes = 0;
     try{
+        Timespan timeout(timeout_ms*1000);
+        m_socket.setReceiveTimeout(timeout);
 
+        data.assign(datalen+1,0);
         bRes = m_socket.receiveBytes(data.data(),datalen);
     }catch(Poco::TimeoutException& e){
 
@@ -331,9 +343,14 @@ void gprs_connector::checknetwork()
 {
     TNetBuffer tmp;
     Timespan timeout(1000000);
-    if(m_socket.poll(timeout, Socket::SELECT_READ))
-    {
-        recv(tmp,m_socket.available(),1);
+    try{
+        if(m_socket.poll(timeout, Socket::SELECT_READ))
+        {
+            recv(tmp,m_socket.available(),1);
+        }
+    }catch(...){
+        GPRS_DBG("checknetwork excetpions\n");
     }
+
 
 }

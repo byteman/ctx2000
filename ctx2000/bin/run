@@ -20,10 +20,10 @@ export LD_LIBRARY_PATH=$exportpath:/usr/local/lib:../lib
 if [ -e reset.txt ];then
 	rm reset.txt 
 fi
-#while :
-#do
+while :
+do
 echo start `date` >> reset.txt
 ./ctx2000
 echo end `date` >> reset.txt
-#sleep 2
-#done
+sleep 2
+done
