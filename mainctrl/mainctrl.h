@@ -5,10 +5,12 @@
 #include <Poco/Thread.h>
 #include <Poco/Notification.h>
 #include <Poco/Timer.h>
+#include <Poco/SharedMemory.h>
 #include "tajidbmgr.h"
 #include "dataacquire.h"
 #include "diantai.h"
 #include "dt_core.h"
+#include "gprs.h"
 using Poco::Event;
 using Poco::Runnable;
 using Poco::Thread;
@@ -81,8 +83,11 @@ public:
     EWorkMode GetDevMode();
     bool      NotifyBypass(bool on);
     void    SignalMode();
+    bool    InitSharedMem();
+    void    SetSharedata();
     ControledStatus m_control_state,m_old_ctrl_state;
 private:
+    Poco::SharedMemory m_shared;
     EWorkMode m_mode;
     int      m_local_id;
     int      m_main_id;

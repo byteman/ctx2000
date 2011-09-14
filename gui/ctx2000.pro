@@ -84,7 +84,7 @@ INCLUDEPATH += ../include ../mgcore/include \
 DEPENDPATH +=$$INCLUDEPATH
 DESTDIR=../bin
 
-LINKLIBS=mgcore cppsqlite3 datacopy gprs bycore
+LINKLIBS=mgcore cppsqlite3 datacopy  bycore
 linux-g++ {
     message(g++ = linux-g++)
     DEFINES+= 
@@ -114,7 +114,7 @@ linux-arm-v5te-g++ {
 #QMAKE_CXXFLAGS+=-g
 LIBS += -lmgcore -lminigui -lmgext -ljpeg \
         -lpng -lPocoFoundation -lts -lsqlite3\
-        -lcppsqlite3 -lusbmount -lserial -lgprs -lPocoUtil 
+        -lcppsqlite3 -lusbmount -lserial -lPocoUtil
 
 HEADERS += \
     torqueForm.h \

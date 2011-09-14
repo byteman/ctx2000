@@ -1,13 +1,18 @@
 #include "gprs.h"
-#include "comdata.h"
+//#include "comdata.h"
 #include <Poco/SingletonHolder.h>
 #include "gps.h"
 #include <arpa/inet.h>
 #include "gprs_connector.h"
+#include <assert.h>
+#include <stdio.h>
+#include <string.h>
+#include <syslog.h>
 using Poco::Net::SocketAddress;
 static Poco::FastMutex _mutex;
 #ifdef GPRS_DEBUG
-#define GPRS_DBG(fmt...) fprintf(stderr,fmt);
+//#define GPRS_DBG(fmt...) fprintf(stderr,fmt);
+#define GPRS_DBG(fmt...)    syslog(LOG_ERR,fmt);
 #else
 #define GPRS_DBG(fmt...) do { } while (0)
 #endif
@@ -82,10 +87,10 @@ void gprs::set_control_func(void *func,void* arg)
         m_conn->set_controller((t_dev_control_func)func,arg);
     }
 }
-bool gprs::start(std::string ip, U16 port,std::string dtu_id)
+bool gprs::start(std::string ip, U16 port,std::string dtu_id,std::string gpspath)
 {
 #if 1
-    if(!gps::get ().start (g_gps_com))
+    if(!gps::get ().start (gpspath))
     {
         GPRS_DBG("gps start failed\n");
     }
@@ -99,7 +104,9 @@ bool gprs::start(std::string ip, U16 port,std::string dtu_id)
             GPRS_DBG("gprs connector start failed\n");
         }
     }
-
+    m_shared_data = Poco::SharedMemory("gprs",4096,Poco::SharedMemory::AM_WRITE);
+    assert(m_shared_data.begin () < m_shared_data.end ());
+    assert(m_shared_data.end() - m_shared_data.begin () == 4096);
     return ByThread::start();
 
 
@@ -136,6 +143,35 @@ bool gprs::build_send_gps_data(std::string &gps)
     if(m_conn)
         m_conn->send ((U8*)&msg,3+gps.length ());
     return true;
+}
+void gprs::build_send_5s_packet()
+{
+    gprs::tc_data data;
+
+    TShared_Data* share = (TShared_Data*)m_shared_data.begin ();
+    if(!share || (share->g_avail != 'a')) return;
+
+    data.m_has_alarm    = false;
+    data.m_angle        = share->g_angle;
+    data.m_car_speed    = 0;
+    data.m_dg_height    = share->g_dg_height;
+    data.m_dist         = share->g_car_dist;
+    data.m_fall         = share->g_tc_rate;
+    data.m_gradient_x   = share->g_angle_x;
+    data.m_gradient_y   = share->g_angle_y;
+    data.m_max_dist     = share->g_local_long_arm_len;
+    data.m_min_dist     = share->g_local_Rs;
+    data.m_speed        = share->g_wild_speed;
+    data.m_tc_height    = share->g_tc_height;
+    data.m_up_angle     = share->g_up_angle;
+    data.m_weight       = share->g_dg_weight;
+    data.m_max_weight   = share->g_rated_weight;
+    data.m_dg_speed     = 0;
+    if(!gprs::get().send_tc_data(0,data))
+    {
+        GPRS_DBG("send_tc_data failed\n");
+    }
+    share->g_avail = 0;
 }
 void gprs::service()
 {
@@ -181,33 +217,14 @@ gprs_connect:
         while(1)
         {
              static int count = 0;
+
              if(!m_conn->is_gprs_conneted()){
                     goto gprs_connect;
              }
              count++;
              if( (count % 5) == 0) //5s
              {
-                 gprs::tc_data data;
-                 data.m_has_alarm = false;
-                 data.m_angle = g_angle;
-                 data.m_car_speed = 0;
-                 data.m_dg_height=g_dg_height;
-                 data.m_dist=g_car_dist;
-                 data.m_fall=g_tc_rate;
-                 data.m_gradient_x=g_angle_x;
-                 data.m_gradient_y=g_angle_y;
-                 data.m_max_dist=g_TC[g_local_id].LongArmLength;
-                 data.m_min_dist=g_TC[g_local_id].Rs;
-                 data.m_speed=g_wild_speed;
-                 data.m_tc_height=g_TC[g_local_id].Height;
-                 data.m_up_angle=g_up_angle;
-                 data.m_weight  =g_dg_weight;
-                 data.m_max_weight=g_rated_weight;
-                 data.m_dg_speed = 0;
-                 if(!gprs::get().send_tc_data(0,data))
-                 {
-                     GPRS_DBG("send_tc_data failed\n");
-                 }
+                build_send_5s_packet();
              }if( (count % 10) == 0) //10s
              {
                  std::string gps_info = gps::get ().poll_gprmc_msg ();
@@ -216,6 +233,7 @@ gprs_connect:
              }
              //if( (count % 2) == 0) //1s
              {
+                 GPRS_DBG("run %d\n",m_tcdata_queue.size());
                  if(m_tcdata_queue.size() > 0){
                      tc_data d;
                      {
@@ -364,7 +382,9 @@ bool gprs::send_tc_data(int type,tc_data data)
     if(!m_start_ok) return false;
     if(m_tcdata_queue.size() < MAX_QUEUE_DATA_COUNT)
     {
+        GPRS_DBG("build_send_5s_packet end3\n");
         Poco::FastMutex::ScopedLock lock(_mutex);
+        GPRS_DBG("build_send_5s_packet end4\n");
         data.m_type = type;  
         m_tcdata_queue.push(data);
         return true;

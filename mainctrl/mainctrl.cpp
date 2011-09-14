@@ -1680,6 +1680,7 @@ void    CMainCtrl::WildService()
 }
 void      CMainCtrl::SendAlarmData()
 {
+#if 0
     gprs::tc_data data;
     data.m_has_alarm = true;
     data.m_angle     = g_angle;
@@ -1697,13 +1698,18 @@ void      CMainCtrl::SendAlarmData()
     data.m_weight    =g_dg_weight;
     data.m_max_weight=g_rated_weight;
     data.m_dg_speed  =  0;
+
     if(!gprs::get().send_tc_data(0,data))
     {
         CTX_DBG("send_alarm_tc_data failed\n");
     }
+#endif
+
+
 }
 void   CMainCtrl::SendWetRecord(double qd_max_weight,bool alarm)
 {
+#if 0
     gprs::tc_data data;
     data.m_has_alarm = alarm;
     data.m_angle     = g_angle;
@@ -1714,6 +1720,7 @@ void   CMainCtrl::SendWetRecord(double qd_max_weight,bool alarm)
     data.m_weight    = qd_max_weight;
     data.m_max_weight= CTorQueMgr::get ().m_rated_weight;
     gprs::get ().send_tc_data (1,data);
+#endif
 }
 /*
 力矩服务程序
@@ -1799,6 +1806,37 @@ void    CMainCtrl::SignalMode()
         DiantaiService();
     }
 }
+void    CMainCtrl::SetSharedata()
+{
+    static int cnt=0;
+    if( ((cnt++)%5)) return;
+
+    TShared_Data* data = (TShared_Data*)m_shared.begin ();
+    if(data){
+        data->g_angle     = g_angle;
+        data->g_angle_x   = g_angle_x;
+        data->g_angle_y   = g_angle_y;
+        data->g_car_dist  = g_car_dist;
+        data->g_dg_height = g_dg_height;
+        data->g_dg_weight = g_dg_weight;
+        data->g_local_long_arm_len = g_TC[g_local_id].LongArmLength;
+        data->g_local_Rs = g_TC[g_local_id].Rs;
+        data->g_rated_weight = g_rated_weight;
+        data->g_tc_height = g_TC[g_local_id].Height;
+        data->g_tc_rate   = g_tc_rate;
+        data->g_up_angle  = g_up_angle;
+        data->g_wild_speed = g_wild_speed;
+        data->g_avail  = 'a';
+    }
+}
+bool    CMainCtrl::InitSharedMem()
+{
+    m_shared = Poco::SharedMemory("gprs",4096,Poco::SharedMemory::AM_WRITE);
+    assert (m_shared.begin() && m_shared.end());
+    assert (m_shared.end()-m_shared.begin() == 4096);
+
+    return true;
+}
 void CMainCtrl::run()
 {
     bool AddState=false;
@@ -1831,6 +1869,7 @@ void CMainCtrl::run()
         }else{
             std::cerr << "unkown mode\n";
         }
+        SetSharedata();
 
         //Poco::Thread::sleep(100);
 
@@ -1971,8 +2010,9 @@ bool CMainCtrl::Start()
         RET_ERR;
     }
 
-#if 1
+
     CJDQAdmin::Get ().ResetDevice (1);
+#if 0
 //启动gprs上传模块
     if( !gprs::get ().start (gprs_remote_ip,gprs_remote_port,gprs_dtu_id))
     {

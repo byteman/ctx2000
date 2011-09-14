@@ -20,6 +20,7 @@ export LD_LIBRARY_PATH=$exportpath:/usr/local/lib:../lib
 if [ -e reset.txt ];then
 	rm reset.txt 
 fi
+./gprs-demon
 while :
 do
 echo start `date` >> reset.txt

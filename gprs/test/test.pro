@@ -3,7 +3,7 @@
 # -------------------------------------------------
 QT       -= gui core network
 
-TARGET = test
+TARGET = ctxgprs
 CONFIG   += console
 CONFIG   -= app_bundle
 
