@@ -156,7 +156,7 @@ void SoftKeyboardForm::CreateIMEWindow()
     m_status = new CSkinLable(&skinctrls[0],this,"skinlable",(void*)&InputSta);
     InitSkinHeader("SoftKeyboardForm");
 
-    fprintf(stderr,"x=%d,y=%d,w=%d,h=%d\n",WinInfo.lx,WinInfo.ly,WinInfo.rx,WinInfo.by);
+    //fprintf(stderr,"x=%d,y=%d,w=%d,h=%d\n",WinInfo.lx,WinInfo.ly,WinInfo.rx,WinInfo.by);
     m_move_able = true;
     this->CreateForm(HWND_DESKTOP,WinInfo.lx,WinInfo.ly,WinInfo.rx,WinInfo.by,TRUE,WS_EX_TOPMOST|WS_EX_TOOLWINDOW);
 

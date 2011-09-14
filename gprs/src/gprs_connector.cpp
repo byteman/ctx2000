@@ -24,6 +24,7 @@ bool gprs_connector::exe_cmd(std::string cmd)
 
     int ret = system(cmdout.c_str());
     //GPRS_DBG("exe %s ret=%d\n",cmd.c_str(),ret);
+    //fprintf(stderr,"exe %s ret=%d\n",cmd.c_str(),ret);
     return (ret!=0)?false:true;
 }
 gprs_connector::gprs_connector()
@@ -39,7 +40,7 @@ bool gprs_connector::is_pppd_exist()
 }
 bool gprs_connector::is_dial_ok()
 {
-    return exe_cmd("/sbin/ifconfig ppp0 | grep inet");
+    return exe_cmd("/sbin/ifconfig ppp0 2>/dev/null | grep inet");
 }
 /*
   call and wait 60s,wait call ok
@@ -96,7 +97,7 @@ bool gprs_connector::can_ping(std::string ip)
 
 bool gprs_connector::fix_route_table()
 {
-
+    return true;
 }
 void gprs_connector::set_controller(t_dev_control_func func,void* arg)
 {
@@ -112,6 +113,7 @@ bool gprs_connector::cutoff_chat()
     GPRS_DBG("cutoff_chat\n");
     return exe_cmd("killall  chat");
 }
+#if 0
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -126,6 +128,7 @@ sig_chld(int signo)
                 printf("child %d terminated\n", pid);
         return;
 }
+#endif
 bool gprs_connector::before_run ()
 {
     //ignore child quit, and zombile process
@@ -186,7 +189,7 @@ void gprs_connector::service()
                 GPRS_DBG("ping %s ok\n",DNS1);
                 m_gprs_conn_flag = true;
                 m_ping_cnt = 0;
-                Poco::Thread::sleep(10000);
+                Poco::Thread::sleep(60000);
             }
             else{
                 //两个dns都ping不通，就认为gprs不在线
@@ -211,7 +214,7 @@ void gprs_connector::service()
                 }else{ //其中一个在线，也可以认为gprs连接成功。只是soccket没有连接成功
                     m_gprs_conn_flag = true;
                     m_ping_cnt = 0;
-                    Poco::Thread::sleep(10000);
+                    Poco::Thread::sleep(60000);
                 }
             }
 
@@ -289,10 +292,12 @@ U32  gprs_connector::send(U8* data, U32 datalen)
     }
     return sendBytes;
 }
+#if 0
 size_t gprs_connector::send(TNetBuffer& data)
 {
     return 0;
 }
+#endif
 size_t gprs_connector::recv(TNetBuffer& data,size_t datalen, long timeout_ms)
 {
     int bRes = 0;

@@ -69,6 +69,7 @@ gprs& gprs::get()
 gprs::gprs():m_conn(NULL)
 {
     m_conn = new gprs_connector();
+    m_start_ok = false;
 }
 gprs::~gprs()
 {
@@ -139,7 +140,8 @@ bool gprs::build_send_gps_data(std::string &gps)
 void gprs::service()
 {
     GPRS_DBG("begin connect\n");
-    bool bRes = false;
+    bool bRes  = false;
+    m_start_ok = true;
 gprs_connect:
     while(1){
         if( (m_conn) && m_conn->is_gprs_conneted())
@@ -182,7 +184,8 @@ gprs_connect:
              if(!m_conn->is_gprs_conneted()){
                     goto gprs_connect;
              }
-             if( ((count++) % 10) == 0) //5s
+             count++;
+             if( (count % 5) == 0) //5s
              {
                  gprs::tc_data data;
                  data.m_has_alarm = false;
@@ -200,17 +203,18 @@ gprs_connect:
                  data.m_up_angle=g_up_angle;
                  data.m_weight  =g_dg_weight;
                  data.m_max_weight=g_rated_weight;
+                 data.m_dg_speed = 0;
                  if(!gprs::get().send_tc_data(0,data))
                  {
                      GPRS_DBG("send_tc_data failed\n");
                  }
-             }if( ((count++) % 20) == 0) //10s
+             }if( (count % 10) == 0) //10s
              {
                  std::string gps_info = gps::get ().poll_gprmc_msg ();
                  if(gps_info.length () != 0)
                     build_send_gps_data(gps_info);
              }
-             if( ((count++) % 2) == 0) //5s
+             //if( (count % 2) == 0) //1s
              {
                  if(m_tcdata_queue.size() > 0){
                      tc_data d;
@@ -226,12 +230,12 @@ gprs_connect:
 
                  }
              }
-             if(!gprs::get().is_connected())
+             if(!gprs::get().is_connected()) //wait 1s
              {
                  GPRS_DBG("disconnected\n");
                  break;
              }
-             Poco::Thread::sleep(500);
+             //Poco::Thread::sleep(500);
         }
     }
 }
@@ -357,7 +361,7 @@ void gprs::buildpacket(tc_data& data)
 
 bool gprs::send_tc_data(int type,tc_data data)
 {
-
+    if(!m_start_ok) return false;
     if(m_tcdata_queue.size() < MAX_QUEUE_DATA_COUNT)
     {
         Poco::FastMutex::ScopedLock lock(_mutex);

@@ -1002,7 +1002,7 @@ void CMainCtrl::InitAlgoData()
         g_qtzs[i].m_sarm_angle       = 0; //动臂仰角,实时参数
         g_qtzs[i].m_carrier_pos      = 0;
         g_qtzs[i].m_long_arm_angle   = 0;
-
+        g_qtzs[i].m_online           = false;
         CTX_DBG("g_qtzs[%d] car_pos=%0.2f height=%0.2f longarm=%0.2f shortarm=%0.2f,x=%0.2f y=%0.2f brake_dist=%0.2f stop_dist=%0.2f slowdown_dist=%0.2f v_slow_dist=%0.2f v_brake_dist=%0.2f\n",\
                 i,g_qtzs[i].m_carrier_pos,g_qtzs[i].m_height,g_qtzs[i].m_long_arm_len,g_qtzs[i].m_short_arm_len,\
                 g_qtzs[i].m_coord.x,g_qtzs[i].m_coord.y,BrakeDis,DangerDis,WarnDis,VWarnDis,VStopDis);
@@ -1651,6 +1651,7 @@ void CMainCtrl::CollideDetect()
             g_qtzs[id].m_carrier_pos      = g_TC[id+1].Position;
             g_qtzs[id].m_sarm_angle       = g_TC[id+1].Dang;
             g_qtzs[id].m_online           = g_TC[id+1].Valide; //其他塔机的在线状态
+            //CTX_DBG("online=%d\n",g_qtzs[id].m_online);
         }
         //CTX_DBG("tj conflict[%d] angle=%0.2f dang=%0.2f h=%0.2f p=%0.2f \n",id+1,g_qtzs[id].m_long_arm_angle,g_qtzs[id].m_sarm_angle,g_qtzs[id].m_height,g_qtzs[id].m_carrier_pos);
     }

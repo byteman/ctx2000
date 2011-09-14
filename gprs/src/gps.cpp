@@ -160,11 +160,20 @@ unsigned short gps::check_sum(unsigned char cmdbuf[] ,int len)
 }
 bool gps::set_ack_time(unsigned char s)
 {
+    bool ret = false;
     cmd_gps[4][8] = s;
     unsigned short sum = check_sum(cmd_gps[4]+2,7);
     cmd_gps[4][9] = sum>>8;
     cmd_gps[4][10] = sum&0xff;
-    com->Write (cmd_gps[4],MAX_LEN);
+    if(com){
+        try{
+            com->Write (cmd_gps[4],MAX_LEN);
+            ret = true;
+        }catch(...){
+            ret = false;
+        }
+    }
+    return ret;
 }
 void gps::service ()
 {

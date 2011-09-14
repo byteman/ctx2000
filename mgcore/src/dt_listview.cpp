@@ -271,6 +271,7 @@ GHANDLE  CListView::_AddItem(LVITEM& item,GHANDLE itemHwnd,int height)
 {
 
     item.nItemHeight = height;
+    item.nItem       = GetItemNum ();
     if( (_parent) && (_parent->m_hWnd != HWND_INVALID))
     {
 
@@ -321,6 +322,8 @@ GHANDLE CListView::AddSubItems(StringList subitems,int itemHeight,GHANDLE hRootI
         subdata.subItem = i;
         //subdata.subItem = 0;
         subdata.pszText = (char*)subitems.at(i).c_str();
+        //HWND hh = GetDlgItem (parent->m_hWnd, _id);
+        //SendNotifyMessage (hh,LVM_SETSUBITEM,(WPARAM)hItem, (LPARAM)&subdata);
         SendDlgItemMessage (_parent->m_hWnd, _id, LVM_SETSUBITEM, (WPARAM)hItem, (LPARAM)&subdata);
     }
 

@@ -69,8 +69,10 @@ private:
     Poco::Net::SocketAddress m_addr;
     gprs_connector* m_conn;
     bool m_conn_flag;
+    bool m_start_ok;
     std::string m_dtu_id;
     std::queue<tc_data> m_tcdata_queue;
+
 };
 
 #endif // GPRS_H
