@@ -7,3 +7,4 @@ lib*.so.*
 ctx2000/*
 ctx2000/bin/ctx2000
 ctx2000/lib/libQtzCollideLib.a
+*.pro.user
