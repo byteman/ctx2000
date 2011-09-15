@@ -17,7 +17,7 @@ done
 cp -a resource $destdir
 
 
-arm-926ejs-linux-strip $destdir/bin/* 2>/dev/null
+arm-926ejs-linux-strip $destdir/bin/ctx2000 2>/dev/null
 arm-926ejs-linux-strip $destlib/* 2>/dev/null
 
 cp -a ctx2000 /media/linuxdata/home/byteman/works/mx27/nfsroot/ctx2000

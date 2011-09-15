@@ -2,3 +2,6 @@
 
 killall run
 killall ctx2000
+killall gprs-demon
+killall ctxgprs
+killall pppd

@@ -5,6 +5,11 @@
 #include <Poco/Thread.h>
 #include <Poco/Net/SocketAddress.h>
 #include <Poco/SharedMemory.h>
+#include "Poco/Net/Net.h"
+#include "Poco/Net/DatagramSocket.h"
+#include "Poco/Net/SocketAddress.h"
+#include "Poco/Thread.h"
+#include "Poco/Event.h"
 #include <queue>
 #include "bythread.h"
 
@@ -29,6 +34,7 @@ struct TShared_Data{
     double g_dg_speed;
 }__attribute__ ((packed));
 class gprs_connector;
+class GPRS_Server;
 class gprs:public ByThread
 {
 public:
@@ -82,6 +88,7 @@ public:
     bool is_connected();
     bool before_run ();
     void service();
+    bool m_login;
 private:
     void buildpacket(tc_data& data);
     bool _send_queue_data(tc_data &data);
@@ -92,6 +99,7 @@ private:
     std::string m_dtu_id;
     std::queue<tc_data> m_tcdata_queue;
     Poco::SharedMemory m_shared_data;
+    GPRS_Server* server;
 
 };
 

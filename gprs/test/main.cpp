@@ -2,25 +2,22 @@
 #include "gprs.h"
 #include <Poco/Thread.h>
 #include <stdlib.h>
-bool gprs_test()
-{
-
-    return false;
-}
-bool exe_cmd(std::string cmd)
-{
-    std::string cmdout = cmd+" 1>/dev/null 2>&1";
-    int ret = system(cmdout.c_str());
-    fprintf(stderr,"exe %s ret=%d\n",cmd.c_str(),ret);
-    return (ret!=0)?false:true;
-}
+#include "iniFile.h"
 int main(int argc, char *argv[])
 {
-    //240305002003158
-    gprs::get().start("118.123.17.25",56000,"a001","/dev/tts1");
-    while(0)
+    TIniFile cfg("./etc/ctx2000.ini");
+
+    std::string ip,dtuid,gps;
+    int port;
+    ip    = cfg.ReadString ("gprs","ip","118.123.17.25");
+    port  = cfg.ReadInteger ("gprs","port",56000);
+    dtuid = cfg.ReadString ("gprs","dtuid","a001");
+    gps   = cfg.ReadString ("serial","gps_com","/dev/tts1");
+    gprs::get().start(ip,port,dtuid,gps);
+    while(1)
     {
-    	Poco::Thread::sleep(1000);
+    	Poco::Thread::sleep(100000);
+    	pause();
     }
-    pause();
+    
 }

@@ -1680,47 +1680,29 @@ void    CMainCtrl::WildService()
 }
 void      CMainCtrl::SendAlarmData()
 {
-#if 0
-    gprs::tc_data data;
-    data.m_has_alarm = true;
-    data.m_angle     = g_angle;
-    data.m_car_speed = 0;
-    data.m_dg_height = g_dg_height;
-    data.m_dist      = g_car_dist;
-    data.m_fall      = g_tc_rate;
-    data.m_gradient_x= g_angle_x;
-    data.m_gradient_y=g_angle_y;
-    data.m_max_dist  =g_TC[g_local_id].LongArmLength;
-    data.m_min_dist  =g_TC[g_local_id].Rs;
-    data.m_speed     =g_wild_speed;
-    data.m_tc_height =g_TC[g_local_id].Height;
-    data.m_up_angle  =g_up_angle;
-    data.m_weight    =g_dg_weight;
-    data.m_max_weight=g_rated_weight;
-    data.m_dg_speed  =  0;
+    TShared_Data data;
+    buildData(data);
+    data.g_alarm = 1;
+    try{
+        socket_gprs.sendTo (&data,sizeof(data),SocketAddress("localhost",3389));
+    }catch(...){
 
-    if(!gprs::get().send_tc_data(0,data))
-    {
-        CTX_DBG("send_alarm_tc_data failed\n");
     }
-#endif
-
 
 }
 void   CMainCtrl::SendWetRecord(double qd_max_weight,bool alarm)
 {
-#if 0
-    gprs::tc_data data;
-    data.m_has_alarm = alarm;
-    data.m_angle     = g_angle;
-    data.m_car_speed = 0;
-    data.m_dg_height = g_dg_height;
-    data.m_fall      = CTorQueMgr::get ().m_rate_int;
-    data.m_dist      = g_car_dist;
-    data.m_weight    = qd_max_weight;
-    data.m_max_weight= CTorQueMgr::get ().m_rated_weight;
-    gprs::get ().send_tc_data (1,data);
-#endif
+
+    TShared_Data data;
+    buildData(data);
+    data.g_alarm        = alarm?1:0;
+    data.g_type         = 1;
+    data.g_dg_weight    = qd_max_weight;
+    try{
+        socket_gprs.sendTo (&data,sizeof(data),SocketAddress("localhost",3389));
+    }catch(...){
+
+    }
 }
 /*
 力矩服务程序
@@ -1806,28 +1788,38 @@ void    CMainCtrl::SignalMode()
         DiantaiService();
     }
 }
-void    CMainCtrl::SetSharedata()
+void    CMainCtrl::buildData(TShared_Data& data)
+{
+    data.g_angle     = g_angle;
+    data.g_angle_x   = g_angle_x;
+    data.g_angle_y   = g_angle_y;
+    data.g_car_dist  = g_car_dist;
+    data.g_dg_height = g_dg_height;
+    data.g_dg_weight = g_dg_weight;
+    data.g_local_long_arm_len = g_TC[g_local_id].LongArmLength;
+    data.g_local_Rs         = g_TC[g_local_id].Rs;
+    data.g_rated_weight     = g_rated_weight;
+    data.g_tc_height        = g_TC[g_local_id].Height;
+    data.g_tc_rate          = g_tc_rate;
+    data.g_up_angle         = g_up_angle;
+    data.g_wild_speed       = g_wild_speed;
+    data.g_avail  = 'a';
+    data.g_alarm  = 0;
+    data.g_type   = 0;
+}
+void    CMainCtrl::Send_5s_data()
 {
     static int cnt=0;
-    if( ((cnt++)%5)) return;
+    if( ((cnt++)%10)) return;
 
-    TShared_Data* data = (TShared_Data*)m_shared.begin ();
-    if(data){
-        data->g_angle     = g_angle;
-        data->g_angle_x   = g_angle_x;
-        data->g_angle_y   = g_angle_y;
-        data->g_car_dist  = g_car_dist;
-        data->g_dg_height = g_dg_height;
-        data->g_dg_weight = g_dg_weight;
-        data->g_local_long_arm_len = g_TC[g_local_id].LongArmLength;
-        data->g_local_Rs = g_TC[g_local_id].Rs;
-        data->g_rated_weight = g_rated_weight;
-        data->g_tc_height = g_TC[g_local_id].Height;
-        data->g_tc_rate   = g_tc_rate;
-        data->g_up_angle  = g_up_angle;
-        data->g_wild_speed = g_wild_speed;
-        data->g_avail  = 'a';
+    TShared_Data data;
+    buildData(data);
+    try{
+        socket_gprs.sendTo (&data,sizeof(data),SocketAddress("localhost",3389));
+    }catch(...){
+
     }
+
 }
 bool    CMainCtrl::InitSharedMem()
 {
@@ -1869,7 +1861,7 @@ void CMainCtrl::run()
         }else{
             std::cerr << "unkown mode\n";
         }
-        SetSharedata();
+        Send_5s_data();
 
         //Poco::Thread::sleep(100);
 
@@ -2011,7 +2003,7 @@ bool CMainCtrl::Start()
     }
 
 
-    CJDQAdmin::Get ().ResetDevice (1);
+    //CJDQAdmin::Get ().ResetDevice (1);
 #if 0
 //启动gprs上传模块
     if( !gprs::get ().start (gprs_remote_ip,gprs_remote_port,gprs_dtu_id))

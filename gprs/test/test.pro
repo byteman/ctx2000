@@ -8,7 +8,8 @@ CONFIG   += console
 CONFIG   -= app_bundle
 
 TEMPLATE = app
-SOURCES += main.cpp ../../bycore/src/ByThread.cpp ../../mainctrl/comdata.cpp
+SOURCES += main.cpp ../../bycore/src/ByThread.cpp \
+    ../../bycore/src/iniFile.cpp
 DEFINES += 
 INCLUDEPATH += ../include  ../../bycore/include ../../mainctrl ../../algo
 linux-g++ {
@@ -25,3 +26,5 @@ QMAKE_CXXFLAGS+=-g
 LIBS += -lgprs -lserial
 DESTDIR += 
 OBJECTS_DIR = 
+
+

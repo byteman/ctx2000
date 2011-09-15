@@ -6,6 +6,8 @@
 #include <Poco/Notification.h>
 #include <Poco/Timer.h>
 #include <Poco/SharedMemory.h>
+#include <Poco/Net/DialogSocket.h>
+#include <Poco/Net/SocketAddress.h>
 #include "tajidbmgr.h"
 #include "dataacquire.h"
 #include "diantai.h"
@@ -16,6 +18,8 @@ using Poco::Runnable;
 using Poco::Thread;
 using Poco::Timer;
 using Poco::Notification;
+using Poco::Net::SocketAddress;
+using Poco::Net::DialogSocket;
 typedef std::vector<CTX_ModuleCtrl*> TModulesList;
 typedef std::vector<int> TIDList;
 typedef std::vector<std::string>  StringList;
@@ -84,7 +88,8 @@ public:
     bool      NotifyBypass(bool on);
     void    SignalMode();
     bool    InitSharedMem();
-    void    SetSharedata();
+    void    Send_5s_data();
+    void    buildData(TShared_Data& data);
     ControledStatus m_control_state,m_old_ctrl_state;
 private:
     Poco::SharedMemory m_shared;
@@ -138,6 +143,7 @@ private:
 
     CDBAdmin*  m_dbadmin;
     TModulesList m_ModuleList;
+    Poco::Net::DatagramSocket socket_gprs;
 public:
     StringList m_errList;
     StringList m_warnList;

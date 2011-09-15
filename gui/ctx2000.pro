@@ -114,7 +114,7 @@ linux-arm-v5te-g++ {
 #QMAKE_CXXFLAGS+=-g
 LIBS += -lmgcore -lminigui -lmgext -ljpeg \
         -lpng -lPocoFoundation -lts -lsqlite3\
-        -lcppsqlite3 -lusbmount -lserial -lPocoUtil
+        -lcppsqlite3 -lusbmount -lserial -lPocoUtil -lPocoNet
 
 HEADERS += \
     torqueForm.h \

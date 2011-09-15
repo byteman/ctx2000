@@ -10,12 +10,13 @@ TARGET = gprs
 TEMPLATE = lib
 OUTPUT=./lib
 DEFINES+=GPRS_DEBUG
-INCLUDEPATH+=./include ../bycore/include ../mainctrl ../algo
+INCLUDEPATH+=./include ../bycore/include ../mainctrl ../algo ../extdev/include
 DEPENDPATH=$$INCLUDEPATH
 SOURCES += \  
     src/gprs.cpp \
     src/gprs_connector.cpp \
-    src/gps.cpp
+    src/gps.cpp \
+    ../extdev/src/gpio.cpp
 
 HEADERS += \ 
     gprs.h \
@@ -40,3 +41,4 @@ linux-g++ {
     DEFINES+=PC_DEBUG
 }
 LIBS+=-lPocoFoundation -lPocoNet
+
