@@ -90,6 +90,8 @@ void GUIAPI InitMainUI()
 #include "torqueForm.h"
 static void    StartCtx2000()
 {
+    std::string en_sys_log = getenv ("en_sys_log");
+
     if( ! CMainCtrl::Get().Start())
     {
         fprintf(stderr,"MainCtrl Start Failed\n");
@@ -97,6 +99,10 @@ static void    StartCtx2000()
         for(size_t i = 0 ; i < CMainCtrl::Get().m_errList.size(); i++)
         {
             std::cerr << CMainCtrl::Get().m_errList.at(i) << std::endl;
+            if(en_sys_log == "yes")
+            {
+                CTajiDbMgr::Get().AddSysLog(CMainCtrl::Get().m_errList.at(i));
+            }
         }
         for(size_t i = 0 ; i < CMainCtrl::Get().m_warnList.size(); i++)
         {
