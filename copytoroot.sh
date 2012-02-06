@@ -8,7 +8,7 @@ if [ ! -f $destlib ]; then
 fi
 
 cp bin $destdir -a
-cp extlib/arm/libQtzCollideLib.a $destlib
+
 for loop in ${libsdir}
 do
     cp -a $loop/lib/arm/* $destlib

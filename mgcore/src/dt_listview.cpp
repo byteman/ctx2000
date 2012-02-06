@@ -1,6 +1,6 @@
 #include "dt_listview.h"
 #include <assert.h>
-
+#include <stdio.h>
 CListView::CListView(CTRLDATA* data,CSkinForm* parent,string typeName)
     :CCommCtrl(data,parent,typeName)
 {
@@ -91,8 +91,13 @@ int CListView::AddColumn(int index,std::string itemText,int width)
         SendDlgItemMessage (_parent->m_hWnd, _id, LVM_ADDCOLUMN, 0, (LPARAM)&lvcol);
         _colNum++;
         _headerStr.push_back(itemText);
+        return 1;
     }
     
+    else
+    {
+        return 0;
+    }
 }
 
 void CListView::Show()
@@ -188,22 +193,29 @@ int  CListView::GetColWidth(int index)
 }
 static std::string GetSubItemText(HWND hlist,HLVITEM item,int sub_index=0)
 {
-    if (hlist != HWND_INVALID){
+    if (hlist != HWND_INVALID)
+    {
         LVSUBITEM subitem;
         char strBuf[256] = {0,};
 
         subitem.subItem = sub_index;
         subitem.pszText = strBuf;
         if( -1 == SendMessage(hlist,LVM_GETSUBITEMTEXT, item , (LPARAM)&subitem))
+        {
             return "";
+        }
         return strBuf;
 
+    }
+    else
+    {
+        return "";
     }
 }
 static bool tryParse(const std::string& s, int& value)
 {
     char temp;
-    return std::sscanf(s.c_str(), "%d%c", &value, &temp) == 1;
+    return sscanf(s.c_str(), "%d%c", &value, &temp) == 1;
 }
 static int listview_sortfunc_high (HLVITEM nItem1, HLVITEM nItem2, PLVSORTDATA sortData)
 {
@@ -315,7 +327,7 @@ GHANDLE CListView::AddSubItems(StringList subitems,int itemHeight,GHANDLE hRootI
     subdata.nItem   =  0;
 
 
-    int num = (_colNum>subitems.size())?subitems.size():_colNum;
+    int num = (_colNum>(int)subitems.size())?(int)subitems.size():_colNum;
     for(int  i = 0 ; i < num; i++)
     {
         //subdata.nItem   =  i;
@@ -563,13 +575,16 @@ bool CListView::EnableSkinStyle(bool yes)
 
         SetWindowAdditionalData(lvHwnd,(DWORD)this);
         m_set_data = true;
-    }else{
+    }
+    else
+    {
         drawFuncs.pfnDrawHdrBk   = NULL;
         drawFuncs.pfnDrawHdrItem = NULL;
 
     }
 
     this->SetCustomDrawFunc(&drawFuncs);
+    return true;
 }
 bool CListView::EnableTreeViewStyle(bool yes)
 {

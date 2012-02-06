@@ -726,10 +726,10 @@ _comm_ctrl_notify_proc(HWND hwnd, int id, int nc, DWORD add_data)
 
     //CSkinForm* frm = (CSkinForm * )add_data;
     CSkinForm *
-    frm = (CSkinForm *) GetWindowAdditionalData(hwnd);
-
-    if (frm)
+    frm = (CSkinForm *) GetWindowAdditionalData3(hwnd);
+    if (frm){
         frm->_CommCtrlNotify(hwnd, id, nc);
+    }
     else
     {
         JDEBUG(JWARN,"NULL FROM\n");
@@ -806,7 +806,7 @@ bool CSkinForm::InstallCommCtrlHook(HWND handle)
         if (p_skin_items[i].id == 0xaa55)
         {
             //p_skin_items[i].attached  = (DWORD)this;
-            SetWindowAdditionalData(GetDlgItem
+            SetWindowAdditionalData3(GetDlgItem
                                     (handle,
                                      ((CTRLDATA *) p_skin_items[i].
                                       type_data)->id), (DWORD) this);

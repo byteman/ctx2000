@@ -68,6 +68,7 @@ extern bool g_show_speed;
 extern bool g_show_dg_height;
 extern bool g_show_max_weight;
 extern int  g_alarm_wild_speed;
+extern bool g_show_lang_zh;
 struct TDispParam{
     TDispParam(double span=0.2);
     bool need_update(double value);

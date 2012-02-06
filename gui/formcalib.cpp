@@ -10,6 +10,7 @@
 #include "Password.h"
 #include "FastStatic.h"
 #include <Poco/Format.h>
+#include "resStr.h"
 #define EDT_W 95
 #define EDT_H 30
 #define SX 115
@@ -24,6 +25,12 @@
 #define LBL_POSTION  {S_X,210,EDT_W,EDT_H,"幅度AD: "}
 #define LBL_WEIGHT   {S_X,280,EDT_W,EDT_H,"重量AD: "}
 #define LBL_HEIGHT   {S_X,350,EDT_W,EDT_H,"高度AD: "}
+
+#define EN_LBL_ANGLE_AD {S_X,70,EDT_W,EDT_H,"Slewing: "}
+#define EN_LBL_UP_ANGLE {S_X,140,EDT_W,EDT_H,"Elevation: "}
+#define EN_LBL_POSTION  {S_X,210,EDT_W,EDT_H,"Amplitude: "}
+#define EN_LBL_WEIGHT   {S_X,280,EDT_W,EDT_H,"Weight: "}
+#define EN_LBL_HEIGHT   {S_X,350,EDT_W,EDT_H,"Height: "}
 
 static const char* mmenu_bmps[] = {
        PCLBACKGROUND,
@@ -68,6 +75,14 @@ static COMM_CTRL_DESC LabelCtrls[] =
     LBL_POSTION,
     LBL_WEIGHT,
     LBL_HEIGHT
+};
+static COMM_CTRL_DESC en_LabelCtrls[] =
+{
+    EN_LBL_ANGLE_AD,
+    EN_LBL_UP_ANGLE,
+    EN_LBL_POSTION,
+    EN_LBL_WEIGHT,
+    EN_LBL_HEIGHT
 };
 static const char* Msg[]={
     "回转标定,起始点记录成功",
@@ -141,17 +156,28 @@ CFormCalib::CFormCalib()
     }
 #endif
 
+
     for(int i = 2 ;i < TABLESIZE(CommCtrls);i++)
     {
+        CommCtrls[i].caption =  (char*)CResStr::Get ().at (res_angle_ad+i-2).c_str ();
         _edtAD[i-2] = new CFastStatic(&CommCtrls[i],this);
     }
 
     btn_ret    = new CSkinButton(&skinctrls[0],this);
 
-    for(int i = 0 ;i < TABLESIZE(LabelCtrls);i++)
+    if(g_show_lang_zh)
     {
-        _edtLable[i] = new CFastStatic(&LabelCtrls[i],this);
+        for(int i = 0 ;i < TABLESIZE(LabelCtrls);i++)
+        {
+            _edtLable[i] = new CFastStatic(&LabelCtrls[i],this);
+        }
+    }else{
+        for(int i = 0 ;i < TABLESIZE(en_LabelCtrls);i++)
+        {
+            _edtLable[i] = new CFastStatic(&en_LabelCtrls[i],this);
+        }
     }
+
 
     btn_angle_zero = new CSkinButton(&skinctrls[1],this);
     InitSkinHeader("formcalib");
@@ -164,13 +190,10 @@ CFormCalib::~CFormCalib()
 
 void CFormCalib::OnCreate()
 {
-    //msgHandler = new ADMessageHandler(m_hWnd);
-    //TelEngine::Engine::install(msgHandler);
     SetTimer(m_hWnd,101,10);
 }
 void CFormCalib::OnClose()
 {
-    //TelEngine::Engine::uninstall(msgHandler);
     KillTimer(m_hWnd,101);
 }
 void CFormCalib::OnTimer(int ID)
@@ -219,23 +242,27 @@ void CFormCalib::calibrate_height(int type)
 {
     static int start_ad = 0;
     static bool start   = false;
+    std::string text,title;
+    title = CResStr::Get ().at (res_hint);
+    text  = CResStr::Get ().at (res_min_height_record_ok);
     if(type == 0){
         start_ad = ad_height;
         start = true;
         MsgBox box;
-        box.ShowBox(this,"最小高度记录成功","提示");
+        box.ShowBox(this,text,title);
     }else if((type == 1) && (start)){
         start = false;
         if(calibrate_height_next (start_ad))
         {
             MsgBox box;
-            box.ShowBox(this,"高度标定完成","提示");
+            text  = CResStr::Get ().at (res_height_calib_ok);
+            box.ShowBox(this,text,title);
         }
 
       }else{
         MsgBox box;
-        box.ShowBox(this,"请先将高度清零","错误");
-
+        text  = CResStr::Get ().at (res_reset_height_first);
+        box.ShowBox(this,text,title);
       }
 }
 void CFormCalib::calibrate_car_dist(int type)
@@ -243,11 +270,14 @@ void CFormCalib::calibrate_car_dist(int type)
     static int start_ad = 0;
     static int end_ad   = 0;
     static bool start=false;
+    std::string text,title;
+    title = CResStr::Get ().at (res_hint);
+    text  = CResStr::Get ().at (res_min_dist_record_ok);
     if(type == 0){
         start_ad = ad_car_dist;
         start = true;
         MsgBox box;
-        box.ShowBox(this,"最小幅度记录成功\n","提示");
+        box.ShowBox(this,text,title);
     }else if((type == 1) && (start)){
         start = false;
         end_ad = ad_car_dist;
@@ -258,8 +288,8 @@ void CFormCalib::calibrate_car_dist(int type)
         if((fabs(k) < 0.001) || ( fabs(k) > 10000 ) )
         {
             MsgBox box;
-            box.ShowBox(this,"幅度标定参数错误，请重新标定\n","参数错误");
-            //MessageBox(m_hWnd,"Calibration ERROR! Please Calibrate again.","Dist Error",MB_OK);
+            text = CResStr::Get ().at (res_dist_param_error);
+            box.ShowBox(this,text,title);
             return;
         }
         g_bd[BD_CAR_DIST].bd_k        = k;
@@ -273,10 +303,12 @@ void CFormCalib::calibrate_car_dist(int type)
         cfg.WriteInteger("dist_bd","zero_ad", g_bd[BD_CAR_DIST].zero_ad);
         cfg.WriteInteger("dist_bd","bd_ad",   g_bd[BD_CAR_DIST].bd_ad);
         MsgBox box;
-        box.ShowBox(this,"幅度标定完成","提示");
+        text = CResStr::Get ().at (res_dist_calib_ok);
+        box.ShowBox(this,text,title);
     }else{
         MsgBox box;
-        box.ShowBox(this,"请先将点击最小幅度按钮","错误");
+        text = CResStr::Get ().at (res_click_min_dist_first);
+        box.ShowBox(this,text,title);
     }
 }
 #include "SoftKeyboard.h"
@@ -286,10 +318,8 @@ void CFormCalib::OnCommCtrlNotify(HWND hwnd, int id, int nc)
 
     if(nc==EN_SETFOCUS)
     {
-        fprintf(stderr,"setfocus\n");
         if(skt)
         {
-            //fprintf(stderr,"t9show\n");
             skt->T9_Show(true);
         }
     }
@@ -303,7 +333,11 @@ bool CFormCalib::calibrate_height_ok(int start_ad,double bd_height)
     if( (fabs(k) < 0.001) || ( fabs(k) > 10000 ) || ((int)(bd_height) == 0))
     {
         MsgBox box;
-        box.ShowBox(this,"高度标定参数错误，请重新标定","错误");
+        std::string text,title;
+        title = CResStr::Get ().at (res_hint);
+        text  = CResStr::Get ().at (res_height_param_error);
+
+        box.ShowBox(this,text,title);
         return false;
     }
     g_bd[BD_HEIGHT].bd_k        = k;
@@ -322,13 +356,19 @@ bool CFormCalib::calibrate_ok(int index,int start_ad,double bd_weight)
     TIniFile cfg(ctx2000_cfg);
     int end_ad = ad_weight;
 
+    if(fabs(bd_weight) < 0.0001 ) return false;
+
     double k = (end_ad - start_ad) / bd_weight;
     printf("end_ad=%d ,start_ad = %d, bd_weight=%0.2f k = %0.2f\n",end_ad,start_ad,bd_weight,k);
-    if(( fabs(k) < 0.001) || ( fabs(k) > 10000 ) || ((int)bd_weight) == 0 )
+    if(( fabs(k) < 0.001) || ( fabs(k) > 10000 ) )
     {
         std::string value = Poco::format("%0.2f",k);
         MsgBox box;
-        box.ShowBox(this,"重量标定参数错误，请重新标定 k=" + value +"\n","错误");
+        std::string text,title;
+        title = CResStr::Get ().at (res_hint);
+        text  = CResStr::Get ().at (res_weight_param_error);
+
+        box.ShowBox(this,text+"k=" + value +"\n",title);
         return false;
     }
     g_bd[BD_WEIGHT+index].valid       = true;
@@ -386,7 +426,11 @@ bool CFormCalib::calibrate_height_next(int start_ad)
    {
        {
            CaliBox box(0);
-           ret = box.ShowBox (this,"请输入标定高度","高度标定");
+           std::string text,title;
+           text = CResStr::Get ().at (res_input_calib_height);
+           title= CResStr::Get ().at (res_height_calib);
+
+           ret = box.ShowBox (this,text,title);
            value = box.m_double_input_value;
        }
    }
@@ -404,12 +448,15 @@ bool CFormCalib::calibrate_height_next(int start_ad)
 
     bool res = false;
     {
-        {
-            CaliBox box;
-            ret = box.ShowBox (this,"请输入第一段的标定重量","第一段重量标定");
-            value = box.m_double_input_value;
-        }
+        CaliBox box;
+        std::string text,title;
+        text = CResStr::Get ().at (res_input_first_weight);
+        title= CResStr::Get ().at (res_hint);
+
+        ret = box.ShowBox (this,text,title);
+        value = box.m_double_input_value;
     }
+
     if(ret > 0 )
     {
         res =  calibrate_ok(0,start_ad,value);
@@ -417,8 +464,13 @@ bool CFormCalib::calibrate_height_next(int start_ad)
         {
             {
                 CaliBox box;
-                ret = box.ShowBox (this,"请输入第二段的标定重量","第二段重量标定");
-                value = box.m_double_input_value;
+                std::string text,title;
+                text = CResStr::Get ().at (res_input_secord_weight);
+                title= CResStr::Get ().at (res_hint);
+
+                ret = box.ShowBox (this,text,title);
+                if(ret > 0)
+                    value = box.m_double_input_value;
             }
 
             if(ret > 0)
@@ -428,7 +480,12 @@ bool CFormCalib::calibrate_height_next(int start_ad)
                 {
                     {
                         CaliBox box;
-                        ret = box.ShowBox (this,"请输入第三段的标定重量","第三段重量标定");
+                        std::string text,title;
+                        text = CResStr::Get ().at (res_input_third_weight);
+                        title= CResStr::Get ().at (res_hint);
+
+                        ret = box.ShowBox (this,text,title);
+
                         value = box.m_double_input_value;
                     }
 
@@ -448,22 +505,29 @@ void CFormCalib::calibrate_weight(int type)
 {
     static int start_ad = 0;
     static bool start=false;
+    std::string text,title;
+
+    title= CResStr::Get ().at (res_hint);
     if(type == 0){
         start_ad = ad_weight;
         start    = true;
         MsgBox box;
-        box.ShowBox(this,"重量清零成功\n","提示");
+
+        text = CResStr::Get ().at (res_reset_weight_ok);
+        box.ShowBox(this,text,title);
     }else if((type == 1) && (start)){
         start = false;
         if(calibrate_weight_next(start_ad))
         {
             MsgBox box;
-            box.ShowBox(this,"重量标定完成","提示");
+            text = CResStr::Get ().at (res_weight_calib_ok);
+            box.ShowBox (this,text,title);
         }
 
     }else{
         MsgBox box;
-        box.ShowBox(this,"请先将重量清零按钮","错误");
+        text = CResStr::Get ().at (res_reset_weight_first);
+        box.ShowBox (this,text,title);
     }
 }
 void CFormCalib::calibrate_angle(int type)
@@ -471,11 +535,16 @@ void CFormCalib::calibrate_angle(int type)
     static int start_ad = 0;
     static int end_ad   = 0;
     static bool start=false;
+    std::string text,title;
+
+    title= CResStr::Get ().at (res_hint);
+
     if(type == 0){
         start_ad = ad_angle;
         start = true;
         MsgBox box;
-        box.ShowBox(this,"A点记录成功","提示");
+        text =  CResStr::Get ().at (res_a_point_record_ok);
+        box.ShowBox (this,text,title);
     }else if((type == 1) && (start)){
         start = false;
         end_ad = ad_angle;
@@ -484,8 +553,8 @@ void CFormCalib::calibrate_angle(int type)
         if( (fabs(k) < 0.001) || ( fabs(k) > 10000 ) )
         {
             MsgBox box;
-            box.ShowBox(this,"回转角度标定参数错误，请重新标定.","错误");
-            //box.ShowBox(this,"Calibration ERROR! Please Calibrate again.","Error");
+            text =  CResStr::Get ().at (res_angle_param_error);
+            box.ShowBox (this,text,title);
             return;
         }
         g_bd[BD_ANGLE].bd_k        = k;
@@ -499,10 +568,12 @@ void CFormCalib::calibrate_angle(int type)
         cfg.WriteInteger("angle_bd","zero_ad", g_bd[BD_ANGLE].zero_ad);
         cfg.WriteInteger("angle_bd","bd_ad", g_bd[BD_ANGLE].bd_ad);
         MsgBox box;
-        box.ShowBox(this,"回转标定完成.","提示");
+        text =  CResStr::Get ().at (res_angle_calib_ok);
+        box.ShowBox (this,text,title);
     }else{
         MsgBox box;
-        box.ShowBox(this,"请先点击标定A点.","错误");
+        text =  CResStr::Get ().at (res_click_a_point_first);
+        box.ShowBox (this,text,title);
     }
 }
 void CFormCalib::calc_up_angle(int type)
@@ -510,11 +581,15 @@ void CFormCalib::calc_up_angle(int type)
     static int start_ad = 0;
     static int end_ad   = 0;
     static bool start=false;
+    std::string text,title;
+
+    title= CResStr::Get ().at (res_hint);
     if(type == 0){
         start_ad = ad_up_angle;
         start = true;
         MsgBox box;
-        box.ShowBox(this,"最小仰角记录成功","提示");
+        text =  CResStr::Get ().at (res_min_upangle_record_ok);
+        box.ShowBox (this,text,title);
     }else if(type == 1 && start){
         start = false;
         end_ad = ad_up_angle;
@@ -524,8 +599,8 @@ void CFormCalib::calc_up_angle(int type)
         if( (fabs(k) < 0.001) || ( fabs(k) > 10000 ) )
         {
             MsgBox box;
-            box.ShowBox(this,"仰角标定参数错误，请重新标定","标定错误");
-            //MessageBox(m_hWnd,"Calibration ERROR! Please Calibrate again.","Error",MB_OK);
+            text =  CResStr::Get ().at (res_upangle_param_error);
+            box.ShowBox (this,text,title);
             return;
         }
         g_bd[BD_UP_ANGLE].bd_k        = k;
@@ -538,10 +613,12 @@ void CFormCalib::calc_up_angle(int type)
         cfg.WriteInteger("up_angle_bd","zero_ad", start_ad);
         cfg.WriteInteger("up_angle_bd","bd_ad", end_ad);
         MsgBox box;
-        box.ShowBox(this,"仰角标定完成.","提示");
+        text =  CResStr::Get ().at (res_upangle_calib_ok);
+        box.ShowBox (this,text,title);
     }else{
         MsgBox box;
-        box.ShowBox(this,"请先点击最小仰角按钮.","错误");
+        text =  CResStr::Get ().at (res_click_min_upangle_first);
+        box.ShowBox (this,text,title);
     }
 }
 void CFormCalib::OnButtonClick(skin_item_t* item)
@@ -582,7 +659,11 @@ void CFormCalib::OnButtonClick(skin_item_t* item)
     }else if(item->id == _btns[11]->GetId()){
 
         PassWord pwd;
-        if(pwd.ShowBox(this,"密码","力矩配置密码:","1020"))
+        std::string text,title;
+
+        title= CResStr::Get ().at (res_moment_cfg_password);
+        text = CResStr::Get ().at (res_pwd);
+        if(pwd.ShowBox(this,text,title,"1020"))
         {
             KillTimer(m_hWnd,101);
             CTorQueForm lj;

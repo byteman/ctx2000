@@ -21,6 +21,8 @@
 #include "LoggerMgr.h"
 #include "SoftKeyboard.h"
 #include "torqueForm.h"
+#include "resStr.h"
+#include "torqueForm.h"
 using Poco::Thread;
 using Poco::Event;
 using Poco::SingletonHolder;
@@ -40,11 +42,7 @@ void GUIAPI InitMainUI()
                 skt = new SoftKeyboard();
                 skt->T9_Show(false);
             }
-            //CTorQueForm init;
-            //init.CreateForm(HWND_DESKTOP);
-            //Fatal("ctx2000 startup\n");
         }
-
         switch(gMainMenuIndex)
         {
             case 1:
@@ -112,13 +110,27 @@ static void    StartCtx2000()
     }
 
 }
+#include "iniFile.h"
+void loadStringRes()
+{
+    TIniFile cfg("etc/ctx2000.ini");
+    g_show_lang_zh = cfg.ReadBool ("display","lang",true);
+    if(g_show_lang_zh)
+    {
+        CResStr::Get ().LoadRes ("etc/str_zh.txt");
+        setenv ("dt1000lang","chinese",1);
+    }else{
+        CResStr::Get ().LoadRes ("etc/str_en.txt");
+        setenv ("dt1000lang","english",1);
+    }
+}
 int MiniGUIMain (int argc, const char* argv[])
 {
 
     gAppName=argv[0];
     argc    = argc;
 
-    fprintf(stderr,"%s build @ %s %s",argv[0],__DATE__,__TIME__);
+    fprintf(stderr,"sss%s build @ %s %s",argv[0],__DATE__,__TIME__);
 #if 0
     if( !CtxEngine::Get().start( 1000, argc, argv ) )
     {
@@ -126,6 +138,7 @@ int MiniGUIMain (int argc, const char* argv[])
         return 1;
     }
 #endif
+    loadStringRes();
     StartCtx2000();
     if (!InitMiniGUIExt()) {
         fprintf ( stderr, "Can't InitMiniGUIExt!\n" );

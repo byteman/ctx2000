@@ -16,7 +16,6 @@ using Poco::Exception;
 #define PPPD_DIAL_MS    10000
 #define PPPD_KILL_MS    10000
 #define DNS2 "119.75.218.45"
-#define DNS1 "118.123.17.25"
 bool gprs_connector::exe_cmd(std::string cmd)
 {
 
@@ -176,7 +175,12 @@ void gprs_connector::service()
         if(!is_pppd_exist())
         {
             GPRS_DBG("pppd dont exist,call pppd and max wait 60s \n");
-            call_pppd_dial();
+            if(!call_pppd_dial())
+            {
+                GPRS_DBG("xxx pppd call failed\n");
+            }else{
+                GPRS_DBG("xxx pppd call ok\n");
+            }
         }
 
     }else{
@@ -185,10 +189,10 @@ void gprs_connector::service()
         if(is_dial_ok()){
             //存在了pppd ，dial ok
             m_dial_cnt = 0;
-            GPRS_DBG("pppd exist and dial_ok,check network by ping %s\n",DNS1);
+            GPRS_DBG("pppd1 exist and dial_ok,check network by ping %s\n",DNS1.c_str ());
             if(can_ping(DNS1))
             {
-                GPRS_DBG("ping %s ok\n",DNS1);
+                GPRS_DBG("ping %s ok\n",DNS1.c_str ());
                 m_gprs_conn_flag = true;
                 m_ping_cnt = 0;
                 Poco::Thread::sleep(60000);
@@ -197,7 +201,7 @@ void gprs_connector::service()
                 //两个dns都ping不通，就认为gprs不在线
                 if( !can_ping(DNS2))
                 {
-                    GPRS_DBG("ping %s  %s failed  ---> count=%d\n",DNS1,DNS2,m_ping_cnt);
+                    GPRS_DBG("ping %s  %s failed  ---> count=%d\n",DNS1.c_str (),DNS2,m_ping_cnt);
 
                     m_ping_cnt++;
                     if(m_ping_cnt >= 2)

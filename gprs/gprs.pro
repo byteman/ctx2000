@@ -16,7 +16,8 @@ SOURCES += \
     src/gprs.cpp \
     src/gprs_connector.cpp \
     src/gps.cpp \
-    ../extdev/src/gpio.cpp
+    ../extdev/src/gpio.cpp \
+    ../bycore/src/iniFile.cpp
 
 HEADERS += \ 
     gprs.h \

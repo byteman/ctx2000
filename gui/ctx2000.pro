@@ -71,7 +71,8 @@ SOURCES += \
     UISetForm.cpp \
     CaliBox.cpp \
     ../torque/src/torque_mgr.cpp \
-    ../torque/src/torque_db.cpp
+    ../torque/src/torque_db.cpp \
+    resStr.cpp
 DEFINES += 
 INCLUDEPATH += ../include ../mgcore/include \
                ../torque/include ../cppsqlite3/include \
@@ -89,15 +90,20 @@ linux-g++ {
     message(g++ = linux-g++)
     DEFINES+= 
     OBJECTS_DIR = ../tmpobj/x86
-    for(lib,LINKLIBS):LIBS+=-L../$$lib/x86
+    for(item,LINKLIBS):LIBS+=-L../$$item/lib/x86
+    INCLUDEPATH += ../../gui/mg1.6/out/x86/include
     LIBS += ../extlib/x86/libQtzCollideLib.a
+    LIBS += -L../../gui/mg1.6/out/x86/lib
+    LIBS += -lttf
 }
 linux-arm-g++ {
-    message(g++ = linux-arm-g++)
+    message(g++ = linux-arm-g++ compile)
     DEFINES+= 
     OBJECTS_DIR = ../tmpobj/arm
-    for(lib,LINKLIBS):LIBS+=-L../$$lib/lib/arm
+    for(item,LINKLIBS):LIBS+=-L../$$item/lib/arm
     LIBS += -lttf ../extlib/arm/libQtzCollideLib.a
+    LIBS += -L../../gui/mg1.6/out/arm/lib
+    INCLUDEPATH += ../../gui/mg1.6/out/arm/include
 }
 linux-arm-v5te-g++ {
     message(g++ = linux-arm-v5te-g++)
@@ -106,7 +112,7 @@ linux-arm-v5te-g++ {
     INCLUDEPATH+=$$BASE/usr/include $$BASE/usr/local/include
     LIBS+=-L$$BASE/usr/lib -L$$BASE/usr/local/lib
     LIBS+= -lm -lpcre -lz #../extlib/arm/libQtzCollideLib.a
-    for(lib,LINKLIBS):LIBS+=-L../$$lib/lib/armv5te
+    for(item,LINKLIBS):LIBS+=-L../$$item/lib/armv5te
     OBJECTS_DIR = ./tmpobj/armv5te
     TARGET = ctx2000-armv5te
     message($$LIBS)
@@ -149,6 +155,9 @@ HEADERS += \
     ime/config.h \
     UISetForm.h \
     CaliBox.h \
-    ../bycore/include/LoggerMgr.h
+    ../bycore/include/LoggerMgr.h \
+    resStr.h
+
+
 
 

@@ -11,6 +11,7 @@ static PLOGFONT gInfoFont  = INV_LOGFONT;
 static PLOGFONT gTitleFont = INV_LOGFONT;
 #define FORM_NAME "CaliBox"
 #include "SoftKeyboard.h"
+#include "resStr.h"
 extern SoftKeyboard *skt;
 static const char* mmenu_bmps[] = {
     "ctx2000/msgboxbj.png",
@@ -116,15 +117,15 @@ bool    CaliBox::check_valid(double& value)
         return true;
     }else{
         MsgBox box;
-        box.ShowBox (this,"输入不正确","提示");
+        std::string text = CResStr::Get ().at (res_input_incorrect);
+        std::string title= CResStr::Get ().at (res_hint);
+        box.ShowBox (this,text,title);
         return false;
     }
 }
 void   CaliBox::OnButtonClick(skin_item_t* item)
 {
     if(item->id == _btnOk->GetId()){
-        printf("ok\n");
-
         if(check_valid (m_double_input_value))
         {
             m_input_value = _edtInput->GetText ();
@@ -137,7 +138,6 @@ void   CaliBox::OnButtonClick(skin_item_t* item)
         m_input_value = "";
         Close();
     }else if(m_type && item->id == _btnNext->GetId()){
-        printf("next\n");
 
         if(check_valid (m_double_input_value))
         {
@@ -149,7 +149,7 @@ void   CaliBox::OnButtonClick(skin_item_t* item)
     }else if(item->id == _btnCancel->GetId()){
         m_ret = 0;
         m_input_value = "";
-        printf("cancel\n");
+
         Close();
     }
 }

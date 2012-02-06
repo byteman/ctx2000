@@ -35,12 +35,15 @@ SOURCES += \
     src/dt_treeview.cpp
 
 INCLUDEPATH += ../mgi/mgiinc ./include
+
 DEPENDPATH=$$INCLUDEPATH
 OUTPUT=./lib
 linux-arm-g++ {
     message(g++ = linux-arm-g++)
     OBJECTS_DIR = ./tmpobj/arm
     DESTDIR = $$OUTPUT/arm
+    INCLUDEPATH += ../../gui/mg1.6/out/arm/include
+    LIBS+=-L./gui/mg1.6/out/arm/lib
 }
 linux-arm-v5te-g++ {
     message(g++ = linux-arm-v5te-g++)
@@ -54,6 +57,8 @@ linux-g++{
     message(g++ = linux-g++)
     OBJECTS_DIR = ./tmpobj/x86
     DESTDIR = $$OUTPUT/x86
+    INCLUDEPATH += ../../gui/mg1.6/out/x86/include
+    LIBS+=-L./gui/mg1.6/out/x86/lib
 }
 
 HEADERS +=

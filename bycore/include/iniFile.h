@@ -14,7 +14,7 @@ void Open(string FileName);
 	virtual int    ReadInteger(const string Section, const string Ident, int Default);
 	virtual string ReadString(const string Section, const string Ident, const string Default);
 	
-	virtual void   WriteFloat(const string Section, const string Ident, double Value);
+        virtual void   WriteFloat(const string Section, const string Ident, double Value,int dot_cont=2);
 	virtual void   WriteInteger(const string Section, const string Ident, int Value);
 	virtual void   WriteString(const string Section, const string Ident, const string Value);
 	virtual void   WriteBool(const string Section, const string Ident, bool Value);

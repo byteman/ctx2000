@@ -408,29 +408,54 @@ bool   TIniFile::SectionExists(const string Section)
 
 }
 
-void   TIniFile::WriteFloat(const string Section, const string Ident, double Value)
+void   TIniFile::WriteFloat(const string Section, const string Ident, double Value,int dot_cont)
 {
-		char buf[32] = {0,};
-		if(m_FileName == "")
-			 return;
-		snprintf(buf,32,"%0.8f",Value);
-		SetValueToEtcFile(m_FileName.c_str(),Section.c_str(),Ident.c_str(),buf);
+    char buf[32] = {0,};
+    if(m_FileName == "")
+             return;
+    switch(dot_cont)
+    {
+        case 0:
+            snprintf(buf,32,"%d",(int)Value);
+        case 1:
+            snprintf(buf,32,"%0.1f",Value);
+            break;
+        case 2:
+            snprintf(buf,32,"%0.2f",Value);
+            break;
+        case 3:
+            snprintf(buf,32,"%0.3f",Value);
+            break;
+        case 4:
+            snprintf(buf,32,"%0.4f",Value);
+            break;
+        case 5:
+            snprintf(buf,32,"%0.5f",Value);
+            break;
+        case 6:
+            snprintf(buf,32,"%0.6f",Value);
+            break;
+        default:
+            snprintf(buf,32,"%0.6f",Value);
+            break;
+    }
+    SetValueToEtcFile(m_FileName.c_str(),Section.c_str(),Ident.c_str(),buf);
 }
 
 void   TIniFile::WriteInteger(const string Section, const string Ident, int Value)
 {
-		char buf[32] = {0,};
-		if(m_FileName == "")
-			 return;
-		snprintf(buf,32,"%d",Value);
-		SetValueToEtcFile(m_FileName.c_str(),Section.c_str(),Ident.c_str(),buf);
+    char buf[32] = {0,};
+    if(m_FileName == "")
+         return;
+    snprintf(buf,32,"%d",Value);
+    SetValueToEtcFile(m_FileName.c_str(),Section.c_str(),Ident.c_str(),buf);
 }
 
 void   TIniFile::WriteString(const string Section, const string Ident, const string Value)
 {
-		if(m_FileName == "")
-			 return;
-		SetValueToEtcFile(m_FileName.c_str(),Section.c_str(),Ident.c_str(),(char*)Value.c_str());
+    if(m_FileName == "")
+         return;
+    SetValueToEtcFile(m_FileName.c_str(),Section.c_str(),Ident.c_str(),(char*)Value.c_str());
 }
 
 bool   TIniFile::ValueExists(const string Section, const string Ident)

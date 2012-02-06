@@ -69,7 +69,7 @@ int  CJDQAdmin::Service(CTX_JDQ type, bool state)
                 ControlEx(JDQ_CIRCLE_BREAK,brake_time);
             }
             else Control(JDQ_CIRCLE_BREAK,JDQ_CLOSE);
-        }else if(type == JDQ_RIGHT_CIRCLE_LIMIT)
+        }else if(type == JDQ_LEFT_CIRCLE_LIMIT)
         {
             if(state)//左回转限制
             {
@@ -104,19 +104,22 @@ void CJDQAdmin::ControlEx(CTX_JDQ jdq, int delayS)
         case JDQ_CIRCLE_BREAK:
             m_gpio.Output((int)jdq,JDQ_OPEN);
             m_jdq[0].jdq_num   = JDQ_CIRCLE_BREAK;
-            m_jdq[0].set_timer = delayS;
+            //m_jdq[0].set_timer = delayS;
+            m_jdq[0].cur_timer = delayS;
             m_jdq[0].set_flag  = true;
             break;
         case JDQ_LEFT_CIRCLE_LIMIT_FD:
             m_gpio.Output((int)jdq,JDQ_OPEN);
             m_jdq[1].jdq_num   = JDQ_LEFT_CIRCLE_LIMIT_FD;
-            m_jdq[1].set_timer = delayS;
+            //m_jdq[1].set_timer = delayS;
+            m_jdq[1].cur_timer = delayS;
             m_jdq[1].set_flag  = true;
             break;
         case JDQ_RIGHT_CIRCLE_LIMIT_FD:
             m_gpio.Output(jdq,JDQ_OPEN);
             m_jdq[2].jdq_num   = JDQ_RIGHT_CIRCLE_LIMIT_FD;
-            m_jdq[2].set_timer = delayS;
+            //m_jdq[2].set_timer = delayS;
+            m_jdq[2].cur_timer = delayS;
             m_jdq[2].set_flag  = true;
             break;
          default:

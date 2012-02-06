@@ -1,0 +1,85 @@
+Password
+System Setup Password
+Bypass Password
+Cancel Bypass
+Bypass setup
+No.
+Time
+Trolley Order
+Slewing Order
+Amplitude
+Weight
+Rate
+Angle
+Wind Speed
+Successful Output 
+Output data
+Fail to output
+No USB device has been detected
+Hint
+Incorrect Input
+Height
+Data have been saved
+Slewing AD
+Elevation AD
+Amplitude AD
+Weight AD
+Height AD
+The minimum height has been recorded.
+Height has been calibrated.
+Clear the height first.
+The minimum amplitude has been recorded.
+The data of slewing calibration is wrong,please reset.
+Slewing has been calibrated.
+Press the button of minimum amplitude first.
+The data of calibrated height is wrong,please reset.
+The data of calibrated weight is wrong,please reset.
+Input the calibrated height.
+height calibration
+Input the first calibrated weight.
+Input the second calibrated weight.
+Input the third calibrated weight
+Weight has been cleared.
+Weight has been calibrated.
+Press the weight clearing button first.
+Point A has been recorded.
+The data of slewing calibration is wrong,please reset.
+Slewing has been calibrated.
+Press Calibrate A
+The minimum elevation has been recorded.
+The data of calibrated elevation is wrong,please reset.
+Elevation has been calibrated.
+Press the button of minimum elevation first.
+moment setup password
+Class
+Content
+Tower Crane No.
+System Name
+axis X
+axis Y
+tower crane height
+main jib length
+jib length
+minimum distance
+luffing tower crane
+maximum elevation
+minimum elevation
+trolley position
+rated weight
+crane type
+jib length
+Moment has been saved,please restart the computer to activate the calibration
+Fail to input the data.No USB device has been deteced. Hint
+Fail to open database
+Data has been output,please restart the computer to activate.
+show weight
+show height
+show wind speed
+multi crane mode
+single crane mode
+wind speed  13m/s  alarm
+wind speed  20m/s  alarm
+chinese
+english
+Stucture parameters
+please select current crane type

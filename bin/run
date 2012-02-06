@@ -13,12 +13,18 @@ else
 fi
 for item in $RUNLIBS
 do
-	exportpath=$exportpath:../$item/lib/$arch
+	exportpath=$exportpath:../$item/lib/$arch:../../gui/mg1.6/out/$arch/lib
 	#echo $exportpath
 done
 export LD_LIBRARY_PATH=$exportpath:/usr/local/lib:../lib
 if [ -e reset.txt ];then
 	rm reset.txt 
+fi
+if [ -e /sys/bus/i2c/devices/1-0020/direction0 ];then
+	echo 0 > /sys/bus/i2c/devices/1-0020/output0 
+	echo 0 > /sys/bus/i2c/devices/1-0020/output1 
+	echo 0 > /sys/bus/i2c/devices/1-0020/direction0 
+	echo 0 > /sys/bus/i2c/devices/1-0020/direction1 
 fi
 ./gprs-demon &
 while :

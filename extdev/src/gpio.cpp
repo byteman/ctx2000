@@ -6,6 +6,7 @@
 #include <Poco/Exception.h>
 #include <iostream>
 #include <cstdio>
+#include <cstdlib>
 #ifdef  _PC_DBG
     #define REG_DIR0      "/dev/shm/direction0"
     #define REG_DIR1      "/dev/shm/direction1"
@@ -69,13 +70,13 @@ bool    CGpio::Init(int num_input, int num_output,bool reset)
             fos0.seekg(0, std::ios::beg);
             fos1.seekg(0, std::ios::beg);
 //set direction
-            fos0 << 0;   //output0
-            fos1 << 0;   //output1
             if(reset)
             {
                 fos2 << 0x0 << std::endl;   //output0
                 fos3 << 0x0 << std::endl;   //output1
             }
+            fos0 << 0;   //output0
+            fos1 << 0;   //output1
             fos0.close();
             fos1.close();
             fos2.close();

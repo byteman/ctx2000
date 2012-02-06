@@ -5,17 +5,17 @@
 #include "usbstormanager.h"
 #include "MsgBox.h"
 #include "comdata.h"
+#include "resStr.h"
 static TListColum alarminfolist[] =
 {
         {"编号",      100},
-        {"时间",      200},
+        {"时间" ,     200},
         {"小车指令",  150},
         {"回转指令",  150}
 };
 
 static TListColum weightinfolist[] =
 {
-        //{"类型",    55},
         {"编号",    100},
         {"时间",    200},
         {"幅度",    50},
@@ -76,6 +76,23 @@ bool CAlarmInfoManForm::UsbStorNotify(U_STATUS status,std::string mountDir)
         ReleaseDC (hdc);
     }
 }
+void CAlarmInfoManForm::InitResString()
+{
+
+    alarminfolist[0].caption  = CResStr::Get ().at (res_no);
+    alarminfolist[1].caption  = CResStr::Get ().at (res_time);
+    alarminfolist[2].caption  = CResStr::Get ().at (res_trolley);
+    alarminfolist[3].caption  = CResStr::Get ().at (res_slewing);
+
+    weightinfolist[0].caption = CResStr::Get ().at (res_no);
+    weightinfolist[1].caption = CResStr::Get ().at (res_time);
+    weightinfolist[2].caption = CResStr::Get ().at (res_dist);
+    weightinfolist[3].caption = CResStr::Get ().at (res_weight);
+    weightinfolist[4].caption = CResStr::Get ().at (res_rate);
+    weightinfolist[5].caption = CResStr::Get ().at (res_angle);
+    weightinfolist[6].caption = CResStr::Get ().at (res_wild_speed);
+
+}
 CAlarmInfoManForm::CAlarmInfoManForm()
 {
     if (!LoadRes(&mmenu_bmps[0], ARRAY_SIZE(mmenu_bmps, char *)))
@@ -96,6 +113,7 @@ CAlarmInfoManForm::CAlarmInfoManForm()
     start       = 0;
     m_usb.LoadFile ("comm/usb.png");
     InitSkinHeader("CAlarmInfoManForm");
+    InitResString();
 
 }
 
@@ -149,16 +167,20 @@ void    CAlarmInfoManForm::OnButtonClick(skin_item_t* item)
         }else if(item->id == _skinBtns[2]->GetId()){
             USBStorage* usb = USBStorManager::get ().getUsbStorage (0);
             MsgBox box;
+            std::string text,title;
+            title = CResStr::Get ().at (res_export_data);
             if(usb){
-
                 if(exportdata (CurSerial,usb->mountDir+"/"))
                 {
-                    box.ShowBox (this,"导出成功","导出数据");
+                    text  = CResStr::Get ().at (res_export_ok);
+                    box.ShowBox (this,text,title);
                 }else{
-                    box.ShowBox (this,"导出失败","导出数据");
+                    text  = CResStr::Get ().at (res_export_fail);
+                    box.ShowBox (this,text,title);
                 }
             }else{
-                box.ShowBox (this,"没有检测到U盘","导出数据");
+                text = CResStr::Get ().at (res_export_no_usb);
+                box.ShowBox (this,text,title);
             }
         }else if(item->id == _skinBtns[3]->GetId()){
             Close();

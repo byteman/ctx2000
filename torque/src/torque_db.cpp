@@ -115,7 +115,9 @@ bool CTorQueDB::listRateByLen(std::string tyname, std::string armlen,TStrList& r
     checkDB();
    try{
     //CppSQLite3Buffer sql;
+    //m_lastSql.format("select  Rate from tcparam where Type=%Q and Length=%Q group by Rate",tyname.c_str(),armlen.c_str());
     m_lastSql.format("select distinct Rate from tcparam where Type=%Q and Length=%Q",tyname.c_str(),armlen.c_str());
+
     //fprintf(stderr,"%s\n",m_lastSql.data ());
     CppSQLite3Query qry = m_DB.execQuery(m_lastSql);
     while (!qry.eof()) {
@@ -300,7 +302,11 @@ bool CTorQueDB::createParamTable()
 {
 
      try{
-		m_lastSql.format("CREATE TABLE  if not exists tcparam (No INTEGER NOT NULL PRIMARY KEY,Rate TEXT NOT NULL, Length TEXT NOT NULL,Distance TEXT NOT NULL,Weight TEXT NOT NULL, Type TEXT NOT NULL);");
+        std::string cmd = "CREATE TABLE tcparam (No INTEGER NOT NULL PRIMARY KEY,Rate TEXT NOT NULL, Length TEXT NOT NULL,Distance TEXT NOT NULL,Weight TEXT NOT NULL, Type TEXT NOT NULL); \
+                CREATE INDEX 'rate' on tcparam (Rate ASC); \
+                CREATE INDEX 'type' on tcparam (Type ASC); \
+                CREATE INDEX 'length' on tcparam (Length ASC);";
+                m_lastSql.format(cmd.c_str ());
 		int rows = m_DB.execDML(m_lastSql);
                 return true;
         /*

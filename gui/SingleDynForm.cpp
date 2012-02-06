@@ -22,6 +22,7 @@
 #include "Password.h"
 #include "jdqadmin.h"
 #include "MsgBox.h"
+#include "resStr.h"
 #define SKIN_BUTTON_MAINCFG     {1,22,410}
 #define SKIN_BUTTON_BYPASS      {2,92,410}
 
@@ -307,11 +308,12 @@ void CSingleDynForm::OnLButtonUp(int x, int y)
 }
 void CSingleDynForm::OnButtonClick(skin_item_t* item)
 {
+    std::string str_text,str_title;
     if(item->id == _skinBtns[0]->GetId()){
-
-
         PassWord psd;
-        if(psd.ShowBox (this,"密码:","系统设置密码","8334"))
+        str_text  = CResStr::Get ().at (res_pwd);
+        str_title = CResStr::Get ().at (res_ssp);
+        if(psd.ShowBox (this,str_text,str_title,"8334"))
         {
             KillTimer(m_hWnd,100);
             CSysSet ss;
@@ -322,12 +324,17 @@ void CSingleDynForm::OnButtonClick(skin_item_t* item)
     }else if(item->id == _skinBtns[1]->GetId()){
 #if 1
         PassWord psd;
-        if(psd.ShowBox (this,"密码:","Bypass密码","hitech"))
+        str_text  = CResStr::Get ().at (res_pwd);
+        str_title = CResStr::Get ().at (res_bypass_pwd);
+        if(psd.ShowBox (this,str_text,str_title,"hitech"))
         {
+            str_text  = CResStr::Get ().at (res_cancle_bypass);
+            str_title = CResStr::Get ().at (res_bypass_set);
+
             CJDQAdmin::Get ().Bypass (true);
             CMainCtrl::Get ().NotifyBypass (true);
             MsgBox box;
-            box.ShowBox (this,"取消bypass","Bypass设置");
+            box.ShowBox (this,str_text,str_title);
             CJDQAdmin::Get ().Bypass (false);
             CMainCtrl::Get ().NotifyBypass (false);
         }

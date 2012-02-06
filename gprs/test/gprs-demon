@@ -1,0 +1,8 @@
+#!/bin/sh
+export LD_LIBRARY_PATH=../lib/arm/:/usr/local/lib:../gprs/lib/arm
+while :
+do
+	./ctxgprs 
+	killall pppd
+	killall chat
+done

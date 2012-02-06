@@ -310,7 +310,6 @@ void      CMainCtrl::UpdateTCStatus()
     }
     //CTX_DBG("valid=%d\n",cnt);
     //DBG("%s main_id=%d local_id=%d\n",__FUNCTION__,m_main_id,m_local_id);
-    g_TC[m_main_id].Valide  = true; //主机始终有效
     g_TC[m_local_id].Valide = true; //本机始终有效
 }
 void      CMainCtrl::DripMainNoAndAddNo(std::string &MainNo, std::string &RightNo, std::string &AddNo)
@@ -1501,6 +1500,52 @@ bool CMainCtrl::DealWorkSiteInfo()
     }
     return false;
 }
+void CMainCtrl::doAlarmBeep(int type)
+{
+    //static int cnt = 0;
+    //if(cnt++ % 2) return ;
+    if(type == 1){
+        CBeeper::get ().BeepMs (100,100000);
+    }else if(type == 2){
+        CBeeper::get ().BeepMs (1000,100000);
+    }
+}
+void CMainCtrl::AlarmBeep()
+{
+    ControledStatus state = m_control_state;
+    if(state.b1){
+        doAlarmBeep(2);
+    }else{
+         if(state.b10)  doAlarmBeep(1);
+    }
+    if(state.b3){
+         doAlarmBeep(2);
+    }else{
+         if(state.b9) doAlarmBeep(1);
+    }
+    if(state.b5){
+         doAlarmBeep(2);
+    }else{
+         if(state.b4) doAlarmBeep(1);
+    }
+    if(state.b6){
+         doAlarmBeep(2);
+    }else{
+         if(state.b7) doAlarmBeep(1);
+    }
+    if(g_show_speed) //如果启用了风速功能
+    {
+        //风速报警，如果超过了20ms
+          if(g_wild_speed >= 20){
+            doAlarmBeep(2);
+
+          }else if(g_wild_speed >= 13){
+            doAlarmBeep(1);
+          }else{
+
+          }
+    }
+}
 void CMainCtrl::ParseCollideStatus()
 {
     int slewing = 0, trolley=0;
@@ -1593,6 +1638,12 @@ void CMainCtrl::ParseCollideStatus()
 }
 bool      CMainCtrl::NotifyBypass(bool on)
 {
+    if(on == false){
+        for(int i = 0 ;i < 12; i++)
+        {
+            m_old_ctrl_state.b[i] = false;
+        }
+    }
     if(m_dbadmin)
     {
         if(!m_dbadmin->PostMessage(new QCollisionNotification(0,0xAA,on?1:0)))
@@ -1863,7 +1914,7 @@ void CMainCtrl::run()
         }
         Send_5s_data();
 
-        //Poco::Thread::sleep(100);
+        AlarmBeep();
 
     }
 }

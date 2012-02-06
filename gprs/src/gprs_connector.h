@@ -25,6 +25,7 @@ public:
     void set_controller(t_dev_control_func func,void* arg);
     virtual bool before_run ();
     virtual void service();
+    std::string DNS1;
 private:
     bool exe_cmd(std::string cmd);
     bool is_pppd_exist();

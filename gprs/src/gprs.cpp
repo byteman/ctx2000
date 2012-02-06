@@ -293,6 +293,7 @@ bool gprs::start(std::string ip, U16 port,std::string dtu_id,std::string gpspath
     GPRS_DBG("reset wait 30s ok------\n");
 
     if(m_conn){
+        m_conn->DNS1 = ip;
         bool bRes = m_conn->start();
         if(!bRes){
             GPRS_DBG("gprs connector start failed\n");

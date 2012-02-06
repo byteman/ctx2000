@@ -21,6 +21,7 @@
 #include "Password.h"
 #include "jdqadmin.h"
 #include "MsgBox.h"
+#include "resStr.h"
 
 #define E_W   82
 #define E_H   27
@@ -385,18 +386,25 @@ void CMainMenu::OnLButtonUp(int x, int y)
        cnt = 0;
     }
 }
-#include "CaliBox.h"
 void CMainMenu::OnButtonClick(skin_item_t* item)
 {
+
+    std::string str_text,str_title;
     if(item->id == _skinBtns[0]->GetId()){
 
 
         PassWord psd;
-        if(psd.ShowBox (this,"密码:","系统设置密码","8334"))
+        str_text  = CResStr::Get ().at (res_pwd);
+        str_title = CResStr::Get ().at (res_ssp);
+        if(psd.ShowBox (this,str_text,str_title,"8334"))
         {
             KillTimer(m_hWnd,100);
+            CJDQAdmin::Get ().Bypass (true);
+            CMainCtrl::Get ().NotifyBypass (true);
             CSysSet ss;
             ss.CreateForm(m_hWnd);
+            CJDQAdmin::Get ().Bypass (false);
+            CMainCtrl::Get ().NotifyBypass (false);
             SetTimer(m_hWnd,100,10);
             UpdateUIArea (false);
         }
@@ -405,12 +413,17 @@ void CMainMenu::OnButtonClick(skin_item_t* item)
     }else if(item->id == _skinBtns[1]->GetId()){
 #if 1
         PassWord psd;
-        if(psd.ShowBox (this,"密码:","Bypass密码","hitech"))
+
+        str_text  = CResStr::Get ().at (res_pwd);
+        str_title = CResStr::Get ().at (res_bypass_pwd);
+        if(psd.ShowBox (this,str_text,str_title,"hitech"))
         {
+            str_text  = CResStr::Get ().at (res_cancle_bypass);
+            str_title = CResStr::Get ().at (res_bypass_set);
             CJDQAdmin::Get ().Bypass (true);
             CMainCtrl::Get ().NotifyBypass (true);
             MsgBox box;
-            box.ShowBox (this,"取消bypass","Bypass设置");
+            box.ShowBox (this,str_text,str_title);
             CJDQAdmin::Get ().Bypass (false);
             CMainCtrl::Get ().NotifyBypass (false);
 
@@ -422,6 +435,7 @@ void CMainMenu::OnButtonClick(skin_item_t* item)
 
     UpdateUIArea();
     m_worksite->updateAll();
+
 }
 void CMainMenu::OnUserMsg(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
 {
@@ -477,9 +491,10 @@ __inline__ void CMainMenu::UpdateRealTimeParam(bool update)
         fast_max_weight->SetText(Poco::format("%0.1ft",CTorQueMgr::get ().m_rated_weight));
         //fast_max_weight->SetText(Poco::format("%0.1ft",30.0));
 
-        if(gDispFilter[disp_weight].need_update (g_dg_weight) || update){
-            fast_weight->SetText(Poco::format("%0.1ft",g_dg_weight));
-        }
+        //if(gDispFilter[disp_weight].need_update (g_dg_weight) || update){
+
+        fast_weight->SetText(Poco::format("%0.1ft",g_dg_weight));
+
         double per = CTorQueMgr::get ().m_percent;
 
         if(gDispFilter[disp_percent].need_update (per) || update){
@@ -494,7 +509,6 @@ __inline__ void CMainMenu::UpdateRealTimeParam(bool update)
         if(gDispFilter[disp_height].need_update (g_dg_height) || update){
             fast_height->SetText(Poco::format("%0.1fm",g_dg_height));
         }
-
     }
     //是否显示仰角
     if(g_show_up_angle)
@@ -502,7 +516,6 @@ __inline__ void CMainMenu::UpdateRealTimeParam(bool update)
         if(gDispFilter[disp_up].need_update (g_up_angle) || update){
             fast_up_angle->SetText(Poco::format("%0.1f°",g_up_angle,Font16));
         }
-
     }
     //是否显示风速
     if(g_show_speed)

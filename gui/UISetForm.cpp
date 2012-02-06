@@ -2,15 +2,17 @@
 #include "BmpRes.h"
 #include "iniFile.h"
 #include "comdata.h"
+#include "resStr.h"
 static const char *SPFormBmps[] =
 {
     PCOMM_BACKGROUND,
     PCOMM_CHECK_BTN,
     PCOMM_CHECK_BTN,
     PCOMM_SAVE_BTN,
-    PCOMM_CLOSE_BTN
+    PCOMM_CLOSE_BTN,
+    "comm/btn_upload.png"
 };
-static const char* lables[] = {
+static std::string lables[] = {
     "显示重量:",
     "显示高度:",
     "显示风速:",
@@ -18,6 +20,8 @@ static const char* lables[] = {
     "单机模式",
     "风速13m/s报警",
     "风速20m/s报警",
+    "中文界面",
+    "英文界面"
 };
 
 #define X_POS  300
@@ -34,11 +38,14 @@ static SKIN_CHECK_DESC  SkinCheckDesc[]= {
 
     {2, X_POS1, Y_POS, NULL}, //show 13m/s
     {2, X_POS1, Y_POS+V_SPAN, NULL}, //show 20m/s
+    {2, X_POS1, Y_POS+2*V_SPAN, NULL}, //show chinese
+    {2, X_POS1, Y_POS+3*V_SPAN, NULL}, //show english
 };
 
 static SKIN_BUTTON_DESC SkinBtnsDesc[] = {
-    {3,346,418, NULL},
+    {3,250,418, NULL},
     {4,738,8,   NULL},
+    {5,500,418,   NULL},
 };
 
 #define SKIN_BMP_NUM 3
@@ -53,6 +60,29 @@ static POS BmpsPos[] = {
     {155,25}
 };
 
+/*
+    "显示重量:",
+    "显示高度:",
+    "显示风速:",
+    "多机模式:",
+    "单机模式",
+    "风速13m/s报警",
+    "风速20m/s报警",
+    "中文界面",
+    "英文界面"
+*/
+static void loadRes()
+{
+    lables[0] = CResStr::Get ().at (res_show_weight);
+    lables[1] = CResStr::Get ().at (res_show_height);
+    lables[2] = CResStr::Get ().at (res_show_wild);
+    lables[3] = CResStr::Get ().at (res_multi_mode);
+    lables[4] = CResStr::Get ().at (res_signal_mode);
+    lables[5] = CResStr::Get ().at (res_wild_13_alarm);
+    lables[6] = CResStr::Get ().at (res_wild_20_alarm);
+    lables[7] = CResStr::Get ().at (res_lang_zh);
+    lables[8] = CResStr::Get ().at (res_lang_en);
+}
 CUISetForm::CUISetForm()
 {
     int buttonCount = TABLESIZE(SPFormBmps);
@@ -68,6 +98,7 @@ CUISetForm::CUISetForm()
 
     _saveButton = new CSkinButton(&SkinBtnsDesc[0], this);
     _exitButton = new CSkinButton(&SkinBtnsDesc[1],this);
+    _updateButton = new CSkinButton(&SkinBtnsDesc[2],this);
     _icons.AddIcons(icon_path,ARRAY_SIZE(icon_path,char*));
 
     Font16 = CFontMgr::Get().GetFont("stxinwei",24);
@@ -82,13 +113,29 @@ CUISetForm::CUISetForm()
         SetRect(&m_lable[i],        X_POS1-LEFT,Y_POS+(i-5)*V_SPAN,  X_POS1+80,Y_POS+(i-5)*V_SPAN+30);
     }
     InitSkinHeader("CUISetForm");
+    loadRes();
 }
 
 CUISetForm::~CUISetForm()
 {
 }
-
-
+#include "MsgBox.h"
+void CUISetForm::updatefile()
+{
+    int ret = system ("./usb_update.sh");
+    fprintf(stderr,"usb_update.sh = %d\n",ret);
+    if(0==ret)
+    {
+        MsgBox box;
+        box.ShowBox (this,"update file ok,please reset","hint");
+    }else if(256==ret){
+        MsgBox box;
+        box.ShowBox (this,"do not detect valid update file","hint");
+    }else if(512==ret){
+        MsgBox box;
+        box.ShowBox (this,"do not detect usb","hint");
+    }
+}
 void CUISetForm::OnButtonClick(skin_item_t *item)
 {
     if(item->id == _saveButton->GetId())
@@ -99,6 +146,8 @@ void CUISetForm::OnButtonClick(skin_item_t *item)
     else if (item->id == _exitButton->GetId())
     {
         Close();
+    }else if (item->id == _updateButton->GetId ()){
+        updatefile();
     }else if(item->id == _skinChk[3]->GetId()){
 
         bool ok = _skinChk[3]->GetCheckStatus();
@@ -130,6 +179,20 @@ void CUISetForm::OnButtonClick(skin_item_t *item)
         }else{
             _skinChk[5]->SetCheckStatus(true);
         }
+    }else if(item->id == _skinChk[7]->GetId()){
+        bool ok = _skinChk[7]->GetCheckStatus();
+        if(ok){
+            _skinChk[8]->SetCheckStatus(false);
+        }else{
+            _skinChk[8]->SetCheckStatus(true);
+        }
+    }else if(item->id == _skinChk[8]->GetId()){
+        bool ok = _skinChk[8]->GetCheckStatus();
+        if(ok){
+            _skinChk[7]->SetCheckStatus(false);
+        }else{
+            _skinChk[7]->SetCheckStatus(true);
+        }
     }
 }
 
@@ -153,6 +216,14 @@ void CUISetForm::OnShow()
         _skinChk[2]->SetCheckStatus (true);
     }else{
         _skinChk[2]->SetCheckStatus (false);
+    }
+    if(cfg.ReadBool("display","lang",  false))
+    {
+        _skinChk[7]->SetCheckStatus (true);
+        _skinChk[8]->SetCheckStatus (false);
+    }else{
+        _skinChk[8]->SetCheckStatus (true);
+        _skinChk[7]->SetCheckStatus (false);
     }
     m_cur_mode = cfg.ReadInteger("display","mainmenu",1);
     if(m_cur_mode == 1)
@@ -204,6 +275,14 @@ void CUISetForm::savedata()
         if(_skinChk[6]->GetCheckStatus ()){
             cfg.WriteInteger("display","alarm_speed",20);
             g_alarm_wild_speed = 20;
+        }
+    }
+
+    if(_skinChk[7]->GetCheckStatus ()){
+        cfg.WriteBool ("display","lang",true);
+    }else {
+        if(_skinChk[8]->GetCheckStatus ()){
+            cfg.WriteInteger("display","lang",false);
         }
     }
 }

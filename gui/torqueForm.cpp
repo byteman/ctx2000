@@ -7,6 +7,9 @@
 #include <Poco/String.h>
 #include "MsgBox.h"
 #include "comdata.h"
+#include "resStr.h"
+#include "iniFile.h"
+#include <Poco/Stopwatch.h>
 #define SKIN_CTRL_STYLE_NUM		5
 
 
@@ -50,14 +53,6 @@
 static CTorQueDB gDB;
 static TStrList  typelist;
 
-#if 0
-static char* userlist_caption[] =
-{
-    "No.",
-    "Arm Length",
-    "Weight"
-};
-#endif
 static TListColum columlist[] =
 {
         {"编号",      50},
@@ -135,6 +130,11 @@ bool CTorQueForm::UsbStorNotify(U_STATUS status,std::string mountDir)
         ReleaseDC (hdc);
     }
 }
+static std::string lables[] = {
+    "塔机类型:",
+    "    臂长:",
+    "    倍率:"
+};
 CTorQueForm::CTorQueForm()
 {
     if (!LoadRes(&mmenu_bmps[0], ARRAY_SIZE(mmenu_bmps, char *)))
@@ -150,7 +150,7 @@ CTorQueForm::CTorQueForm()
         _skinBtns[i] = new CSkinButton(&SkinBtnsDesc[i],this);
     }
 
-    tv = new CTreeView(&CommCtrlsDesc[0],this,"塔机曲线信息");
+    tv = new CTreeView(&CommCtrlsDesc[0],this,"tcinfo");
     lv = new CListView(&CommCtrlsDesc[1],this);
     cbx_type= new CComBox(&CommCtrlsDesc[2],this);
     cbx_arm_len=new CComBox(&CommCtrlsDesc[3],this);
@@ -176,17 +176,20 @@ CTorQueForm::CTorQueForm()
     m_cur_armlen = StrTCArmLen;
     m_cur_rate   = StrTCRate;
 
+    lables[0] = CResStr::Get ().at (res_tower_type);
+    lables[1] = CResStr::Get ().at (res_arm_len);
+    lables[2] = CResStr::Get ().at (res_rate);
+
+    columlist[0].caption = CResStr::Get ().at (res_no);
+    columlist[1].caption = CResStr::Get ().at (res_car_pos);
+    columlist[2].caption = CResStr::Get ().at (res_rate_weight);
+
+
 }
 
 CTorQueForm::~CTorQueForm()
 {
 }
-
-static const char* lables[] = {
-    "塔机类型:",
-    "    臂长:",
-    "    倍率:"
-};
 void
 CTorQueForm::OnPaint(HWND hWnd)
 {
@@ -251,9 +254,36 @@ bool CTorQueForm::DoIt(int type,std::string dist,std::string wet)
     }
     return false;
 }
+
+bool CTorQueForm::checkValid()
+{
+    bool find = false;
+    TIniFile cfg(ctx2000_cfg);
+    std::string tctype = Poco::trim(cfg.ReadString("device","tctype","def_typename"));
+    TStrList  typelist;
+    if(gDB.listAllTCTypes (typelist))
+    {
+        for(size_t i = 0; i < typelist.size (); i++){
+            if(tctype == typelist.at (i)){
+                find = true;
+                break;
+            }
+        }
+    }
+    if(find == false){
+        std::string title = CResStr::Get ().at (res_hint);
+        std::string text  = CResStr::Get ().at (res_not_find_tctype);
+        MsgBox box;
+        box.ShowBox (this,text,title);
+    }
+    return find;
+}
 void
 CTorQueForm::OnButtonClick(skin_item_t * item)
 {
+    std::string title,text;
+    title = CResStr::Get ().at (res_hint);
+
     if(item->id == _skinBtns[0]->GetId ()) //save
     {
         std::string type = cbx_type->GetText ();
@@ -265,7 +295,8 @@ CTorQueForm::OnButtonClick(skin_item_t * item)
             if( CTorQueMgr::get ().saveCfg (type,arm,rate))
             {
                 MsgBox box;
-                box.ShowBox (this,"力矩配置保存成功,重启后生效","提示");
+                text = CResStr::Get ().at (res_moment_save_ok);
+                box.ShowBox (this,text,title);
             }
         }
     }
@@ -294,19 +325,22 @@ CTorQueForm::OnButtonClick(skin_item_t * item)
         }
     }else if(item->id == _skinBtns[4]->GetId ()) //exit
     {
-        Close();
+        if(checkValid())
+            Close();
     }else if(item->id == _skinBtns[5]->GetId ()) //import
     {
         USBStorage *usb = USBStorManager::get ().getUsbStorage (0);
         if(!usb){
             MsgBox box;
-            box.ShowBox (this,"没有检测到U盘","提示");
+            text = CResStr::Get ().at (res_export_no_usb);
+            box.ShowBox (this,text,title);
             return;
         }
         if(!usb->exportData ("tc.db",ctx2000_torque_db))
         {
             MsgBox box;
-            box.ShowBox (this,"导入数据失败,U盘中没有检测到数据","提示");
+            text = CResStr::Get ().at (res_import_fail_usb_nodata);
+            box.ShowBox (this,text,title);
             return;
         }
         try{
@@ -316,10 +350,12 @@ CTorQueForm::OnButtonClick(skin_item_t * item)
           }catch(...)
           {
             MsgBox box;
-            box.ShowBox (this,"数据库打开失败\n","提示");
+            text = CResStr::Get ().at (res_database_open_failed);
+            box.ShowBox (this,text,title);
           }
           MsgBox box;
-          box.ShowBox (this,"导入数据成功,重启后生效\n","提示");
+          text = CResStr::Get ().at (res_import_ok);
+          box.ShowBox (this,text,title);
 
     }
 }
@@ -355,6 +391,7 @@ void CTorQueForm::ReloadTorqueItems(std::string type, std::string armLen, std::s
 }
 bool CTorQueForm::loadDB(std::string cur_type, std::string cur_armLen, std::string cur_rate)
 {
+
      if(!gDB.existData() )
      {
         if(!gDB.createParamTable())
@@ -363,8 +400,14 @@ bool CTorQueForm::loadDB(std::string cur_type, std::string cur_armLen, std::stri
             return false;
         }
      }
+
      typelist.clear();
      tv->Clear();
+     std::string prefix_tc_type,prefix_arm,prefix_rate;
+     prefix_tc_type = CResStr::Get ().at (res_tower_type)+"_";
+     prefix_arm     = CResStr::Get ().at (res_arm_len)+"_";
+     prefix_rate    = CResStr::Get ().at (res_rate)+"_";
+
      if(gDB.listAllTCTypes(typelist))
      {
        GHANDLE root =  tv->GetRoot ();
@@ -372,25 +415,26 @@ bool CTorQueForm::loadDB(std::string cur_type, std::string cur_armLen, std::stri
        {
            bool fold = true;
            bool equal_type=false;
-           std::string type =   "塔机类型_"+ typelist.at(i);
+           std::string type =   prefix_tc_type+ typelist.at(i);
            TOR_DBG("cur=%s type=%s\n",cur_type.c_str (),typelist.at(i).c_str());
            if(typelist.at(i) == cur_type)
            {
-               //fold = false;
                TOR_DBG("type=%s\n",cur_type.c_str ());
                equal_type = true;
            }
+
            GHANDLE tyNode = tv->AddItem(root,type,fold);
            fold = true;
            TStrList  lenlist;
+
            if(gDB.listArmLenByType(typelist.at(i),lenlist))
            {
                  for(size_t j = 0; j < lenlist.size(); j++)
                  {
                     bool equal_armlen = false;
-                    std::string len =   "臂长_"+lenlist.at(j);
+                    std::string len =   prefix_arm+lenlist.at(j);
 #if 1
-                    if( (lenlist.at(j) == cur_armLen) && (equal_type) )
+                    if( ( lenlist.at(j) == cur_armLen ) && ( equal_type ) )
                     {
                         equal_armlen=true;
                         TOR_DBG("equal_armlen=%s\n",cur_armLen.c_str ());
@@ -399,11 +443,13 @@ bool CTorQueForm::loadDB(std::string cur_type, std::string cur_armLen, std::stri
                     GHANDLE lenNode = tv->AddItem(tyNode,len,fold);
 
                     TStrList  ratelist;
+
                     if(gDB.listRateByLen(typelist.at(i),lenlist.at(j),ratelist))
                     {
+
                         for(size_t k = 0; k < ratelist.size(); k++)
                         {
-                              std::string rate =   "倍率_"+ratelist.at(k);
+                              std::string rate =   prefix_rate+ratelist.at(k);
                               GHANDLE hwnd = tv->AddItem(lenNode,rate);
                               if(ratelist.at(k) == cur_rate)
                               {
@@ -417,6 +463,7 @@ bool CTorQueForm::loadDB(std::string cur_type, std::string cur_armLen, std::stri
 
                               }
                         }
+
                     }
                  }
            }
@@ -427,7 +474,10 @@ bool CTorQueForm::loadDB(std::string cur_type, std::string cur_armLen, std::stri
             tv->SelectItem (m_sel_hwnd);
             m_sel_hwnd = 0;
        }
+
        ReloadTorqueItems (cur_type,cur_armLen,cur_rate);
+
+
 
      }
 }
@@ -472,7 +522,8 @@ void CTorQueForm::OnCommCtrlNotify(HWND hwnd, int id, int nc)
             bool ret = tv->GetSelectItemCaption (rate);
             if(ret)
             {
-                if(rate.find ("倍率") != std::string::npos)
+                std::string prefix_rate    = CResStr::Get ().at (res_rate);
+                if(rate.find (prefix_rate) != std::string::npos)
                 {
                     GHANDLE hwndRate =  tv->GetSelectItem ();
                     GHANDLE hwndArmLen =  tv->GetParentItem (hwndRate);

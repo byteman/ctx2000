@@ -7,6 +7,11 @@
 #include "comdata.h"
 #include <Poco/String.h>
 #include "MsgBox.h"
+#include "SoftKeyboard.h"
+#include <Poco/Format.h>
+#include "mainctrl.h"
+#include <Poco/NumberParser.h>
+#include "resStr.h"
 extern TTjRecord g_TC[21];
 static COMM_CTRL_DESC lablectrls[] = {
     {50,  50, 100,30,"编号:"},
@@ -112,7 +117,7 @@ static POS IconsPos[] =
 {
 
 };
-#include "SoftKeyboard.h"
+
 extern SoftKeyboard* skt;
 void  CDivParam::OnCommCtrlNotify(HWND hwnd, int id, int nc)
 {
@@ -192,7 +197,7 @@ void    CDivParam::OnShow()
 {
     Update(1);
 }
-#include <Poco/Format.h>
+
 void    CDivParam::Update(int id)
 {
 
@@ -208,28 +213,15 @@ void    CDivParam::Update(int id)
             fprintf(stderr,"i=%d\n",i);
             edits[2+i*2]->SetText(Poco::format("%0.2f",wba[id].Pointxy[i][0]),false);
             edits[3+i*2]->SetText(Poco::format("%0.2f",wba[id].Pointxy[i][1]),false);
-            //edits[2+i*2]->SetFloatText();
-            //edits[3+i*2]->SetFloatText(wba[id].Pointxy[i][1]);
         }
         else
         {
             edits[2+i*2]->SetText("");
             edits[3+i*2]->SetText("");
         }
-    }/*
-    edits[2]->SetFloatText(wba[id].);
-    edits[3]->SetFloatText(g_TC[id].y);
-    edits[4]->SetFloatText(g_TC[id].Height);
-    edits[5]->SetFloatText(g_TC[id].LongArmLength);
-    edits[6]->SetFloatText(g_TC[id].ShortArmLenght);
-    edits[7]->SetFloatText(g_TC[id].Rs);
-    edits[8]->SetFloatText(g_TC[id].L1);
-    edits[9]->SetFloatText(g_TC[id].L2);
-    edits[10]->SetFloatText(g_TC[id].a0);
-    */
+    }
 }
-#include "mainctrl.h"
-#include <Poco/NumberParser.h>
+
 void    CDivParam::SaveTC(int id)
 {
     bool ok1 =false,ok2=false;
@@ -270,7 +262,9 @@ void    CDivParam::OnButtonClick(skin_item_t* item)
 
         SaveTC(m_tc_id);
         MsgBox box;
-        box.ShowBox(this,"参数保存成功","信息提示");
+        std::string text = CResStr::Get ().at (res_param_save_ok);
+        std::string title= CResStr::Get ().at (res_hint);
+        box.ShowBox(this,text,title);
 
     }
     else if(item->id == btn_exit->GetId())

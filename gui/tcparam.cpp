@@ -8,6 +8,7 @@
 #include <Poco/String.h>
 #include "mainctrl.h"
 #include "MsgBox.h"
+#include "resStr.h"
 extern TTjRecord g_TC[21];
 static COMM_CTRL_DESC lablectrls[] = {
     {50,  50, 100,30,"塔机编号:"},
@@ -332,7 +333,9 @@ void    CTCParam::OnButtonClick(skin_item_t* item)
         SaveTC(m_tc_id);
         CMainCtrl::Get().SaveTowerCraneInfo();
         MsgBox box;
-        box.ShowBox(this,"参数保存成功","信息提示");
+        std::string title = CResStr::Get ().at (res_hint);
+        std::string text  = CResStr::Get ().at (res_param_save_ok);
+        box.ShowBox(this,text,title);
     }
     else if(item->id == btn_exit->GetId())
     {

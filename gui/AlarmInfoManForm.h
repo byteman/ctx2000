@@ -30,6 +30,7 @@ public:
     virtual void   OnPaint(HWND hWnd);
     virtual void   OnClose ();
     virtual void   OnButtonClick(skin_item_t* item);
+    void InitResString();
     bool UsbStorNotify(U_STATUS status,std::string mountDir);
 private:
     void InitListCol();

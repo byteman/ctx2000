@@ -49,6 +49,7 @@ bool g_show_speed;
 bool g_show_dg_height;
 bool g_show_max_weight;
 int  g_alarm_wild_speed=13;
+bool g_show_lang_zh=true;
 /**************************ʱת5k**************************/
 double          tmp_wksp[4][2]; //64
 double          tmp_czwzb[2][2]; //32

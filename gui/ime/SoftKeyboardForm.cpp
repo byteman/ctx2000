@@ -17,8 +17,8 @@ static int keymap[KEYNUM] = {
 static RECT keyret[KEYNUM];
 
 static const char *SoftKeyboardForm_path[] = {
-    "../resource/chinese/ime/keyboard.png",
-    "../resource/chinese/ime/ziti.png"
+    "ime/keyboard.png",
+    "ime/ziti.png"
 };
 static int oldx, oldy;
 static si_bmplabel_t InputSta={"0","12340"};
@@ -151,8 +151,8 @@ void SoftKeyboardForm::CreateIMEWindow()
             printf("Can't loadres\n");
             exit(0);
     }
-    m_mask1.LoadFile("../resource/chinese/ime/bts.png");
-    m_mask2.LoadFile("../resource/chinese/ime/btmaskl.png");
+    m_mask1.LoadFile("ime/bts.png");
+    m_mask2.LoadFile("ime/btmaskl.png");
     m_status = new CSkinLable(&skinctrls[0],this,"skinlable",(void*)&InputSta);
     InitSkinHeader("SoftKeyboardForm");
 

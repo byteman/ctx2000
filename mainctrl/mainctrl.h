@@ -90,6 +90,8 @@ public:
     bool    InitSharedMem();
     void    Send_5s_data();
     void    buildData(TShared_Data& data);
+    void AlarmBeep();
+    void doAlarmBeep(int type);
     ControledStatus m_control_state,m_old_ctrl_state;
 private:
     Poco::SharedMemory m_shared;

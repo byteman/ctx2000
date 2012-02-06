@@ -3,7 +3,7 @@
 #include "BmpRes.h"
 #include <Poco/Format.h>
 #include "tajidbmgr.h"
-
+#include "resStr.h"
 static TListColum SysLogList[] =
 {
         {"±àºÅ",  50},
@@ -71,6 +71,11 @@ CSysLogForm::CSysLogForm()
     m_colum_num = 0;
     start       = 0;
     InitSkinHeader("SysLogForm");
+
+    SysLogList[0].caption =CResStr::Get ().at (res_no);
+    SysLogList[1].caption =CResStr::Get ().at (res_time);
+    SysLogList[2].caption =CResStr::Get ().at (res_class);
+    SysLogList[3].caption =CResStr::Get ().at (res_content);
 
 }
 

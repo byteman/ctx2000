@@ -18,6 +18,7 @@ public:
     virtual void OnCommCtrlNotify(HWND hwnd, int id, int nc);
     bool UsbStorNotify(U_STATUS status,std::string mountDir);
 private:
+    bool checkValid();
     bool DoIt(int type,std::string dist,std::string wet);
     void InitListCol();
     void ReloadTorqueItems(std::string type, std::string armLen, std::string rate,bool clear=false);
