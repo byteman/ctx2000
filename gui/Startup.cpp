@@ -90,7 +90,12 @@ void GUIAPI InitMainUI()
 #include "torqueForm.h"
 static void    StartCtx2000()
 {
-    std::string en_sys_log = getenv ("en_sys_log");
+
+    std::string en_sys_log =  "";
+    const char* str_en_sys_log = getenv ("en_sys_log");
+
+    if(str_en_sys_log)en_sys_log = str_en_sys_log;
+
 
     if( ! CMainCtrl::Get().Start())
     {
@@ -136,7 +141,7 @@ int MiniGUIMain (int argc, const char* argv[])
     gAppName=argv[0];
     argc    = argc;
 
-    fprintf(stderr,"sss%s build @ %s %s",argv[0],__DATE__,__TIME__);
+    fprintf(stderr,"%s build @ %s %s",argv[0],__DATE__,__TIME__);
 #if 0
     if( !CtxEngine::Get().start( 1000, argc, argv ) )
     {

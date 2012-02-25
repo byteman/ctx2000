@@ -1029,7 +1029,7 @@ void CMainCtrl::InitAlgoData()
     for(int i=0; i < wbNum; i++)
     {
 
-        if( ( wba[i].VertexNum > 0 ) && ( wba[i].VertexNum < 6 ) )
+        if( ( wba[i].VertexNum > 0 ) && ( wba[i].VertexNum <= 6 ) )
         {
             CTX_DBG("Add Diving[%d] VertexNum=%d Height=%0.2f\n",i,wba[i].VertexNum,wba[i].h);
             PolyDef poly;
@@ -1990,12 +1990,15 @@ bool dev_ctrl_func(void* arg, int state)
 bool CMainCtrl::Start()
 {
 //这是仅仅打开了数据库
+
     if( !CTajiDbMgr::Get().load(ctx2000_db))
     {
         PushErrorMsg("TajiDbMgr load failed");
         RET_ERR;
     }
+
 #if 1
+
     if(!ReloadParam())
     {
         PushErrorMsg("ReloadParam failed");
