@@ -992,8 +992,8 @@ void CMainCtrl::InitAlgoData()
         g_qtzs[i].m_slowdown_dist    = WarnDis;
         g_qtzs[i].m_carrier_slowdown_dist= VWarnDis;
         g_qtzs[i].m_carrier_brake_dist   = VStopDis;
-        if(g_TC[g_local_id].Dyna)
-            g_qtzs[i].m_sarm_cc_len      = g_TC[g_local_id].a0;
+        if(g_TC[i+1].Dyna)
+            g_qtzs[i].m_sarm_cc_len      = g_TC[i+1].a0;
         else
             g_qtzs[i].m_sarm_cc_len      = 0;
 

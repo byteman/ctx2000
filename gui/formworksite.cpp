@@ -81,7 +81,7 @@ void CFormWorksite::draw_zhangai(HDC hdc)
         for(size_t i=0; i <wbNum;i++)
         {
             //fprintf(stderr,"i=%d num=%d h=%0.2f\n",i,wba[i].VertexNum,wba[i].h);
-            if( (wba[i].VertexNum>0) && (wba[i].VertexNum<6))
+            if( (wba[i].VertexNum>0) && (wba[i].VertexNum<=6))
             {
                 //fprintf(stderr,"l_x=%d,zom=%0.2f,c_x=%d\n",m_local_x,m_zoom,m_center_x);
                 for(int j =0; j < wba[i].VertexNum;j++)

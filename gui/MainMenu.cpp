@@ -448,7 +448,8 @@ void CMainMenu::OnUserMsg(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
         //fprintf(stderr,"Receive UpdateCollideStatus Msg\n");
         //UpdateCollideStatus((int)wParam, (int)lParam);
     }else if(message == MSG_GUI_NOFITY_MSG){
-
+			system("sync");
+         exit(0);
     }
 }
 void CMainMenu::EmulateSensor()

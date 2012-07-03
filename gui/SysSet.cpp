@@ -12,6 +12,8 @@
 #include "iniFile.h"
 #include "comdata.h"
 #include "SysCfgForm.h"
+#include "Password.h"
+#include "resStr.h"
 #define EDIT_ANGLE   {20,250,160,30,"20.8"}
 #define EDIT_DIST    {20,320,160,30,"12.4"}
 //////////////////////////////////////////////////////////////////////
@@ -98,8 +100,17 @@ void CSysSet::OnButtonClick(skin_item_t* item)
         CWorkSite ws;
         ws.CreateForm(m_hWnd);
     }else if(item->id == _skinBtns[3]->GetId()){
-        CSysCfgForm form;
-        form.CreateForm(m_hWnd);
+        PassWord pwd;
+        std::string text,title;
+
+        text  = CResStr::Get ().at (res_pwd);
+        title = CResStr::Get ().at (res_ssp);
+        if(pwd.ShowBox(this,text,title,"1125"))
+        {
+            CSysCfgForm form;
+            form.CreateForm(m_hWnd);
+        }
+
     }else if(item->id == _skinBtns[4]->GetId()){
         CAlarmInfoManForm alarm;
         alarm.CreateForm(m_hWnd);

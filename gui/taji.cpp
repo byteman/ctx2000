@@ -108,7 +108,7 @@ bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
      if(g_TC[m_id].Dyna)
      {
         //fprintf(stderr,"Postion=%0.2f\n",g_TC[m_id].Position*m_zoom);
-        m_r  = (g_TC[m_id].LongArmLength*cos(g_TC[m_id].Dang*3.1415/180)+g_TC[g_local_id].a0)*m_zoom;
+        m_r  = (g_TC[m_id].LongArmLength*cos(g_TC[m_id].Dang*3.1415/180)-g_TC[m_id].a0)*m_zoom;
         //m_r = g_TC[m_id].Position*m_zoom; //动臂式塔机的半径，就等于小车的幅度
      }else{
         m_r = m_long_arm_len;
@@ -161,7 +161,7 @@ bool CTaji::Draw(HDC hdc,std::string tjnum,double angle,double car_dist)
          y = y_pt - car_dist * sin(angle)*m_zoom-h/2;
      }
 
-     FillBox(hdc,x,y,10,10);
+     FillBox(hdc,x-5,y,10,10);
      return true;
 }
 

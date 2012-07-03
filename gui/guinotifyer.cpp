@@ -72,7 +72,7 @@ bool TGuiNotifyer::Notify(TGuiMsg* msg)
     for(; wnd_it != wndlist->end(); wnd_it++)
     {
         hwnd = *wnd_it;
-        SendMessage(hwnd, MSG_GUI_NOFITY_MSG, (WPARAM)msg, 0);
+        SendMessage(hwnd, MSG_GUI_NOFITY_MSG, NULL, 0);
     }
 
     return true;

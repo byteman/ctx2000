@@ -73,7 +73,6 @@ bool  CStatic::SetFontSize(int size)
     if( (_parent) && (_parent->m_hWnd != HWND_INVALID))
     {
         fprintf(stderr,"fontxx = %s\n",_font->family);
-
         return (SetWindowFont(GetDlgItem(_parent->m_hWnd,_id),_font)!=NULL);
     }
     return false;

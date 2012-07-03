@@ -549,7 +549,8 @@ void CFormCalib::calibrate_angle(int type)
         start = false;
         end_ad = ad_angle;
         double k = (end_ad - start_ad) / g_angle_C;
-
+        //fprintf(stderr,"end_ad=%d,start_ad=%d,angle_C=%0.6f\n",end_ad,start_ad,g_angle_C);
+/*
         if( (fabs(k) < 0.001) || ( fabs(k) > 10000 ) )
         {
             MsgBox box;
@@ -557,6 +558,7 @@ void CFormCalib::calibrate_angle(int type)
             box.ShowBox (this,text,title);
             return;
         }
+        */
         g_bd[BD_ANGLE].bd_k        = k;
         g_bd[BD_ANGLE].zero_ad     = start_ad;
         g_bd[BD_ANGLE].bd_ad     = end_ad;
