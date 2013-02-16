@@ -396,7 +396,7 @@ void CMainMenu::OnButtonClick(skin_item_t* item)
         PassWord psd;
         str_text  = CResStr::Get ().at (res_pwd);
         str_title = CResStr::Get ().at (res_ssp);
-        if(psd.ShowBox (this,str_text,str_title,"8334"))
+        if(psd.ShowBox (this,str_text,str_title,"1111"))
         {
             KillTimer(m_hWnd,100);
             CJDQAdmin::Get ().Bypass (true);
@@ -416,7 +416,7 @@ void CMainMenu::OnButtonClick(skin_item_t* item)
 
         str_text  = CResStr::Get ().at (res_pwd);
         str_title = CResStr::Get ().at (res_bypass_pwd);
-        if(psd.ShowBox (this,str_text,str_title,"hitech"))
+        if(psd.ShowBox (this,str_text,str_title,"1111"))
         {
             str_text  = CResStr::Get ().at (res_cancle_bypass);
             str_title = CResStr::Get ().at (res_bypass_set);
@@ -448,7 +448,7 @@ void CMainMenu::OnUserMsg(HWND hWnd, int message, WPARAM wParam, LPARAM lParam)
         //fprintf(stderr,"Receive UpdateCollideStatus Msg\n");
         //UpdateCollideStatus((int)wParam, (int)lParam);
     }else if(message == MSG_GUI_NOFITY_MSG){
-			system("sync");
+         system("sync");
          exit(0);
     }
 }

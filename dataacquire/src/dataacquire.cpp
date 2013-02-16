@@ -120,6 +120,10 @@ public:
             //PostMessage(GetActiveWindow(),0x804,0,0);
             ad_height =  m_filter[1].Filter((data.at(3)<<8)+data.at(4));
             tmp_dg_height=(ad_height-g_bd[BD_HEIGHT].zero_ad)/g_bd[BD_HEIGHT].bd_k+g_bd[BD_HEIGHT].start_value;
+            if(g_TC[g_local_id].Dyna)
+            {
+                tmp_dg_height += (g_TC[g_local_id].LongArmLength*sin(g_up_angle*3.1415/180));
+            }
             ad_weight =  m_filter[2].Filter((data.at(5)<<8)+data.at(6));
 
             double k = g_bd[BD_WEIGHT].bd_k;
