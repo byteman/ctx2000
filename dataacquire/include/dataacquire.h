@@ -32,7 +32,7 @@ public:
 
     bool StartAcquireMcuAD(std::string pathToMCU);
     bool StartAcquireAngleEncoder(std::string pathToEncoder);
-
+	int  output(int port, unsigned char state);
     bool Stop();
     bool Pause(bool yes);
     void addObserver(const AbstractObserver& observer);

@@ -31,6 +31,32 @@ using LibSerial::SerialPort;
 using LibSerial::SerialStream;
 using LibSerial::SerialStreamBuf;
 
+typedef struct 
+{
+	unsigned b1:1;
+	unsigned b2:1;
+	unsigned b3:1;
+	unsigned b4:1;
+	unsigned b5:1;
+	unsigned b6:1;
+	unsigned b7:1;
+	unsigned b8:1;
+	unsigned b9:1;
+	unsigned b10:1;
+	unsigned b11:1;
+	unsigned b12:1;
+	unsigned b13:1;
+	unsigned b14:1;
+	unsigned b15:1;
+	unsigned b16:1;
+}t_jdq_bits;
+union JDQ_STATE
+{
+	t_jdq_bits jdq_bits;
+	unsigned short value;
+};
+
+
 static double crane_angle_save,crane_angle_thresh,crane_angle;
 static void calc_angle(int ad_angle)
 {
@@ -83,6 +109,15 @@ public:
     {
         m_quit = true;
         return m_quitEvt.tryWait(1000);
+    }
+    void check_jdq(unsigned short state)
+    {
+    	cur_state.value = state;
+    	if(want_state.value != state)
+    	{
+    		
+    	}
+    
     }
     void calc_rt_value(LibSerial::SerialPort::DataBuffer& data)
     {
@@ -150,7 +185,9 @@ public:
                 ad_angle = m_filter[3].Filter((data.at(7)<<8)+data.at(8));
                 calc_angle (ad_angle);
             }
-#endif
+#endif		
+			check_jdq((data.at(7)<<8)+data.at(8)); //继电器反馈控制
+			
             ad_angle_x    = m_filter[4].Filter((data.at(9)<<8)+data.at(10));
             ad_angle_y    = m_filter[5].Filter((data.at(11)<<8)+data.at(12));
 
@@ -186,6 +223,28 @@ public:
             g_dg_height= tmp_dg_height<0?0:tmp_dg_height;
         }
     }
+    void output(int port, unsigned char  state)
+    {
+    	/*************************
+    	head type	   r/w  param checksum tail
+    	0x2  ad:  01   r:0	1byte	1byte   0x3
+    		 jdq: 02   w:1
+    	*************************/
+    	static unsigned char cmdbuf[] = {0x2,'2','1',0,0,0x3};
+    	
+    	cmdbuf[3] = state?'1':'0';
+    	cmdbuf[4] = cmdbuf[1]+cmdbuf[2]+cmdbuf[3];
+    	if(state)
+    	{
+    		want_state.value |= (1<<port);
+    	}
+    	else
+    	{
+    		want_state.value &= ~(1<<port);
+    	}
+    	
+    	m_port->Write(cmdbuf,5);
+    }
     virtual void run()
     {
         set_thread_title("ctx2000.ad1");
@@ -199,7 +258,7 @@ public:
             try{
                 Poco::Thread::sleep(50);
                 m_buf.clear();
-                m_port->WriteByte(0x2);
+                //m_port->WriteByte(0x2);
                 m_port->Read(m_buf,AD_PRO_LEN,1000);
                 if(m_buf.size () >= AD_PRO_LEN)
                     calc_rt_value(m_buf);
@@ -224,6 +283,9 @@ protected:
     CFilter      m_filter[6];
     Poco::NotificationQueue &m_queue;
     volatile bool m_quit;
+    
+    JDQ_STATE want_state;
+    JDQ_STATE cur_state;
 
 };
 class CDataAcquireWorker2:public CDataAcquireWorker1{
@@ -315,6 +377,17 @@ CDataAcquire::CDataAcquire():
 
 }
 
+/*
+FixMe: 如何保证发下去的继电器控制命令不会丢失。
+*/
+int  CDataAcquire::output(int port, unsigned char state)
+{
+	if(m_aq_work1){
+		m_aq_work1->output(port,state);
+		return state;
+	}
+	return -1;
+}
 bool CDataAcquire::Init(std::string path1,std::string path2)
 {
     if(!m_aq_work1)
